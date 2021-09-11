@@ -1,9 +1,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <math.h>
+#include <stdlib.h>
 //TODO pthread
 //TODO pass more things by reference
 
+#include <time.h>
 #include <stdio.h>
 
 //MATH CONSTANT
@@ -17,27 +19,34 @@
 #define LIGHT_COUNT          10
 
 //CAMERA
-#define	WIDTH                10
-#define	HEIGHT               10
+#define	WIDTH                1000
+#define	HEIGHT               1000
 #define	CAMERA_FOCAL_LENGTH  1.0
-#define	CAMERA_POSITION      { 0, -5, 0 }
-#define	CAMERA_ROTATION      { 0, -PI / 2, 0 }
+#define	CAMERA_POSITION      { 3, -4, 2 }
+#define	CAMERA_ROTATION      { -.2, 0, .5 }
 #define	FIELD_OF_VIEW        PI / 2
 
 //PERFORMANCE / SYSTEM
 #define	THREAD_COUNT         16
 
-typedef struct s_pos {
+//COLORS
+#define	RED                  { 255, 0  , 0   }
+#define	GREEN                { 0  , 255, 0   }
+#define	BLUE                 { 0  , 0  , 255 }
+#define	WHITE                { 255, 255, 255 }
+#define	BLACK                { 0  , 0  , 0   }
+
+typedef struct s_vec {
 	float	x;
 	float	y;
 	float	z;
-}	t_pos;
+}	t_vec;
 
 typedef struct s_tris {
-	t_pos	*a;
-	t_pos	*b;
-	t_pos	*c;
-	t_pos	normal;
+	t_vec	*a;
+	t_vec	*b;
+	t_vec	*c;
+	t_vec	normal;
 }	t_tris;
 
 typedef struct s_color {
@@ -56,6 +65,7 @@ typedef enum e_obj_type {
 
 typedef struct s_obj {
 	t_obj_type	type;
+	t_color		color;
 	void		*data;
 }	t_obj;
 
@@ -63,15 +73,15 @@ typedef struct s_camera {
 	unsigned int	width;
 	unsigned int	height;
 	float			aspect_ratio;
-	t_pos			pos;
-	t_pos			rot;// euler radian
+	t_vec			pos;
+	t_vec			rot;// euler radian
 	float			fovx;// field of view
 	float			fovy;
 	float			fov_pixel;// field of view of a pixel
 }	t_camera;
 
 typedef struct s_light {
-	t_pos	pos;
+	t_vec	pos;
 	t_color	color;
 	float	intensity;
 }	t_light;
@@ -85,37 +95,49 @@ typedef struct s_scene {
 	t_light 		*lights;
 }	t_scene;
 
+typedef struct s_hit {
+	float	dist;
+	t_vec	pos;
+	t_vec	normal;
+	t_obj	*obj;
+}	t_hit;
+
 int		abs(int v)
 {
 	return v < 0 ? -v : v;
 }
 
-float	dot(t_pos a, t_pos b)
+float	absf(float v)
+{
+	return v < 0 ? -v : v;
+}
+
+float	dot(t_vec a, t_vec b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-t_pos	sub(t_pos a, t_pos b) 
+t_vec	sub(t_vec a, t_vec b) 
 {
-	t_pos	r = { a.x - b.x, a.y - b.y, a.z - b.z };
+	t_vec	r = { a.x - b.x, a.y - b.y, a.z - b.z };
 	return r;
 }
 
-t_pos	mult(t_pos a, float fac)
+t_vec	mult(t_vec a, float fac)
 {
-	t_pos	r = { a.x * fac, a.y * fac, a.z * fac };
+	t_vec	r = { a.x * fac, a.y * fac, a.z * fac };
 	return r;
 }
 
-t_pos	add3(t_pos a, t_pos b, t_pos c)
+t_vec	add3(t_vec a, t_vec b, t_vec c)
 {
-	t_pos r = { a.x + b.x + c.x, a.y + b.y + c.y, a.z + b.z + c.z };
+	t_vec r = { a.x + b.x + c.x, a.y + b.y + c.y, a.z + b.z + c.z };
 	return r;
 }
 
-t_pos	cross(t_pos a, t_pos b)
+t_vec	cross(t_vec a, t_vec b)
 {
-	t_pos r = { a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x };
+	t_vec r = { a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x };
 	return r;
 }
 
@@ -125,10 +147,18 @@ t_color	mult_color(t_color *a, float fac)
 
 	color.r = a->r * fac;
 	color.g = a->g * fac;
-	return color;
 	color.b = a->b * fac;
+	return color;
 }
-
+/*
+t_color	divid_color4(t_color a)
+{
+	a.r = a.r << 2;
+	a.g = a.g << 2;
+	a.b = a.b << 2;
+	return a;
+}
+*/
 t_color	mix_color(t_color *a, t_color *b, float fac)
 {
 	t_color	color;
@@ -141,6 +171,15 @@ t_color	mix_color(t_color *a, t_color *b, float fac)
 	color.r = a->r * fac + b->r * facb;
 	color.g = a->g * fac + b->g * facb;
 	color.b = a->b * fac + b->b * facb;
+	return color;
+}
+
+t_color	mix_color4(t_color a, t_color b, t_color c, t_color d)
+{
+	t_color	color;
+	color.r = (a.r + b.r + c.r + d.r) >> 2;
+	color.g = (a.g + b.g + c.g + d.g) >> 2;
+	color.b = (a.b + b.b + c.b + d.b) >> 2;
 	return color;
 }
 
@@ -160,7 +199,7 @@ float	Q_rsqrt(float number)
     return y;
 }
 
-t_pos	normalize(t_pos vec)
+t_vec	normalize(t_vec vec)
 {
 	float	fac = Q_rsqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
 
@@ -181,9 +220,9 @@ float	cosf(float	v)
 }
 
 //euler radian to vector
-t_pos	etov(t_pos *rot)
+t_vec	etov(t_vec *rot)
 {
-	t_pos	vec;
+	t_vec	vec;
 	float	sin_z = sinf(rot->z),
 			cos_z = cosf(rot->z),
 			sin_y = sinf(rot->y),
@@ -196,37 +235,17 @@ t_pos	etov(t_pos *rot)
 	vec.z =  cos_y * sin_x;
 	return vec;
 }
-/*
-t_pos	apply_rot(t_pos vec, t_pos *rot)
+
+t_vec	rand_vec(float fac)
 {
-	t_pos	vec_a;
-	float	sin_z = sinf(rot->z),
-			cos_z = cosf(rot->z),
-			sin_y = sinf(rot->y),
-			cos_y = cosf(rot->y),
-			sin_x = sinf(rot->x),
-			cos_x = cosf(rot->x);
+	t_vec	vec;
 
-	printf("\ns: x %f, y %f, z %f, c: x %f, y %f, z %f\n", sin_x, sin_y, sin_z, cos_x, cos_y, cos_z);
-
-	vec_a.       x =
-		vec.      x  * ( cos_x * cos_y                         )
-		+ vec.    y  * ( cos_x * sin_y * sin_z - sin_x * cos_z )
-		+ vec.    z  * ( cos_x * sin_y * cos_z + sin_x * sin_z );
-
-	vec_a.        y =
-		vec.       x  * ( sin_x * cos_y                         )
-		+ vec.     y  * ( sin_x * sin_y * sin_z + cos_x * cos_z )
-		+ vec.     z  * ( sin_x * sin_y * cos_z - cos_x * sin_z );
-
-	vec_a.        z =
-		vec.       x  * ( -sin_z        )
-		+ vec.     y  * ( cos_y * sin_z )
-		+ vec.     z  * ( cos_y * cos_z );
-
-	return vec_a;
+	vec.x = (float)rand() * fac;
+	vec.y = (float)rand() * fac;
+	vec.z = (float)rand() * fac;
+	return vec;
 }
-*/
+
 void	print_uint(int fd, unsigned int n)
 {
 	int i;
@@ -242,7 +261,7 @@ void	print_uint(int fd, unsigned int n)
 void	save_image(t_camera *camera, char *path, t_color *data)
 {
 	int				fd;
-	unsigned int	count;
+	//unsigned int	count;
 
 	fd = open(path, O_CREAT|O_WRONLY|O_TRUNC, S_IWUSR);
 	if (fd == -1)
@@ -252,16 +271,23 @@ void	save_image(t_camera *camera, char *path, t_color *data)
 	write(fd, " ", 1);
 	print_uint(fd, camera->height);
 	write(fd, "\n255\n", 5);
-	count = camera->width * camera->height;
-	write(fd, data, count * 3);
+	//count = camera->width * camera->height;
+	write(fd, data, camera->width * camera->height * 3);
+	//for (unsigned int y = 0; y < camera->height; y++)
+	//	for (unsigned int x = 0; x < camera->width; x++)
+	//	{
+	//		t_color *actual = data + y * camera->width + y + x;
+	//		t_color c = mix_color4(actual, actual + 1, actual + camera->width + 1, actual + camera->width + 2);
+	//		write(fd, (unsigned char *)&c, 3);
+	//	}
 	close(fd);
 }
 
-int	ray_tris(t_pos *orig, t_pos *ray, t_tris *tris, t_pos *intersect, float *t)
+int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
 {
-	t_pos	ea = sub(*tris->b, *tris->a);// vector from b to a
-	t_pos	eb = sub(*tris->c, *tris->a);// vector from c to a
-	t_pos	pvec, dist, qvec;
+	t_vec	ea = sub(*tris->b, *tris->a);// vector from b to a
+	t_vec	eb = sub(*tris->c, *tris->a);// vector from c to a
+	t_vec	pvec, dist, qvec;
 	float	det, idet;
 
 	pvec = cross(*ray, eb);
@@ -289,80 +315,95 @@ int	ray_tris(t_pos *orig, t_pos *ray, t_tris *tris, t_pos *intersect, float *t)
 	return 1;
 }
 
-void	ray_scene(t_pos *orig, t_pos ray, t_scene *scene, t_color *color)
+int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 {
-	printf(" = appl: %f %f %f\n", ray.x, ray.y, ray.z);
-	*(int *)color = *(int *)(&scene->ambient_color);
-	float	closest_hit = -1;
-	t_pos	closest_hit_pos;
-	t_obj	*closest_hit_obj;
-	float	hit;
-	t_pos	hit_pos;
+	t_hit	hit;
 
+	closest->dist = -1;
 	for (t_obj *obj = scene->obj; obj->type != END_OBJ; obj++)
 	{
+		hit.dist = -1;
 		switch(obj->type)
 		{
 			case TRIS_OBJ :
-				if (!ray_tris(orig, &ray, (t_tris *)obj->data, &hit_pos, &hit))
-					hit = -1;
+				hit.normal = ((t_tris *)obj->data)->normal;
+				if (!ray_tris(orig, ray, (t_tris *)obj->data, &hit.pos, &hit.dist))
+					hit.dist = -1;
 				break;
 			default :
-				hit = -1;
 				break;
 		}
-		if (hit != -1 && (closest_hit == -1 || hit < closest_hit))
+		if (hit.dist != -1 && (closest->dist == -1 || hit.dist < closest->dist))
 		{
-			closest_hit = hit;
-			closest_hit_pos = hit_pos;
-			closest_hit_obj = obj;
+			closest->dist = hit.dist;
+			closest->pos = hit.pos;
+			closest->normal = hit.normal;
+			closest->obj = obj;
 		}
 	}
-	(void)closest_hit_pos;
-	(void)closest_hit_obj;
-	if (closest_hit != -1)
-	{
-		color->r = color->g = color->b = closest_hit / 15 * 255;
-	}
+	if (closest->dist == -1)
+		return 0;
+	return 1;
 }
 
-//TODO change to rotation based or relative position based
+t_color	ray_scene_color(t_vec *orig, t_vec ray, t_scene *scene/*, float rand_fac*/)
+{
+	t_color	color;
+	t_hit	hit;
+	//ray = sub(ray, rand_vec(rand_fac));
+	
+	if (ray_scene(orig, &ray, scene, &hit))
+	{
+		t_vec	dir = normalize(sub(scene->lights[0].pos, hit.pos));
+		float	fac = 0;
+		//t_hit	light_dir_hit;
+		//if (ray_scene(&hit.pos, &dir, scene, &light_dir_hit))//TODO check hit dist
+		//	printf();
+		//{}
+		//else
+			fac = absf(dot(dir, hit.normal));//TODO distance relative too
+		//TODO take object color too
+		color = mix_color(&scene->lights[0].color, &hit.obj->color, 1 / scene->lights[0].intensity);//TODO fix that
+		color = mult_color(&color, fac);
+		return color;
+	}
+	return scene->ambient_color;
+}
+
+//TODO antialiasing
 void	render(t_scene *scene, t_color *data)
 {
 	unsigned int		j = 0;
 
-	t_pos	rot = scene->camera->rot;
-	t_pos	dir = etov(&rot);
-	t_pos	cv_right = normalize(cross(dir, (t_pos){0, 0, 1}));
-	t_pos	cv_up = normalize(cross(cv_right, dir));
-	float	half_x = scene->camera->width / 2;
-	float	half_y = scene->camera->height / 2;
+	t_vec	dir = etov(&scene->camera->rot);
+	t_vec	cv_right = normalize(cross(dir, (t_vec){0, 0, 1}));
+	t_vec	cv_up = normalize(cross(cv_right, dir));
+	float	half_x = scene->camera->width / 2.0 - .5;
+	float	half_y = scene->camera->height / 2.0 - .5;
+	t_vec	ray;
+	//t_vec	ray_cp;
+	//float	rand_fac = scene->camera->fov_pixel / (float)(RAND_MAX);
 
-	//t_pos	dir = {0, 0, 0};
-	//dir.z = (scene->camera->height / 2.0 - .5) * scene->camera->fov_pixel;
-
-	for (unsigned int y = 0; y < scene->camera->height; y++)
+	for (unsigned int y = scene->camera->height; y-- > 0;)
 	{
-		t_pos	yr = mult(cv_up, (y - half_y) * scene->camera->fov_pixel);
-		//dir.y = -scene->camera->fov / 2.0 - .5 * scene->camera->fov_pixel;
+		t_vec	yr = mult(cv_up, (y - half_y) * scene->camera->fov_pixel);
 		for (unsigned int x = 0; x < scene->camera->width; x++)
 		{
-			t_pos	xr = mult(cv_right, (x - half_x) * scene->camera->fov_pixel);
-		/*	printf("pos: %f %f %f, dir: %f %f %f -> %f %f %f  + rot: %f %f %f", 
-					scene->camera->pos.x, scene->camera->pos.y, scene->camera->pos.z,
-					dir.x, dir.y, dir.z,
-					etov(dir).x, etov(dir).y, etov(dir).z,
-					rot.x, rot.y, rot.z);*/
-			//ray_scene(&scene->camera->pos, /*normalize(*/apply_rot(etov(dir), &scene->camera->rot)/*)*/, scene, data + j++);
-			ray_scene(&scene->camera->pos, normalize(add3(dir, xr, yr)), scene, data + j++);
-			//dir.y += scene->camera->fov_pixel;
+			t_vec	xr = mult(cv_right, (x - half_x) * scene->camera->fov_pixel);
+			ray = normalize(add3(dir, xr, yr));
+			data[j] = //mix_color4(
+				ray_scene_color(&scene->camera->pos, ray, scene/*, rand_fac*/);//,
+				//ray_scene_color(&scene->camera->pos, ray, scene, rand_fac),
+				//ray_scene_color(&scene->camera->pos, ray, scene, rand_fac),
+				//ray_scene_color(&scene->camera->pos, ray, scene, rand_fac)
+			//);
+			j++;
 		}
-		//dir.z -= scene->camera->fov_pixel;
 	}
 }
 
 t_camera	create_camera(unsigned int width, unsigned int height, 
-		t_pos pos, t_pos rot, float fov)
+		t_vec pos, t_vec rot, float fov)
 {
 	t_camera	camera;
 
@@ -394,8 +435,8 @@ t_scene	create_scene(t_camera *camera, t_color ambient_color, t_obj *obj, t_ligh
 int	main()
 {
 	t_camera camera = create_camera(WIDTH, HEIGHT,
-			(t_pos)CAMERA_POSITION, (t_pos)CAMERA_ROTATION, FIELD_OF_VIEW);
-	t_pos	points[POINTS_COUNT] = {
+			(t_vec)CAMERA_POSITION, (t_vec)CAMERA_ROTATION, FIELD_OF_VIEW);
+	t_vec	points[POINTS_COUNT] = {
 		{ 1, 1, 1    },
 		{ 1, 1, -1   },
 		{ 1, -1, -1  },
@@ -420,28 +461,30 @@ int	main()
 		{ points + 6, points + 2, points + 1, { 0, 0, -1 } }
 	};
 	t_obj	objects[OBJ_COUNT] = {
-		{ TRIS_OBJ, (void *)(tris + 0)  },
-		{ TRIS_OBJ, (void *)(tris + 1)  },
-		{ TRIS_OBJ, (void *)(tris + 2)  },
-		{ TRIS_OBJ, (void *)(tris + 3)  },
-		{ TRIS_OBJ, (void *)(tris + 4)  },
-		{ TRIS_OBJ, (void *)(tris + 5)  },
-		{ TRIS_OBJ, (void *)(tris + 6)  },
-		{ TRIS_OBJ, (void *)(tris + 7)  },
-		{ TRIS_OBJ, (void *)(tris + 8)  },
-		{ TRIS_OBJ, (void *)(tris + 9)  },
-		{ TRIS_OBJ, (void *)(tris + 10) },
-		{ TRIS_OBJ, (void *)(tris + 11) },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 0)  },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 1)  },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 2)  },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 3)  },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 4)  },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 5)  },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 6)  },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 7)  },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 8)  },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 9)  },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 10) },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 11) },
 		{ END_OBJ }
 	};
 	t_light	lights[LIGHT_COUNT] = {
-		{ { 2, 2, 2 }, { 255, 200, 200 }, 2 }
+		{ { 2, -4, 3 }, { 255, 0, 0 }, 2 }
 	};
-	t_color	data[WIDTH * HEIGHT];
+	t_color	data[(WIDTH + 1) * (HEIGHT + 1)];
 	t_scene	scene = create_scene(&camera, (t_color){ 23, 20, 33 }, objects, lights);
 
+	clock_t	start = clock();
 	render(&scene, data);
-	save_image(&camera, "image.ppm", data);
+	clock_t	end = clock();
+	printf("actual render time was %fms\n", (double)(end - start) / CLOCKS_PER_SEC * 1000);
 
-	printf("%f\n", camera.aspect_ratio);
+	save_image(&camera, "image.ppm", data);
 }
