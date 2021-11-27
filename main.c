@@ -263,7 +263,7 @@ void	save_image(t_camera *camera, char *path, t_color *data)
 	int				fd;
 	//unsigned int	count;
 
-	fd = open(path, O_CREAT|O_WRONLY|O_TRUNC, S_IWUSR);
+	fd = open(path, O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU);
 	if (fd == -1)
 		return ;
 	write(fd, "P6\n", 3);
@@ -473,7 +473,7 @@ int	main()
 		{ TRIS_OBJ, WHITE, (void *)(tris + 9)  },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 10) },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 11) },
-		{ END_OBJ }
+		{ END_OBJ, BLACK, NULL }
 	};
 	t_light	lights[LIGHT_COUNT] = {
 		{ { 2, -4, 3 }, { 255, 0, 0 }, 2 }
