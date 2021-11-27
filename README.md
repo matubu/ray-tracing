@@ -1,3 +1,3 @@
 # Ray Tracing
 
-![](./image.ppm)
+![](./image.png)
