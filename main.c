@@ -13,32 +13,22 @@
 #define	PI					3.1415926535
 #define EPSILON				0.0000001
 
-//COUNT
-#define	POINTS_COUNT		300
-#define TRIS_COUNT			100
-#define	OBJ_COUNT			100
-#define LIGHT_COUNT			10
-
 //CAMERA
 #define	WIDTH				500
 #define	HEIGHT				500
-#define	CAMERA_FOCAL_LENGTH	1.0
-#define	CAMERA_POSITION		{ 3, -4, 2 }
-#define	CAMERA_ROTATION		{ -.2, 0, .5 }
-#define	FIELD_OF_VIEW		PI / 2
-
-//PERFORMANCE / SYSTEM
-#define	THREAD_COUNT		16
+#define	CAMERA_POSITION		(t_vec){ 5, -4, 5.5 }
+#define	CAMERA_ROTATION		(t_vec){ -PI / 4, 0, PI / 4 }
+#define	FIELD_OF_VIEW		PI / 4
 
 //COLORS
-#define	RED					{ 255, 0  , 0   }
-#define	GREEN				{ 0  , 255, 0   }
-#define	BLUE				{ 0  , 0  , 255 }
-#define	WHITE				{ 255, 255, 255 }
-#define	BLACK				{ 0  , 0  , 0   }
+#define	RED					(t_color){ 255, 0  , 0   }
+#define	GREEN				(t_color){ 0  , 255, 0   }
+#define	BLUE				(t_color){ 0  , 0  , 255 }
+#define	WHITE				(t_color){ 255, 255, 255 }
+#define	BLACK				(t_color){ 0  , 0  , 0   }
 
 //VECTOR
-#define ORIGIN				{ 0  , 0  , 0   }
+#define ORIGIN				(t_vec){ 0  , 0  , 0   }
 
 typedef struct s_vec {
 	float	x;
@@ -60,6 +50,7 @@ typedef struct s_color {
 }	t_color;
 
 typedef enum e_obj_type {
+	END_OBJ    = 0,
 	SPHERE_OBJ = 1,
 	LINE_OBJ   = 2,
 	TRIS_OBJ   = 3,
@@ -105,19 +96,9 @@ typedef struct s_hit {
 	t_obj	*obj;
 }	t_hit;
 
-int		abs(int v)
+float	dot(t_vec *a, t_vec *b)
 {
-	return (v < 0 ? -v : v);
-}
-
-float	absf(float v)
-{
-	return (v < 0 ? -v : v);
-}
-
-float	dot(t_vec a, t_vec b)
-{
-	return (a.x * b.x + a.y * b.y + a.z * b.z);
+	return (a->x * b->x + a->y * b->y + a->z * b->z);
 }
 
 t_vec	sub(t_vec *a, t_vec *b) 
@@ -125,14 +106,14 @@ t_vec	sub(t_vec *a, t_vec *b)
 	return ((t_vec){ a->x - b->x, a->y - b->y, a->z - b->z });
 }
 
-t_vec	mult(t_vec a, float fac)
+t_vec	mult(t_vec *a, float fac)
 {
-	return ((t_vec){ a.x * fac, a.y * fac, a.z * fac });
+	return ((t_vec){ a->x * fac, a->y * fac, a->z * fac });
 }
 
-t_vec	add3(t_vec a, t_vec b, t_vec c)
+t_vec	add3(t_vec *a, t_vec *b, t_vec *c)
 {
-	return ((t_vec){ a.x + b.x + c.x, a.y + b.y + c.y, a.z + b.z + c.z });
+	return ((t_vec){ a->x + b->x + c->x, a->y + b->y + c->y, a->z + b->z + c->z });
 }
 
 t_vec	cross(t_vec a, t_vec b)
@@ -165,17 +146,6 @@ t_color	mix_color(t_color *a, t_color *b, float fac)
 	return (color);
 }
 
-/*
-t_color	mix_color4(t_color a, t_color b, t_color c, t_color d)
-{
-	return ((t_color){
-		(a.r + b.r + c.r + d.r) >> 2,
-		(a.g + b.g + c.g + d.g) >> 2,
-		(a.b + b.b + c.b + d.b) >> 2
-	});
-}
-*/
-
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
 float	q_rsqrt(float number)
 {
@@ -184,11 +154,11 @@ float	q_rsqrt(float number)
 	const float threehalfs = 1.5F;
 
 	x2 = number * 0.5F;
-	y  = number;
-	i  = * ( long * ) &y;    // evil floating point bit level hacking
-	i  = 0x5f3759df - ( i >> 1 );               // what the fuck? 
-	y  = * ( float * ) &i;
-	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
+	y = number;
+	i = *(long *)&y;    // evil floating point bit level hacking
+	i = 0x5f3759df - (i >> 1);               // what the fuck? 
+	y = *(float *)&i;
+	y = y * (threehalfs - (x2 * y * y));   // 1st iteration
 	return (y);
 }
 
@@ -200,16 +170,6 @@ t_vec	normalize(t_vec vec)
 	vec.y *= fac;
 	vec.z *= fac;
 	return (vec);
-}
-
-float	sinf(float	v)
-{
-	return (float)sin((double)v);
-}
-
-float	cosf(float	v)
-{
-	return (float)cos((double)v);
 }
 
 //euler radian to vector
@@ -228,17 +188,7 @@ t_vec	etov(t_vec *rot)
 	vec.z =  cos_y * sin_x;
 	return (vec);
 }
-/*
-t_vec	rand_vec(float fac)
-{
-	t_vec	vec;
 
-	vec.x = (float)rand() * fac;
-	vec.y = (float)rand() * fac;
-	vec.z = (float)rand() * fac;
-	return (vec);
-}
-*/
 int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
 {
 	t_vec	ea = sub(tris->b, tris->a);// vector from b to a
@@ -247,23 +197,23 @@ int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
 	float	det, idet;
 
 	pvec = cross(*ray, eb);
-	det = dot(ea, pvec);
+	det = dot(&ea, &pvec);
 	if (det > -EPSILON && det < EPSILON)
 		return (0);// ray and tris are parallel
 	idet = 1.0 / det;
 	dist = sub(orig, tris->a); // dist between origin and point a
 	//U
-	float	u = dot(dist, pvec) * idet;
+	float	u = dot(&dist, &pvec) * idet;
 	if (u < 0.0 || u > 1.0)
 		return (0);
 	//V
 	qvec = cross(dist, ea);
 
-	float	v = dot(*ray, qvec) * idet;
+	float	v = dot(ray, &qvec) * idet;
 	if (v < 0.0 || u + v > 1.0)
 		return (0);
 	//T	
-	*t = dot(eb, qvec) * idet;
+	*t = dot(&eb, &qvec) * idet;
 	intersect->x = orig->x + ray->x * *t;
 	intersect->y = orig->y + ray->y * *t;
 	intersect->z = orig->z + ray->z * *t;
@@ -302,28 +252,17 @@ int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 
 t_color	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 {
-	t_color	color = RED;
 	t_hit	hit;
-	//t_vec	dir = normalize(sub(&scene->lights[0].pos, orig));
-	float	fac = 0;
-	if (ray_scene(orig, ray, scene, &hit))
-		fac = 1.0 / hit.dist;
-		//fac = absf(dot(dir, hit.normal)) * .5 + .5;
-	//TODO check hit dist
-	//TODO distance relative too
-	//TODO take object color too
-	//TODO use light color
-	color = mult_color(&color, fac);
-	return (color);
+	t_vec	dir = normalize(sub(&scene->lights[0].pos, orig));
+
+	if (!ray_scene(orig, ray, scene, &hit))
+		return (scene->ambient_color);
+	return (mult_color(&hit.obj->color, fabsf(dot(&dir, &hit.normal)) * .3 + .7));
 }
 
 int	rgb(t_color color)
 {
-	return (
-		((color.r & 255) << 16)
-		| ((color.g & 255) << 8)
-		| (color.b & 255)
-	);
+	return (((color.r & 255) << 16) | ((color.g & 255) << 8) | (color.b & 255));
 }
 
 typedef struct s_mlx_data {
@@ -335,11 +274,9 @@ typedef struct s_mlx_data {
 	int		height;
 }	t_mlx_data;
 
-//TODO antialiasing
 void	render(t_scene *scene, t_mlx_data *mlx)
 {
 	unsigned int		j = 0;
-
 	t_vec	dir = etov(&scene->camera->rot);
 	t_vec	cv_right = normalize(cross(dir, (t_vec){0, 0, 1}));
 	t_vec	cv_up = normalize(cross(cv_right, dir));
@@ -347,13 +284,16 @@ void	render(t_scene *scene, t_mlx_data *mlx)
 	float	half_y = scene->camera->height / 2.0 - .5;
 	t_vec	ray;
 
-	for (unsigned int y = scene->camera->height; y-- > 0;)
+	int	y = scene->camera->height;
+	int	x;
+	while (y--)
 	{
-		t_vec	yr = mult(cv_up, (y - half_y) * scene->camera->fov_pixel);
-		for (unsigned int x = 0; x < scene->camera->width; x++)
+		t_vec	yr = mult(&cv_up, (y - half_y) * scene->camera->fov_pixel);
+		x = scene->camera->width;
+		while (x--)
 		{
-			t_vec	xr = mult(cv_right, (x - half_x) * scene->camera->fov_pixel);
-			ray = normalize(add3(dir, xr, yr));
+			t_vec	xr = mult(&cv_right, (half_x - x) * scene->camera->fov_pixel);
+			ray = normalize(add3(&dir, &xr, &yr));
 			mlx->buf[j++] = rgb(ray_scene_color(&scene->camera->pos, &ray, scene));
 		}
 	}
@@ -397,46 +337,50 @@ int	main()
 
 	t_camera camera = create_camera(WIDTH, HEIGHT,
 			(t_vec)CAMERA_POSITION, (t_vec)CAMERA_ROTATION, FIELD_OF_VIEW);
-	t_vec	points[POINTS_COUNT] = {
-		{ 1, 1, 1    },
-		{ 1, 1, -1   },
-		{ 1, -1, -1  },
-		{ 1, -1, 1   },
-		{ -1, 1, 1   },
-		{ -1, 1, -1  },
-		{ -1, -1, -1 },
-		{ -1, -1, 1  }
+	t_vec	points[] = {
+		{  1,  1,  1  },
+		{  1,  1, -1  },
+		{  1, -1, -1  },
+		{  1, -1,  1  },
+		{ -1,  1,  1  },
+		{ -1,  1, -1  },
+		{ -1, -1, -1  },
+		{ -1, -1,  1  },
+
+		{ 2, -1,  1  }
 	};
-	t_tris	tris[TRIS_COUNT] = {
-		{ points + 0, points + 1, points + 2, { 1, 0, 0  } },//front x
-		{ points + 0, points + 3, points + 2, { 1, 0, 0  } },
-		{ points + 4, points + 5, points + 6, { -1, 0, 0 } },//back x
-		{ points + 4, points + 8, points + 6, { -1, 0, 0 } },
-		{ points + 4, points + 5, points + 1, { 0, 1, 0  } },//front y
-		{ points + 4, points + 0, points + 1, { 0, 1, 0  } },
-		{ points + 7, points + 6, points + 2, { 0, -1, 0 } },//back y
-		{ points + 7, points + 3, points + 2, { 0, -1, 0 } },
-		{ points + 7, points + 4, points + 0, { 0, 0, 1  } },//front z
-		{ points + 7, points + 3, points + 0, { 0, 0, 1  } },
-		{ points + 6, points + 5, points + 1, { 0, 0, -1 } },//back z
-		{ points + 6, points + 2, points + 1, { 0, 0, -1 } }
+	t_tris	tris[] = {
+		{ points + 0, points + 1, points + 2, {  1,  0,  0  } },//front x
+		{ points + 0, points + 3, points + 2, {  1,  0,  0  } },
+		{ points + 4, points + 5, points + 6, { -1,  0,  0  } },//back x
+		{ points + 4, points + 7, points + 6, { -1,  0,  0  } },
+		{ points + 4, points + 5, points + 1, {  0,  1,  0  } },//front y
+		{ points + 4, points + 0, points + 1, {  0,  1,  0  } },
+		{ points + 7, points + 6, points + 2, {  0, -1,  0  } },//back y
+		{ points + 7, points + 3, points + 2, {  0, -1,  0  } },
+		{ points + 7, points + 4, points + 0, {  0,  0,  1  } },//front z
+		{ points + 7, points + 3, points + 0, {  0,  0,  1  } },
+		{ points + 6, points + 5, points + 1, {  0,  0, -1  } },//back z
+		{ points + 6, points + 2, points + 1, {  0,  0, -1  } },
+		{ points + 8, points + 2, points + 3, {  0,  0, -1  } }
 	};
-	t_obj	objects[OBJ_COUNT] = {
+	t_obj	objects[] = {
 		{ TRIS_OBJ, WHITE, (void *)(tris + 0)  },
-		{ TRIS_OBJ, WHITE, (void *)(tris + 1)  },
+		{ TRIS_OBJ, BLUE, (void *)(tris + 1)  },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 2)  },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 3)  },
-		{ TRIS_OBJ, WHITE, (void *)(tris + 4)  },
+		{ TRIS_OBJ, GREEN, (void *)(tris + 4)  },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 5)  },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 6)  },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 7)  },
-		{ TRIS_OBJ, WHITE, (void *)(tris + 8)  },
+		{ TRIS_OBJ, RED, (void *)(tris + 8)  },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 9)  },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 10) },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 11) },
+		{ TRIS_OBJ, GREEN, (void *)(tris + 12) },
 		{ 0, BLACK, NULL }
 	};
-	t_light	lights[LIGHT_COUNT] = {
+	t_light	lights[] = {
 		{ { 2, -4, 3 }, { 255, 0, 0 }, 2 }
 	};
 	t_scene	scene = create_scene(&camera, (t_color){ 23, 20, 33 }, objects, lights);
