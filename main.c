@@ -37,6 +37,9 @@
 #define	WHITE				{ 255, 255, 255 }
 #define	BLACK				{ 0  , 0  , 0   }
 
+//VECTOR
+#define ORIGIN				{ 0  , 0  , 0   }
+
 typedef struct s_vec {
 	float	x;
 	float	y;
@@ -51,9 +54,9 @@ typedef struct s_tris {
 }	t_tris;
 
 typedef struct s_color {
-	unsigned char	r;
-	unsigned char	g;
-	unsigned char	b;
+	unsigned int	r;
+	unsigned int	g;
+	unsigned int	b;
 }	t_color;
 
 typedef enum e_obj_type {
@@ -104,41 +107,37 @@ typedef struct s_hit {
 
 int		abs(int v)
 {
-	return v < 0 ? -v : v;
+	return (v < 0 ? -v : v);
 }
 
 float	absf(float v)
 {
-	return v < 0 ? -v : v;
+	return (v < 0 ? -v : v);
 }
 
 float	dot(t_vec a, t_vec b)
 {
-	return a.x * b.x + a.y * b.y + a.z * b.z;
+	return (a.x * b.x + a.y * b.y + a.z * b.z);
 }
 
-t_vec	sub(t_vec a, t_vec b) 
+t_vec	sub(t_vec *a, t_vec *b) 
 {
-	t_vec	r = { a.x - b.x, a.y - b.y, a.z - b.z };
-	return r;
+	return ((t_vec){ a->x - b->x, a->y - b->y, a->z - b->z });
 }
 
 t_vec	mult(t_vec a, float fac)
 {
-	t_vec	r = { a.x * fac, a.y * fac, a.z * fac };
-	return r;
+	return ((t_vec){ a.x * fac, a.y * fac, a.z * fac });
 }
 
 t_vec	add3(t_vec a, t_vec b, t_vec c)
 {
-	t_vec r = { a.x + b.x + c.x, a.y + b.y + c.y, a.z + b.z + c.z };
-	return r;
+	return ((t_vec){ a.x + b.x + c.x, a.y + b.y + c.y, a.z + b.z + c.z });
 }
 
 t_vec	cross(t_vec a, t_vec b)
 {
-	t_vec r = { a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x };
-	return r;
+	return ((t_vec){ a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x });
 }
 
 t_color	mult_color(t_color *a, float fac)
@@ -148,7 +147,7 @@ t_color	mult_color(t_color *a, float fac)
 	color.r = a->r * fac;
 	color.g = a->g * fac;
 	color.b = a->b * fac;
-	return color;
+	return (color);
 }
 
 t_color	mix_color(t_color *a, t_color *b, float fac)
@@ -163,17 +162,19 @@ t_color	mix_color(t_color *a, t_color *b, float fac)
 	color.r = a->r * fac + b->r * facb;
 	color.g = a->g * fac + b->g * facb;
 	color.b = a->b * fac + b->b * facb;
-	return color;
+	return (color);
 }
 
+/*
 t_color	mix_color4(t_color a, t_color b, t_color c, t_color d)
 {
-	t_color	color;
-	color.r = (a.r + b.r + c.r + d.r) >> 2;
-	color.g = (a.g + b.g + c.g + d.g) >> 2;
-	color.b = (a.b + b.b + c.b + d.b) >> 2;
-	return color;
+	return ((t_color){
+		(a.r + b.r + c.r + d.r) >> 2,
+		(a.g + b.g + c.g + d.g) >> 2,
+		(a.b + b.b + c.b + d.b) >> 2
+	});
 }
+*/
 
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
 float	q_rsqrt(float number)
@@ -188,7 +189,7 @@ float	q_rsqrt(float number)
 	i  = 0x5f3759df - ( i >> 1 );               // what the fuck? 
 	y  = * ( float * ) &i;
 	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
-	return y;
+	return (y);
 }
 
 t_vec	normalize(t_vec vec)
@@ -225,9 +226,9 @@ t_vec	etov(t_vec *rot)
 	vec.x = -cos_z * sin_y * sin_x - sin_z * cos_x;
 	vec.y = -sin_z * sin_y * sin_x + cos_z * cos_x;
 	vec.z =  cos_y * sin_x;
-	return vec;
+	return (vec);
 }
-
+/*
 t_vec	rand_vec(float fac)
 {
 	t_vec	vec;
@@ -235,13 +236,13 @@ t_vec	rand_vec(float fac)
 	vec.x = (float)rand() * fac;
 	vec.y = (float)rand() * fac;
 	vec.z = (float)rand() * fac;
-	return vec;
+	return (vec);
 }
-
+*/
 int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
 {
-	t_vec	ea = sub(*tris->b, *tris->a);// vector from b to a
-	t_vec	eb = sub(*tris->c, *tris->a);// vector from c to a
+	t_vec	ea = sub(tris->b, tris->a);// vector from b to a
+	t_vec	eb = sub(tris->c, tris->a);// vector from c to a
 	t_vec	pvec, dist, qvec;
 	float	det, idet;
 
@@ -250,7 +251,7 @@ int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
 	if (det > -EPSILON && det < EPSILON)
 		return (0);// ray and tris are parallel
 	idet = 1.0 / det;
-	dist = sub(*orig, *tris->a); // dist between origin and point a
+	dist = sub(orig, tris->a); // dist between origin and point a
 	//U
 	float	u = dot(dist, pvec) * idet;
 	if (u < 0.0 || u > 1.0)
@@ -285,7 +286,7 @@ int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 			if (!ray_tris(orig, ray, (t_tris *)obj->data, &hit.pos, &hit.dist))
 				hit.dist = -1;
 		}
-		if (hit.dist != -1 && (closest->dist == -1 || hit.dist < closest->dist))
+		if (hit.dist >= 0 && (closest->dist == -1 || hit.dist < closest->dist))
 		{
 			closest->dist = hit.dist;
 			closest->pos = hit.pos;
@@ -295,33 +296,25 @@ int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 		obj++;
 	}
 	if (closest->dist == -1)
-		return 0;
-	return 1;
+		return (0);
+	return (1);
 }
 
-t_color	ray_scene_color(t_vec *orig, t_vec ray, t_scene *scene/*, float rand_fac*/)
+t_color	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 {
-	t_color	color;
+	t_color	color = RED;
 	t_hit	hit;
-	//ray = sub(ray, rand_vec(rand_fac));
-	
-	while (ray_scene(orig, &ray, scene, &hit))
-	{
-		t_vec	dir = normalize(sub(scene->lights[0].pos, hit.pos));
-		float	fac = 0;
-		t_hit	light_dir_hit;
-		ray_scene(&hit.pos, &dir, scene, &light_dir_hit);
-		if (ray_scene(&hit.pos, &dir, scene, &light_dir_hit))//TODO check hit dist
-		//	printf();
-		//{}
-		//else
-			fac = absf(dot(dir, hit.normal)) * .1 + .9;//TODO distance relative too
-		//TODO take object color too
-		//color = mix_color(&scene->lights[0].color, &hit.obj->color, 1 / scene->lights[0].intensity);//TODO fix that
-		color = mult_color(&color, fac);
-		return color;
-	}
-	return scene->ambient_color;
+	//t_vec	dir = normalize(sub(&scene->lights[0].pos, orig));
+	float	fac = 0;
+	if (ray_scene(orig, ray, scene, &hit))
+		fac = 1.0 / hit.dist;
+		//fac = absf(dot(dir, hit.normal)) * .5 + .5;
+	//TODO check hit dist
+	//TODO distance relative too
+	//TODO take object color too
+	//TODO use light color
+	color = mult_color(&color, fac);
+	return (color);
 }
 
 int	rgb(t_color color)
@@ -353,8 +346,6 @@ void	render(t_scene *scene, t_mlx_data *mlx)
 	float	half_x = scene->camera->width / 2.0 - .5;
 	float	half_y = scene->camera->height / 2.0 - .5;
 	t_vec	ray;
-	//t_vec	ray_cp;
-	//float	rand_fac = scene->camera->fov_pixel / (float)(RAND_MAX);
 
 	for (unsigned int y = scene->camera->height; y-- > 0;)
 	{
@@ -363,8 +354,7 @@ void	render(t_scene *scene, t_mlx_data *mlx)
 		{
 			t_vec	xr = mult(cv_right, (x - half_x) * scene->camera->fov_pixel);
 			ray = normalize(add3(dir, xr, yr));
-			mlx->buf[j] = rgb(ray_scene_color(&scene->camera->pos, ray, scene));
-			j++;
+			mlx->buf[j++] = rgb(ray_scene_color(&scene->camera->pos, &ray, scene));
 		}
 	}
 	mlx_put_image_to_window(mlx->ptr, mlx->win, mlx->img, 0, 0);
@@ -383,7 +373,7 @@ t_camera	create_camera(unsigned int width, unsigned int height,
 	camera.fovx = fov;
 	camera.fovy = fov / width * height;
 	camera.fov_pixel = fov / width;
-	return camera;
+	return (camera);
 }
 
 t_scene	create_scene(t_camera *camera, t_color ambient_color, t_obj *obj, t_light *lights)
@@ -397,7 +387,7 @@ t_scene	create_scene(t_camera *camera, t_color ambient_color, t_obj *obj, t_ligh
 	while (obj++->type)
 		scene.obj_count++;
 	scene.lights = lights;
-	return scene;
+	return (scene);
 }
 
 int	main()
@@ -467,4 +457,5 @@ int	main()
 	printf("actual render time was %fms\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 
 	mlx_loop(mlx.ptr);
+	return (0);
 }
