@@ -16,9 +16,13 @@
 //CAMERA
 #define	WIDTH				1000
 #define	HEIGHT				1000
-#define	FIELD_OF_VIEW		PI / 4
-#define	SAMPLING			64
-#define	CAMERA_CLIP_START	.01
+//#define	WIDTH				960
+//#define	HEIGHT				540
+//#define	WIDTH				1920
+//#define	HEIGHT				1080
+#define	FIELD_OF_VIEW		PI / 2
+#define	SAMPLING			2
+#define	CAMERA_CLIP_START	.001
 
 //COLORS
 #define	RED					(t_color){ 245, 152, 175 }
@@ -31,7 +35,7 @@
 #define	ORIGIN				(t_vec){ 0  , 0  , 0   }
 
 //SHADOW
-#define	SHADOW_DIFFUSENESS	.1
+#define	SHADOW_DIFFUSENESS	.01
 
 typedef struct s_vec {
 	float	x;
@@ -150,18 +154,17 @@ t_color	mix_color(t_color *a, t_color *b, float fac)
 }
 
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
-float	q_rsqrt(float number)
+float	q_rsqrt(float y)
 {
-	long i;
-	float x2, y;
-	const float threehalfs = 1.5F;
+	int			i;
+	float		x2;
+	const float	threehalfs = 1.5F;
 
-	x2 = number * 0.5F;
-	y = number;
-	i = *(long *)&y;    // evil floating point bit level hacking
-	i = 0x5f3759df - (i >> 1);               // what the fuck? 
+	x2 = y * 0.5F;
+	i = *(int *)&y;
+	i = 0x5f3759df - (i >> 1);
 	y = *(float *)&i;
-	y = y * (threehalfs - (x2 * y * y));   // 1st iteration
+	y = y * (threehalfs - (x2 * y * y));
 	return (y);
 }
 
@@ -226,8 +229,8 @@ int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
 
 int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 {
-	t_hit	hit;
-	t_obj	*obj = scene->obj;
+	t_hit			hit;
+	register t_obj	*obj = scene->obj;
 
 	closest->dist = -1;
 	while (obj->type)
@@ -267,14 +270,14 @@ int	rgbmult(int color, float fac)
 	);
 }
 
-t_vec	rand_vec(float fac)
+t_vec	*rand_vec(float fac)
 {
-	t_vec	vec;
+	static t_vec	vec;
 
 	vec.x = (float)rand() * fac;
 	vec.y = (float)rand() * fac;
 	vec.z = (float)rand() * fac;
-	return vec;
+	return (&vec);
 }
 
 int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
@@ -282,15 +285,15 @@ int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 	t_hit	cam_hit, light_hit;
 	t_vec	cam_to_light = normalize(sub(&scene->lights[0].pos, orig));
 	t_vec	hit_to_light;
-	t_vec	rand = rand_vec(SHADOW_DIFFUSENESS / (float)RAND_MAX);
 
 	if (!ray_scene(orig, ray, scene, &cam_hit))
 		return (rgb(scene->ambient_color));
+	//TODO light reduce by distance + multi light + color disruption
 	hit_to_light = normalize(sub(&scene->lights[0].pos, &cam_hit.pos));
-	hit_to_light = sub(&hit_to_light, &rand);
+	hit_to_light = sub(&hit_to_light, rand_vec(SHADOW_DIFFUSENESS / (float)RAND_MAX));
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))
 		return (rgb(scene->ambient_color));
-	return (rgb(mult_color(&cam_hit.obj->color, fabsf(dot(&cam_to_light, &cam_hit.normal)) * .3 + .7)));
+	return (rgb(mult_color(&cam_hit.obj->color, fabsf(dot(&cam_to_light, &cam_hit.normal)) * .4 + .6)));
 }
 
 typedef struct s_mlx_data {
@@ -307,23 +310,23 @@ void	render(t_scene *scene, t_mlx_data *mlx, int i)
 
 	clock_t	start = clock();
 
-	unsigned int		j = 0;
+	register unsigned int		j = 0;
 	t_vec	dir = etov(&scene->camera->rot);
 	t_vec	cv_right = normalize(cross(dir, (t_vec){0, 0, 1}));
 	t_vec	cv_up = normalize(cross(cv_right, dir));
-	float	half_x = scene->camera->width / 2.0 - .5;
-	float	half_y = scene->camera->height / 2.0 - .5;
+	float	half_x = scene->camera->width / 2.0;
+	float	half_y = scene->camera->height / 2.0;
 	t_vec	ray;
 
-	int	y = scene->camera->height;
-	int	x;
+	register int	y = scene->camera->height;
+	register int	x;
 	while (y--)
 	{
 		t_vec	yr = mult(&cv_up, (y - half_y) * scene->camera->fov_pixel);
-		x = scene->camera->width;
-		while (x--)
+		x = -1;
+		while ((unsigned int)++x < scene->camera->width)
 		{
-			t_vec	xr = mult(&cv_right, (half_x - x) * scene->camera->fov_pixel);
+			t_vec	xr = mult(&cv_right, (x - half_x) * scene->camera->fov_pixel);
 			ray = normalize(add3(&dir, &xr, &yr));
 			mlx->buf[j] = 
 				rgbmult(ray_scene_color(&scene->camera->pos, &ray, scene), 1.0 / (float)i)
@@ -333,7 +336,7 @@ void	render(t_scene *scene, t_mlx_data *mlx, int i)
 	}
 	mlx_put_image_to_window(mlx->ptr, mlx->win, mlx->img, 0, 0);
 
-	printf("iteration %i took %.5fms ⚡\n", i, (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
+	printf("iteration %i took %.2fms ⚡\n", i, (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
 t_camera	create_camera(unsigned int width, unsigned int height, 
@@ -365,7 +368,38 @@ t_scene	create_scene(t_camera *camera, t_color ambient_color, t_obj *obj, t_ligh
 	scene.lights = lights;
 	return (scene);
 }
+/*
+void	denoise(t_mlx_data *mlx)
+{
+	clock_t	start = clock();
 
+	int	x;
+	int	y;
+	int	j;
+
+	y = 0;
+	while (++y < mlx->height - 1)
+	{
+		x = 0;
+		while (++x < mlx->width - 1)
+		{
+			j = y * mlx->width + x;
+			mlx->buf[j] = 
+				rgbmult(mlx->buf[j - 1 - mlx->width], 1.0 / 16.0)
+				+ rgbmult(mlx->buf[j - mlx->width], 2.0 / 16.0)
+				+ rgbmult(mlx->buf[j + 1 - mlx->width], 1.0 / 16.0)
+				+ rgbmult(mlx->buf[j - 1], 2.0 / 16.0)
+				+ rgbmult(mlx->buf[j], 4.0 / 16.0)
+				+ rgbmult(mlx->buf[j + 1], 2.0 / 16.0)
+				+ rgbmult(mlx->buf[j - 1 + mlx->width], 1.0 / 16.0)
+				+ rgbmult(mlx->buf[j + mlx->width], 2.0 / 16.0)
+				+ rgbmult(mlx->buf[j + 1 + mlx->width], 1.0 / 16.0);
+		}
+	}
+	mlx_put_image_to_window(mlx->ptr, mlx->win, mlx->img, 0, 0);
+	printf("denoising ended after %.2fms 🌈\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
+}
+*/
 int	main()
 {
 	t_mlx_data	mlx;
@@ -385,10 +419,10 @@ int	main()
 
 		{ 2, -1,  1  },
 
-		{ 100, 100, -10 },
-		{ 100, -100, -10 },
-		{ -100, -100, -10 },
-		{ -100, 100, -10 },
+		{ 100, 100, -3 },
+		{ 100, -100, -3 },
+		{ -100, -100, -3 },
+		{ -100, 100, -3 },
 	};
 	t_tris	tris[] = {
 		{ points + 0, points + 1, points + 2, {  1,  0,  0  } },//front x
@@ -425,12 +459,12 @@ int	main()
 
 		{ TRIS_OBJ, GREEN, (void *)(tris + 12) },
 
-		{ TRIS_OBJ, RED, (void *)(tris + 13) },
-		{ TRIS_OBJ, GREEN, (void *)(tris + 14) },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 13) },
+		{ TRIS_OBJ, WHITE, (void *)(tris + 14) },
 		{ 0, BLACK, NULL }
 	};
 	t_light	lights[] = {
-		{ { 7, -7, 7 }, { 255, 0, 0 }, 2 }
+		{ { 5, 5, 5 }, { 255, 0, 0 }, 2 }
 	};
 	t_scene	scene = create_scene(&camera, BLACK, objects, lights);
 
@@ -448,6 +482,8 @@ int	main()
 	int	i = 0;
 	while (i++ < SAMPLING)
 		render(&scene, &mlx, i);
+
+	//denoise(&mlx);
 
 	mlx_loop(mlx.ptr);
 	return (0);

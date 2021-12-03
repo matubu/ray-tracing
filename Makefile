@@ -3,7 +3,7 @@ NAME = minirt
 OBJ_BOTH = bin/main.o
 
 BIN = bin
-FLAGS = -Wall -Wextra -Werror# -g -fsanitize=address
+FLAGS = -Wall -Wextra -Werror -O3 -fno-strict-aliasing
 
 OS = $$(uname -s)
 
