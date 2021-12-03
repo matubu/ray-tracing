@@ -3,7 +3,7 @@ NAME = minirt
 OBJ_BOTH = bin/main.o
 
 BIN = bin
-FLAGS = -Wall -Wextra -Werror -O3 -fno-strict-aliasing
+FLAGS = -Wall -Wextra -Werror -O3 -Ofast -fno-strict-aliasing -ffast-math -march=native -fwhole-program -funsafe-math-optimizations -fomit-frame-pointer -funroll-loops -fprefetch-loop-arrays -fopenmp -mtune=native -msse4.2
 
 OS = $$(uname -s)
 
