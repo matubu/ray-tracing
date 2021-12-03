@@ -16,8 +16,6 @@
 //CAMERA
 #define	WIDTH				500
 #define	HEIGHT				500
-#define	CAMERA_POSITION		(t_vec){ 5, -4, 5.5 }
-#define	CAMERA_ROTATION		(t_vec){ -PI / 4, 0, PI / 4 }
 #define	FIELD_OF_VIEW		PI / 4
 
 //COLORS
@@ -236,7 +234,7 @@ int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 			if (!ray_tris(orig, ray, (t_tris *)obj->data, &hit.pos, &hit.dist))
 				hit.dist = -1;
 		}
-		if (hit.dist >= 0 && (closest->dist == -1 || hit.dist < closest->dist))
+		if (hit.dist > 0 && (closest->dist == -1 || hit.dist < closest->dist))
 		{
 			closest->dist = hit.dist;
 			closest->pos = hit.pos;
@@ -250,19 +248,23 @@ int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 	return (1);
 }
 
-t_color	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
-{
-	t_hit	hit;
-	t_vec	dir = normalize(sub(&scene->lights[0].pos, orig));
-
-	if (!ray_scene(orig, ray, scene, &hit))
-		return (scene->ambient_color);
-	return (mult_color(&hit.obj->color, fabsf(dot(&dir, &hit.normal)) * .3 + .7));
-}
-
 int	rgb(t_color color)
 {
 	return (((color.r & 255) << 16) | ((color.g & 255) << 8) | (color.b & 255));
+}
+
+int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
+{
+	t_hit	cam_hit, light_hit;
+	t_vec	cam_to_light = normalize(sub(&scene->lights[0].pos, orig));
+	t_vec	hit_to_light;
+
+	if (!ray_scene(orig, ray, scene, &cam_hit))
+		return (rgb(scene->ambient_color));
+	hit_to_light = normalize(sub(&scene->lights[0].pos, &cam_hit.pos));
+	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))// check dist with light&& hit.dist < )
+		return (rgb(mult_color(&scene->ambient_color, .5)));
+	return (rgb(mult_color(&cam_hit.obj->color, fabsf(dot(&cam_to_light, &cam_hit.normal)) * .3 + .7)));
 }
 
 typedef struct s_mlx_data {
@@ -294,7 +296,7 @@ void	render(t_scene *scene, t_mlx_data *mlx)
 		{
 			t_vec	xr = mult(&cv_right, (half_x - x) * scene->camera->fov_pixel);
 			ray = normalize(add3(&dir, &xr, &yr));
-			mlx->buf[j++] = rgb(ray_scene_color(&scene->camera->pos, &ray, scene));
+			mlx->buf[j++] = ray_scene_color(&scene->camera->pos, &ray, scene);
 		}
 	}
 	mlx_put_image_to_window(mlx->ptr, mlx->win, mlx->img, 0, 0);
@@ -336,7 +338,7 @@ int	main()
 	int			null;
 
 	t_camera camera = create_camera(WIDTH, HEIGHT,
-			(t_vec)CAMERA_POSITION, (t_vec)CAMERA_ROTATION, FIELD_OF_VIEW);
+			(t_vec){ 5, -4, 5.5 }, (t_vec){ -PI / 4, 0, PI / 4 }, FIELD_OF_VIEW);
 	t_vec	points[] = {
 		{  1,  1,  1  },
 		{  1,  1, -1  },
@@ -381,7 +383,7 @@ int	main()
 		{ 0, BLACK, NULL }
 	};
 	t_light	lights[] = {
-		{ { 2, -4, 3 }, { 255, 0, 0 }, 2 }
+		{ { 7, -7, 7 }, { 255, 0, 0 }, 2 }
 	};
 	t_scene	scene = create_scene(&camera, (t_color){ 23, 20, 33 }, objects, lights);
 
