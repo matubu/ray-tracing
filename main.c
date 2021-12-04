@@ -9,29 +9,26 @@
 #include <stdio.h>
 
 //MATH CONSTANT
-#define	PI					3.1415926535
-#define EPSILON				0.0000001
+#define	PI						3.1415926535
+#define EPSILON					0.0000001
 
 //CAMERA
-#define	WIDTH				1000
-#define	HEIGHT				1000
-#define	FIELD_OF_VIEW		PI / 2
-#define	CAMERA_CLIP_START	.001
+#define	WIDTH					1000
+#define	HEIGHT					1000
+#define	FIELD_OF_VIEW			PI / 2
+#define	CAMERA_CLIP_START		.001
 
 //COLORS
-#define	RED					0xf598af
-#define	GREEN				0xa2fac0
-#define	BLUE				0xaec9f0
-#define	WHITE				0xeeeeee
-#define	BLACK				0x191a1f
-#define	GREY				0x504d5e
+#define	RED						0xf598af
+#define	GREEN					0xa2fac0
+#define	BLUE					0xaec9f0
+#define	WHITE					0xeeeeee
+#define	BLACK					0x191a1f
+#define	GREY					0x504d5e
 
 //VECTOR
-#define	ORIGIN				(t_vec){ 0, 0, 0 }
-#define	UP					(t_vec){ 0, 0, 1 }
-
-//SHADOW
-#define	SHADOW_DIFFUSENESS	.01
+#define	ORIGIN					(t_vec){ 0, 0, 0 }
+#define	UP						(t_vec){ 0, 0, 1 }
 
 typedef struct s_vec {
 	float	x;
@@ -61,11 +58,11 @@ typedef struct s_obj {
 }	t_obj;
 
 typedef struct s_camera {
-	unsigned int	width;
-	unsigned int	height;
-	t_vec			pos;
-	t_vec			rot;// euler radian
-	float			fov_pixel;// field of view of a pixel
+	int		width;
+	int		height;
+	t_vec	pos;
+	t_vec	rot;// euler radian
+	float	fov_pixel;// field of view of a pixel
 }	t_camera;
 
 typedef struct s_light {
@@ -149,17 +146,17 @@ t_vec	normalize(t_vec vec)
 //euler radian to vector
 t_vec	etov(t_vec *rot)
 {
-	t_vec	vec;
 	float	sin_z = sinf(rot->z),
 			cos_z = cosf(rot->z),
 			sin_y = sinf(rot->y),
 			sin_x = sinf(rot->x),
 			cos_x = cosf(rot->x);
 
-	vec.x = -cos_z * sin_y * sin_x - sin_z * cos_x;
-	vec.y = -sin_z * sin_y * sin_x + cos_z * cos_x;
-	vec.z =  cosf(rot->y) * sin_x;
-	return (vec);
+	return ((t_vec){
+		-cos_z * sin_y * sin_x - sin_z * cos_x,
+		-sin_z * sin_y * sin_x + cos_z * cos_x,
+		cosf(rot->y) * sin_x
+	});
 }
 
 int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
@@ -220,23 +217,13 @@ int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 	return (closest->dist != -1);
 }
 
-int	rgbmult(int color, float fac)
+int	rgbmult(int	color, int fac)
 {
 	return (
-		((int)((float)((color & (255 << 16))) * fac) & (255 << 16))
-		| ((int)((float)((color & (255 << 8))) * fac) & (255 << 8))
-		| ((int)((float)((color & (255 << 0))) * fac) & (255 << 0))
+		((((color & (255 << 16)) * fac) & (255 << 24))
+		| (((color & (255 << 8)) * fac) & (255 << 16))
+		| (((color & (255 << 0)) * fac) & (255 << 8))) >> 8
 	);
-}
-
-t_vec	*rand_vec(float fac)
-{
-	static t_vec	vec;
-
-	vec.x = (float)rand() * fac;
-	vec.y = (float)rand() * fac;
-	vec.z = (float)rand() * fac;
-	return (&vec);
 }
 
 int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
@@ -249,10 +236,9 @@ int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 		return (scene->ambient_color);
 	//TODO law of light + multi light + color disruption
 	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
-	hit_to_light = sub(&hit_to_light, rand_vec(SHADOW_DIFFUSENESS / (float)RAND_MAX));
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit)) //TODO check hit distance
 		return (scene->ambient_color);
-	return (rgbmult(cam_hit.obj->color, fabsf(dot(&cam_to_light, &cam_hit.normal)) * .4 + .6));
+	return (rgbmult(cam_hit.obj->color, 240 - abs((int)(dot(&cam_to_light, &cam_hit.normal) * 120.0))));
 }
 
 
@@ -274,7 +260,7 @@ void	render(t_scene *scene, int *buf)
 	{
 		t_vec	yr = mult(&cv_up, (y - half_y) * scene->camera->fov_pixel);
 		x = -1;
-		while ((unsigned int)++x < scene->camera->width)
+		while (++x < scene->camera->width)
 		{
 			t_vec	xr = mult(&cv_right, (x - half_x) * scene->camera->fov_pixel);
 			ray = normalize(add3(&dir, &xr, &yr));
@@ -285,7 +271,7 @@ void	render(t_scene *scene, int *buf)
 	printf("rendering took %.2fms\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
-t_camera	create_camera(unsigned int width, unsigned int height, 
+t_camera	create_camera(int width, int height, 
 		t_vec pos, t_vec rot, float fov)
 {
 	t_camera	camera;
@@ -368,8 +354,8 @@ int	main()
 
 		{ TRIS_OBJ, GREEN, (void *)(tris + 12) },
 
-		{ TRIS_OBJ, WHITE, (void *)(tris + 13) },
-		{ TRIS_OBJ, WHITE, (void *)(tris + 14) },
+		{ TRIS_OBJ, GREEN, (void *)(tris + 13) },
+		{ TRIS_OBJ, GREEN, (void *)(tris + 14) },
 		{ 0, BLACK, NULL }
 	};
 	t_light	lights[] = {
