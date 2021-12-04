@@ -248,7 +248,7 @@ int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 
 	if (!ray_scene(orig, ray, scene, &cam_hit))
 		return (scene->ambient_color);
-	//TODO light reduce by distance + multi light + color disruption
+	//TODO law of light + multi light + color disruption
 	hit_to_light = normalize(sub(&scene->lights[0].pos, &cam_hit.pos));
 	hit_to_light = sub(&hit_to_light, rand_vec(SHADOW_DIFFUSENESS / (float)RAND_MAX));
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))
@@ -297,7 +297,7 @@ void	render(t_scene *scene, t_mlx_data *mlx, int i)
 	}
 	mlx_put_image_to_window(mlx->ptr, mlx->win, mlx->img, 0, 0);
 
-	printf("iteration %i took %.2fms ⚡\n", i, (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
+	printf("iteration %i took %.2fms\n", i, (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
 t_camera	create_camera(unsigned int width, unsigned int height, 
@@ -409,7 +409,6 @@ int	main()
 	mlx.img = mlx_new_image(mlx.ptr, mlx.width, mlx.height);
 	mlx.buf = (int *)mlx_get_data_addr(mlx.img, &null, &null, &null);
 
-	//TODO threading
 	int	i = 0;
 	while (i++ < SAMPLING)
 		render(&scene, &mlx, i);
