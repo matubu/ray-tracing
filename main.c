@@ -16,7 +16,6 @@
 #define	WIDTH				1000
 #define	HEIGHT				1000
 #define	FIELD_OF_VIEW		PI / 2
-#define	SAMPLING			2
 #define	CAMERA_CLIP_START	.001
 
 //COLORS
@@ -64,11 +63,8 @@ typedef struct s_obj {
 typedef struct s_camera {
 	unsigned int	width;
 	unsigned int	height;
-	float			aspect_ratio;
 	t_vec			pos;
 	t_vec			rot;// euler radian
-	float			fovx;// field of view
-	float			fovy;
 	float			fov_pixel;// field of view of a pixel
 }	t_camera;
 
@@ -81,8 +77,6 @@ typedef struct s_light {
 typedef struct s_scene {
 	t_camera		*camera;
 	int				ambient_color;
-	unsigned int	obj_count;
-	unsigned int	lights_count;
 	t_obj			*obj;
 	t_light 		*lights;
 }	t_scene;
@@ -93,6 +87,13 @@ typedef struct s_hit {
 	t_vec	normal;
 	t_obj	*obj;
 }	t_hit;
+
+typedef struct s_mlx_data {
+	void	*ptr;
+	void	*win;
+	void	*img;
+	int		*buf;
+}	t_mlx_data;
 
 float	dot(t_vec *a, t_vec *b)
 {
@@ -152,13 +153,12 @@ t_vec	etov(t_vec *rot)
 	float	sin_z = sinf(rot->z),
 			cos_z = cosf(rot->z),
 			sin_y = sinf(rot->y),
-			cos_y = cosf(rot->y),
 			sin_x = sinf(rot->x),
 			cos_x = cosf(rot->x);
 
 	vec.x = -cos_z * sin_y * sin_x - sin_z * cos_x;
 	vec.y = -sin_z * sin_y * sin_x + cos_z * cos_x;
-	vec.z =  cos_y * sin_x;
+	vec.z =  cosf(rot->y) * sin_x;
 	return (vec);
 }
 
@@ -190,7 +190,6 @@ int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
 	intersect->x = orig->x + ray->x * *t;
 	intersect->y = orig->y + ray->y * *t;
 	intersect->z = orig->z + ray->z * *t;
-
 	return (1);
 }
 
@@ -243,35 +242,25 @@ t_vec	*rand_vec(float fac)
 int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 {
 	t_hit	cam_hit, light_hit;
-	t_vec	cam_to_light = normalize(sub(&scene->lights[0].pos, orig));
+	t_vec	cam_to_light = normalize(sub(&scene->lights->pos, orig));
 	t_vec	hit_to_light;
 
 	if (!ray_scene(orig, ray, scene, &cam_hit))
 		return (scene->ambient_color);
 	//TODO law of light + multi light + color disruption
-	hit_to_light = normalize(sub(&scene->lights[0].pos, &cam_hit.pos));
+	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
 	hit_to_light = sub(&hit_to_light, rand_vec(SHADOW_DIFFUSENESS / (float)RAND_MAX));
-	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))
+	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit)) //TODO check hit distance
 		return (scene->ambient_color);
 	return (rgbmult(cam_hit.obj->color, fabsf(dot(&cam_to_light, &cam_hit.normal)) * .4 + .6));
 }
 
-typedef struct s_mlx_data {
-	void	*ptr;
-	void	*win;
-	void	*img;
-	int		*buf;
-	int		width;
-	int		height;
-}	t_mlx_data;
 
-t_vec	up = UP;
-
-void	render(t_scene *scene, t_mlx_data *mlx, int i)
+void	render(t_scene *scene, int *buf)
 {
 	clock_t	start = clock();
 
-	register unsigned int		j = 0;
+	t_vec	up = UP;
 	t_vec	dir = etov(&scene->camera->rot);
 	t_vec	cv_right = normalize(cross(&dir, &up));
 	t_vec	cv_up = normalize(cross(&cv_right, &dir));
@@ -289,15 +278,11 @@ void	render(t_scene *scene, t_mlx_data *mlx, int i)
 		{
 			t_vec	xr = mult(&cv_right, (x - half_x) * scene->camera->fov_pixel);
 			ray = normalize(add3(&dir, &xr, &yr));
-			mlx->buf[j] = 
-				rgbmult(ray_scene_color(&scene->camera->pos, &ray, scene), 1.0 / (float)i)
-				+ rgbmult(mlx->buf[j], 1.0 - (1.0 / (float)i));
-			j++;
+			*buf++ = ray_scene_color(&scene->camera->pos, &ray, scene);
 		}
 	}
-	mlx_put_image_to_window(mlx->ptr, mlx->win, mlx->img, 0, 0);
 
-	printf("iteration %i took %.2fms\n", i, (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
+	printf("rendering took %.2fms\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
 t_camera	create_camera(unsigned int width, unsigned int height, 
@@ -307,11 +292,8 @@ t_camera	create_camera(unsigned int width, unsigned int height,
 
 	camera.width = width;
 	camera.height = height;
-	camera.aspect_ratio = width / height;
 	camera.pos = pos;
 	camera.rot = rot;
-	camera.fovx = fov;
-	camera.fovy = fov / width * height;
 	camera.fov_pixel = fov / width;
 	return (camera);
 }
@@ -323,9 +305,6 @@ t_scene	create_scene(t_camera *camera, int ambient_color, t_obj *obj, t_light *l
 	scene.camera = camera;
 	scene.ambient_color = ambient_color;
 	scene.obj = obj;
-	scene.obj_count = 0;
-	while (obj++->type)
-		scene.obj_count++;
 	scene.lights = lights;
 	return (scene);
 }
@@ -401,17 +380,14 @@ int	main()
 	mlx.ptr = mlx_init();
 	if (mlx.ptr == NULL)
 		return (1);
-	mlx.width = WIDTH;
-	mlx.height = HEIGHT;
-	mlx.win = mlx_new_window(mlx.ptr, mlx.width, mlx.height, "MINIRT");
+	mlx.win = mlx_new_window(mlx.ptr, WIDTH, HEIGHT, "MINIRT");
 	if (mlx.win == NULL)
 		return (1);
-	mlx.img = mlx_new_image(mlx.ptr, mlx.width, mlx.height);
+	mlx.img = mlx_new_image(mlx.ptr, WIDTH, HEIGHT);
 	mlx.buf = (int *)mlx_get_data_addr(mlx.img, &null, &null, &null);
 
-	int	i = 0;
-	while (i++ < SAMPLING)
-		render(&scene, &mlx, i);
+	render(&scene, mlx.buf);
+	mlx_put_image_to_window(mlx.ptr, mlx.win, mlx.img, 0, 0);
 
 	mlx_loop(mlx.ptr);
 	return (0);
