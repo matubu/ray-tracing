@@ -35,20 +35,25 @@ typedef struct s_vec {
 	float	y;
 	float	z;
 }	t_vec;
-
+/*
 typedef struct s_tris {
 	t_vec	*a;
 	t_vec	*b;
 	t_vec	*c;
 	t_vec	normal;
 }	t_tris;
+*/
+typedef struct s_sphere {
+	t_vec	pos;
+	float	rad;
+}	t_sphere;
 
 typedef enum e_obj_type {
 	END_OBJ    = 0,
 	SPHERE_OBJ = 1,
-	LINE_OBJ   = 2,
-	TRIS_OBJ   = 3,
-	QUAD_OBJ   = 4
+//	LINE_OBJ   = 2,
+//	TRIS_OBJ   = 3,
+//	QUAD_OBJ   = 4
 }	t_obj_type;
 
 typedef struct s_obj {
@@ -166,17 +171,19 @@ inline t_vec	etov(t_vec *rot)
 		cosf(rot->y) * sin_x
 	});
 }
-/*
-inline int	ray_plane(t_vec *orig, t_vec *ray, t_vec *cor, t_vec *intersect, float *t)
-{
-	float	denom;
 
-	denom = dot()
+//https://facultyweb.cs.wwu.edu/~wehrwes/courses/csci480_21w/lectures/L07/L07_notes.pdf
+inline int	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit)
+{
+	hit->normal = (t_vec){0, 0, 0};
+	hit->pos = (t_vec){0, 0, 0};
+	hit->dist = 0;
+	return (1);
 }
-*/
+
 
 //TODO fixme too slow
-inline int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
+/*inline int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
 {
 	t_vec	ba = sub(tris->b, tris->a);// vector from b to a
 	t_vec	ca = sub(tris->c, tris->a);// vector from c to a
@@ -204,7 +211,7 @@ inline int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, flo
 	intersect->y = orig->y + ray->y * *t;
 	intersect->z = orig->z + ray->z * *t;
 	return (1);
-}
+}*/
 
 inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 {
@@ -215,12 +222,17 @@ inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 	while (obj->type)
 	{
 		hit.dist = -1;
-		if (obj->type == TRIS_OBJ)
+		if (obj->type == SPHERE_OBJ)
+		{
+			if (!ray_sphere(orig, ray, (t_sphere *)obj->data, &hit))
+				hit.dist = -1;
+		}
+/*		if (obj->type == TRIS_OBJ)
 		{
 			hit.normal = ((t_tris *)obj->data)->normal;
 			if (!ray_tris(orig, ray, (t_tris *)obj->data, &hit.pos, &hit.dist))
 				hit.dist = -1;
-		}
+		}*/
 		if (hit.dist > CAMERA_CLIP_START && (closest->dist == -1 || hit.dist < closest->dist))
 		{
 			closest->dist = hit.dist;
@@ -311,7 +323,7 @@ int	main()
 
 	t_camera camera = create_camera(WIDTH, HEIGHT,
 			(t_vec){ 5, -4, 5.5 }, (t_vec){ -PI / 4, 0, PI / 4 }, FIELD_OF_VIEW);
-	t_vec	points[] = {
+/*	t_vec	points[] = {
 		{  1,  1,  1  },
 		{  1,  1, -1  },
 		{  1, -1, -1  },
@@ -346,9 +358,13 @@ int	main()
 
 		{ points + 9, points + 10, points + 11, {  0,  0, 1  } },
 		{ points + 11, points + 12, points + 9, {  0,  0, 1  } },
+	};*/
+	t_sphere	sphere[] = {
+		{ (t_vec){ 0.0, 0.0, 1.0 }, 5.0 }
 	};
 	t_obj	objects[] = {
-		{ TRIS_OBJ, WHITE, (void *)(tris + 0)  },
+		{ SPHERE_OBJ, BLUE, (void *)(sphere + 0) },
+		/*{ TRIS_OBJ, WHITE, (void *)(tris + 0)  },
 		{ TRIS_OBJ, BLUE, (void *)(tris + 1)  },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 2)  },
 		{ TRIS_OBJ, WHITE, (void *)(tris + 3)  },
@@ -364,7 +380,7 @@ int	main()
 		{ TRIS_OBJ, GREEN, (void *)(tris + 12) },
 
 		{ TRIS_OBJ, GREEN, (void *)(tris + 13) },
-		{ TRIS_OBJ, GREEN, (void *)(tris + 14) },
+		{ TRIS_OBJ, GREEN, (void *)(tris + 14) },*/
 		{ 0, BLACK, NULL }
 	};
 	t_light	lights[] = {
