@@ -10,7 +10,7 @@
 
 //MATH CONSTANT
 #define	PI						3.1415926535
-#define EPSILON					0.0000001
+#define EPSILON					0.0001
 
 //CAMERA
 #define	WIDTH					1000
@@ -58,30 +58,30 @@ typedef struct s_obj {
 }	t_obj;
 
 typedef struct s_camera {
-	int		width;
-	int		height;
 	t_vec	pos;
 	t_vec	rot;// euler radian
+	int		width;
+	int		height;
 	float	fov_pixel;// field of view of a pixel
 }	t_camera;
 
 typedef struct s_light {
 	t_vec	pos;
-	int		color;
 	float	intensity;
+	int		color;
 }	t_light;
 
 typedef struct s_scene {
 	t_camera		*camera;
-	int				ambient_color;
 	t_obj			*obj;
 	t_light 		*lights;
+	int				ambient_color;
 }	t_scene;
 
 typedef struct s_hit {
-	float	dist;
 	t_vec	pos;
 	t_vec	normal;
+	float	dist;
 	t_obj	*obj;
 }	t_hit;
 
@@ -92,33 +92,38 @@ typedef struct s_mlx_data {
 	int		*buf;
 }	t_mlx_data;
 
-float	dot(t_vec *a, t_vec *b)
+inline float	dot(t_vec *a, t_vec *b)
 {
+//	asm("dpps %xmm1, %xmm2, 11100000b" : "=a" (ret) : "a" (a) , "b" (b));
 	return (a->x * b->x + a->y * b->y + a->z * b->z);
 }
 
-t_vec	sub(t_vec *a, t_vec *b) 
+inline t_vec	sub(t_vec *a, t_vec *b) 
 {
+//	asm("subps");
 	return ((t_vec){ a->x - b->x, a->y - b->y, a->z - b->z });
 }
 
-t_vec	mult(t_vec *a, float fac)
+inline t_vec	mult(t_vec *a, float fac)
 {
+//	asm();
 	return ((t_vec){ a->x * fac, a->y * fac, a->z * fac });
 }
 
-t_vec	add3(t_vec *a, t_vec *b, t_vec *c)
+inline t_vec	add3(t_vec *a, t_vec *b, t_vec *c)
 {
+//	asm("addps");
 	return ((t_vec){ a->x + b->x + c->x, a->y + b->y + c->y, a->z + b->z + c->z });
 }
 
-t_vec	cross(t_vec *a, t_vec *b)
+inline t_vec	cross(t_vec *a, t_vec *b)
 {
+//	asm("VFMSUB132SS/VFMSUB213SS/VFMSUB231SS");
 	return ((t_vec){ a->y * b->z - a->z * b->y, a->z * b->x - a->x * b->z, a->x * b->y - a->y * b->x });
 }
 
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
-float	q_rsqrt(float y)
+inline float	q_rsqrt(float y)
 {
 	int			i;
 	float		x2;
@@ -132,19 +137,22 @@ float	q_rsqrt(float y)
 	return (y);
 }
 
-t_vec	normalize(t_vec vec)
+static inline t_vec	normalize(t_vec vec)
 {
-	float	fac;
+	return (mult(&vec, q_rsqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z)));
+}
 
-	fac = q_rsqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-	vec.x *= fac;
-	vec.y *= fac;
-	vec.z *= fac;
-	return (vec);
+inline int	rgbmult(int	color, int fac)
+{
+	return (
+		((((color & (255 << 16)) * fac) & (255 << 24))
+		| (((color & (255 << 8)) * fac) & (255 << 16))
+		| (((color & (255 << 0)) * fac) & (255 << 8))) >> 8
+	);
 }
 
 //euler radian to vector
-t_vec	etov(t_vec *rot)
+inline t_vec	etov(t_vec *rot)
 {
 	float	sin_z = sinf(rot->z),
 			cos_z = cosf(rot->z),
@@ -158,39 +166,47 @@ t_vec	etov(t_vec *rot)
 		cosf(rot->y) * sin_x
 	});
 }
-
-int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
+/*
+inline int	ray_plane(t_vec *orig, t_vec *ray, t_vec *cor, t_vec *intersect, float *t)
 {
-	t_vec	ea = sub(tris->b, tris->a);// vector from b to a
-	t_vec	eb = sub(tris->c, tris->a);// vector from c to a
-	t_vec	pvec, dist, qvec;
-	float	det, idet;
+	float	denom;
 
-	pvec = cross(ray, &eb);
-	det = dot(&ea, &pvec);
+	denom = dot()
+}
+*/
+
+//TODO fixme too slow
+inline int	ray_tris(t_vec *orig, t_vec *ray, t_tris *tris, t_vec *intersect, float *t)
+{
+	t_vec	ba = sub(tris->b, tris->a);// vector from b to a
+	t_vec	ca = sub(tris->c, tris->a);// vector from c to a
+	t_vec	pvec, dist, qvec;
+	float	det;
+
+	pvec = cross(ray, &ca);
+	det = dot(&ba, &pvec);
 	if (det > -EPSILON && det < EPSILON)
 		return (0);// ray and tris are parallel
-	idet = 1.0 / det;
+	det = 1.0 / det;
 	dist = sub(orig, tris->a); // dist between origin and point a
 	//U
-	float	u = dot(&dist, &pvec) * idet;
+	float	u = dot(&dist, &pvec) * det;
 	if (u < 0.0 || u > 1.0)
 		return (0);
 	//V
-	qvec = cross(&dist, &ea);
-
-	float	v = dot(ray, &qvec) * idet;
+	qvec = cross(&dist, &ba);
+	float	v = dot(ray, &qvec) * det;
 	if (v < 0.0 || u + v > 1.0)
 		return (0);
 	//T	
-	*t = dot(&eb, &qvec) * idet;
+	*t = dot(&ca, &qvec) * det;
 	intersect->x = orig->x + ray->x * *t;
 	intersect->y = orig->y + ray->y * *t;
 	intersect->z = orig->z + ray->z * *t;
 	return (1);
 }
 
-int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
+inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 {
 	t_hit			hit;
 	register t_obj	*obj = scene->obj;
@@ -217,27 +233,19 @@ int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
 	return (closest->dist != -1);
 }
 
-int	rgbmult(int	color, int fac)
-{
-	return (
-		((((color & (255 << 16)) * fac) & (255 << 24))
-		| (((color & (255 << 8)) * fac) & (255 << 16))
-		| (((color & (255 << 0)) * fac) & (255 << 8))) >> 8
-	);
-}
-
 int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 {
 	t_hit	cam_hit, light_hit;
-	t_vec	cam_to_light = normalize(sub(&scene->lights->pos, orig));
+	t_vec	cam_to_light;
 	t_vec	hit_to_light;
 
 	if (!ray_scene(orig, ray, scene, &cam_hit))
 		return (scene->ambient_color);
 	//TODO law of light + multi light + color disruption
-	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
+	hit_to_light = sub(&scene->lights->pos, &cam_hit.pos);
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit)) //TODO check hit distance
 		return (scene->ambient_color);
+	cam_to_light = normalize(sub(&scene->lights->pos, orig));
 	return (rgbmult(cam_hit.obj->color, 240 - abs((int)(dot(&cam_to_light, &cam_hit.normal) * 120.0))));
 }
 
@@ -253,17 +261,18 @@ void	render(t_scene *scene, int *buf)
 	float	half_x = scene->camera->width / 2.0;
 	float	half_y = scene->camera->height / 2.0;
 	t_vec	ray;
+	t_vec	yr, xr;
 
 	register int	y = scene->camera->height;
 	register int	x;
 	while (y--)
 	{
-		t_vec	yr = mult(&cv_up, (y - half_y) * scene->camera->fov_pixel);
-		x = -1;
-		while (++x < scene->camera->width)
+		yr = mult(&cv_up, (y - half_y) * scene->camera->fov_pixel);
+		x = scene->camera->width;
+		while (x--)
 		{
-			t_vec	xr = mult(&cv_right, (x - half_x) * scene->camera->fov_pixel);
-			ray = normalize(add3(&dir, &xr, &yr));
+			xr = mult(&cv_right, (half_x - x) * scene->camera->fov_pixel);
+			ray = add3(&dir, &xr, &yr);
 			*buf++ = ray_scene_color(&scene->camera->pos, &ray, scene);
 		}
 	}
