@@ -3,7 +3,7 @@ NAME = minirt
 OBJ_BOTH = bin/main.o
 
 BIN = bin
-FLAGS = -Wall -Wextra -Werror -O3 -Ofast -fno-strict-aliasing -ffast-math -march=native -fwhole-program -funsafe-math-optimizations -fomit-frame-pointer -funroll-loops -fprefetch-loop-arrays -fopenmp -mtune=native -msse4.2 -mfpmath=sse -Wno-maybe-uninitialized 
+FLAGS = -Wall -Wextra -Werror -O3 -Ofast -fno-strict-aliasing -ffast-math -march=native -funsafe-math-optimizations -fomit-frame-pointer -funroll-loops -mtune=native -msse4.2 -mfpmath=sse 
 
 OS = $$(uname -s)
 
@@ -26,7 +26,7 @@ bonus: $(OBJ_BONUS) $(NAME)
 	@$(ECHO) "$(GRE)● Using $@ map to run $(NAME) 🎨$(EOC)"
 	@./$(NAME) maps/$@
 
-run:
+run: all
 	@$(ECHO) "$(GRE)● Launching $(NAME) 💪$(EOC)"
 	@./$(NAME) maps/$(DEFAULT_MAP)
 
