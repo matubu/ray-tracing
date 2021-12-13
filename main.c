@@ -30,8 +30,6 @@
 #define	ORIGIN					(t_vec){ 0, 0, 0 }
 #define	UP						(t_vec){ 0, 0, 1 }
 
-
-
 typedef struct s_vec {
 	float	x;
 	float	y;
@@ -40,6 +38,7 @@ typedef struct s_vec {
 
 typedef struct s_sphere {
 	t_vec	pos;
+	float	rad;
 	float	srad;
 }	t_sphere;
 
@@ -68,17 +67,10 @@ typedef struct s_light {
 	int		color;
 }	t_light;
 
-typedef struct s_scene {
-	t_camera		*camera;
-	t_obj			*obj;
-	t_light 		*lights;
-	int				ambient_color;
-}	t_scene;
-
 typedef struct s_hit {
 	t_vec	pos;
 	t_vec	normal;
-	float	sdist;
+	float	dist;
 	t_obj	*obj;
 }	t_hit;
 
@@ -88,6 +80,20 @@ typedef struct s_mlx_data {
 	void	*img;
 	int		*buf;
 }	t_mlx_data;
+
+typedef enum e_mouse {
+	LEFT_MOUSE=1,
+	MIDDLE_MOUSE=3
+}	t_mouse;
+
+typedef struct s_scene {
+	t_camera	*camera;
+	t_obj		*obj;
+	t_light 	*lights;
+	int			ambient_color;
+	t_mouse		button;
+	t_mlx_data	*mlx;
+}	t_scene;
 
 inline float	dot(t_vec *a, t_vec *b)
 {
@@ -113,17 +119,28 @@ inline t_vec	add3(t_vec *a, t_vec *b, t_vec *c)
 	return ((t_vec){ a->x + b->x + c->x, a->y + b->y + c->y, a->z + b->z + c->z });
 }
 
+inline t_vec	add(t_vec *a, t_vec *b)
+{
+	return ((t_vec){ a->x + b->x, a->y + b->y, a->z + b->z });
+}
+
 inline t_vec	cross(t_vec *a, t_vec *b)
 {
 //	asm("VFMSUB132SS/VFMSUB213SS/VFMSUB231SS");
 	return ((t_vec){ a->y * b->z - a->z * b->y, a->z * b->x - a->x * b->z, a->x * b->y - a->y * b->x });
 }
 
+t_vec	reflect(t_vec *ray, t_vec *normal)
+{
+	t_vec	tmp = mult(normal, 2 * dot(ray, normal));
+	return (sub(ray, &tmp));
+}
+/*
 inline float	sdist(t_vec *a)
 {
 	return (a->x * a->x + a->y * a->y + a->z * a->z);
 }
-
+*/
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
 inline float	q_rsqrt(float y)
 {
@@ -144,7 +161,7 @@ static inline t_vec	normalize(t_vec vec)
 	return (mult(&vec, q_rsqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z)));
 }
 
-inline unsigned int	rgbmult(unsigned int	color, int fac)
+inline unsigned int	rgbmult(unsigned int color, int fac)
 {
 	return (
 		((((color & (255 << 16)) * fac) & (255 << 24))
@@ -168,23 +185,38 @@ inline t_vec	radian_to_vector(t_vec *rot)
 	});;
 }
 
-inline int	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit)
+static inline void	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit)
 {
-	t_vec	os;
+/*	t_vec	os;
 	t_vec	o;
 	float	d;
 
 	os = sub(&sphere->pos, orig);
+	//os = sub(orig, &sphere->pos);
 	os = cross(ray, &os);
 	d = os.x * os.x + os.y * os.y + os.z * os.z;
 	if (d > sphere->srad)
-		return (0);
-	o = mult(ray, -sqrtf(sphere->srad - d));
+	{
+		hit->dist = -1;
+		return ;
+	}
+	//o = mult(ray, -sqrtf(sphere->srad - d));
+	o = mult(ray, cos(sqrtf(d) / sphere->rad) * -sphere->rad);
 	hit->pos = add3(&sphere->pos, &os, &o);
 	hit->normal = normalize(sub(&hit->pos, &sphere->pos));
 	o = sub(&hit->pos, orig);
-	hit->sdist = sdist(&o);
-	return (1);
+	hit->dist = sqrt(o.x * o.x + o.y * o.y + o.z * o.z);*/
+	t_vec	oc = sub(orig, &sphere->pos);
+	float	a = dot(ray, ray);
+	float	b = dot(&oc, ray);
+	float	c = dot(&oc, &oc) - sphere->srad;
+	float	d = b * b - a * c;
+	if (d <= 0)
+		return ((void)(hit->dist = -1));
+	hit->dist = (-b - sqrt(b * b - a * c)) / a;
+	hit->pos = mult(ray, hit->dist);
+	hit->pos = add(orig, &hit->pos);
+	hit->normal = normalize(sub(&hit->pos, &sphere->pos));
 }
 
 static inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
@@ -192,45 +224,51 @@ static inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *clos
 	t_hit			hit;
 	register t_obj	*obj = scene->obj;
 
-	closest->sdist = -1;
+	closest->dist = -1;
 	while (obj->type)
 	{
-		hit.sdist = -1;
+		hit.dist = -1;
 		if (obj->type == SPHERE_OBJ)
+			ray_sphere(orig, ray, (t_sphere *)obj->data, &hit);
+		if (hit.dist > CAMERA_CLIP_START
+				&& (closest->dist == -1 || hit.dist < closest->dist))
 		{
-			if (!ray_sphere(orig, ray, (t_sphere *)obj->data, &hit))
-				hit.sdist = -1;
-		}
-		if (hit.sdist > CAMERA_CLIP_START && (closest->sdist == -1 || hit.sdist < closest->sdist))
-		{
-			closest->sdist = hit.sdist;
+			closest->dist = hit.dist;
 			closest->pos = hit.pos;
 			closest->normal = hit.normal;
 			closest->obj = obj;
 		}
 		obj++;
 	}
-	return (closest->sdist != -1);
+	return (closest->dist != -1);
 }
 
-int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
+unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 {
-	t_hit	cam_hit;//, light_hit;
+	t_hit	cam_hit, light_hit;
 	t_vec	cam_to_light;
+	t_vec	reflected;
 	t_vec	hit_to_light;
 
 	if (!ray_scene(orig, ray, scene, &cam_hit))
 		return (scene->ambient_color);
+	reflected = reflect(ray, &cam_hit.normal);
+	//return (
+	//		(int)(cam_hit.normal.x * 100 + 100)
+	//		| (int)(cam_hit.normal.y * 100 + 100) << 8
+	//		| (int)(cam_hit.normal.z * 100 + 100) << 16
+	//		);
 	//TODO law of light + multi light + color disruption
 	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
-	//if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit)) //TODO check hit distance
+	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit)) //TODO check hit distance
+		return (rgbmult(cam_hit.obj->color, 100));
 	//	return (BLACK);//scene->ambient_color);
 	cam_to_light = normalize(sub(&scene->lights->pos, orig));
 	//printf("%f %d %x %x\n", dot(&cam_to_light, &cam_hit.normal), 240 - abs((int)(dot(&cam_to_light, &cam_hit.normal) * 120.0)), rgbmult(cam_hit.obj->color, 240 - abs((int)(dot(&cam_to_light, &cam_hit.normal) * 120.0))), cam_hit.obj->color);
-	return (rgbmult(cam_hit.obj->color, abs((int)(dot(&cam_to_light, &cam_hit.normal) * 120.0)) - 240));
-	//return (cam_hit.obj->color);
+	//return (rgbmult(cam_hit.obj->color, abs((int)(dot(&cam_to_light, &reflected) * 120.0)) + 100));
+	//return (rgbmult(cam_hit.obj->color, 240 - abs((int)(dot(&cam_to_light, &cam_hit.normal) * 120.0))));
+	return (cam_hit.obj->color);
 }
-
 
 void	render(t_scene *scene, int *buf)
 {
@@ -258,6 +296,7 @@ void	render(t_scene *scene, int *buf)
 			*buf++ = ray_scene_color(&scene->camera->pos, &ray, scene);
 		}
 	}
+	mlx_put_image_to_window(scene->mlx->ptr, scene->mlx->win, scene->mlx->img, 0, 0);
 
 	printf("rendering took %.2fms\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
@@ -286,17 +325,69 @@ t_scene	create_scene(t_camera *camera, int ambient_color, t_obj *obj, t_light *l
 	return (scene);
 }
 
+int	on_mouse_move(int x, int y, t_scene *scene)
+{
+	static int	first = 1;
+	static int	last[2];
+
+	if (first)
+		first = 0;
+	else
+	{
+		if (scene->button == LEFT_MOUSE)
+		{
+			scene->camera->rot.z += (float)(last[0] - x) / 50.0;
+			scene->camera->rot.y += (float)(last[1] - y) / 50.0;
+		}
+		render(scene, scene->mlx->buf);
+	}
+	last[0] = x;
+	last[1] = y;
+	return (1);
+}
+
+int	on_button_down(int button, int x, int y, t_scene *scene)
+{
+	(void)x;
+	(void)y;
+	scene->button = button;
+	t_vec rad;
+	rad = radian_to_vector(&scene->camera->rot);
+	if (button == 5)
+	//	scene->camera->fov_pixel /= .9;
+		rad = mult(&rad, -1);
+	//else if (button == 4)
+	//	rad = mult(&rad, .1);
+		//	scene->camera->fov_pixel *= .9;
+		//scene->camera->pos = sub(scene->camera->pos, mult(radian_to_vector(&scene->camera->rot), .1));
+	if (button == 4 || button == 5)
+	{
+		scene->camera->pos = sub(&scene->camera->pos, &rad);
+		render(scene, scene->mlx->buf);
+	}
+	return (1);
+}
+
+int	on_button_up(int button, int x, int y, t_scene *scene)
+{
+	(void)x;
+	(void)y;
+	(void)button;
+	scene->button = 0;
+	return (1);
+}
+
 int	main()
 {
 	t_mlx_data	mlx;
 	int			null;
 
 	t_camera camera = create_camera(WIDTH, HEIGHT,
-			(t_vec){ 5, -4, 5.5 }, (t_vec){ -PI / 4, 0, PI / 4 }, FIELD_OF_VIEW);
+			(t_vec){ 8, -4, 5.5 }, (t_vec){ -PI / 4, 0, PI / 4 }, FIELD_OF_VIEW);
 	t_sphere	sphere[] = {
-		{ (t_vec){ 5, 0, 0 }, 5.0 },
-		{ (t_vec){ 0, 1, 0 }, 1.0 },
-		{ (t_vec){ 0, 0, 2 }, 2.0 }
+		{ (t_vec){ 0, 0, 0 }, 2.0, 4.0 },
+		{ (t_vec){ 0, 1, 0 }, 1.0, 1.0 },
+		{ (t_vec){ 4, -4, 3.5 }, .5, .25 }
 	};
 	t_obj	objects[] = {
 		{ SPHERE_OBJ, RED, (void *)(sphere + 0) },
@@ -318,8 +409,13 @@ int	main()
 	mlx.img = mlx_new_image(mlx.ptr, WIDTH, HEIGHT);
 	mlx.buf = (int *)mlx_get_data_addr(mlx.img, &null, &null, &null);
 
-	render(&scene, mlx.buf);
-	mlx_put_image_to_window(mlx.ptr, mlx.win, mlx.img, 0, 0);
+	scene.mlx = &mlx;
+
+	mlx_hook(mlx.win, 4, 1 << 2, on_button_down, &scene);
+	mlx_hook(mlx.win, 5, 1 << 3, on_button_up, &scene);
+	mlx_hook(mlx.win, 6, 64, on_mouse_move, &scene);
+
+	render(&scene, scene.mlx->buf);
 
 	mlx_loop(mlx.ptr);
 	return (0);
