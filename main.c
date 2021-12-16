@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/16 16:19:22 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/16 18:40:41 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 
 //MODES
 //#define DEV_NO_SHADOW
-//#define DEV_SHOW_NORMAL
+#define DEV_SHOW_NORMAL
 //#define DEV_SHOW_DISTANCE
 
 //MATH CONSTANT
@@ -252,7 +252,6 @@ static inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *clos
 static unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 {
 	t_hit	cam_hit, light_hit;
-	t_vec	reflected;
 	t_vec	hit_to_light;
 
 	if (!ray_scene(orig, ray, scene, &cam_hit))
@@ -268,7 +267,7 @@ static unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 	#ifdef DEV_NO_SHADOW
 	return (cam_hit.obj->color);
 	#endif
-	reflected = reflect(ray, &cam_hit.normal);
+	//reflected = reflect(ray, &cam_hit.normal);
 	//TODO law of light + multi light + color disruption
 	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit)) //TODO check hit distance
@@ -378,6 +377,20 @@ int	on_button_up(int button, int x, int y, t_scene *scene)
 	return (1);
 }
 
+int	minirt_exit(t_scene *scene)
+{
+	mlx_destroy_window(scene->mlx->ptr, scene->mlx->win);
+	exit(0);
+	return (1);
+}
+
+int	on_key_up(int key, t_scene *scene)
+{
+	if (key == 12)
+		minirt_exit(scene);
+	return (1);
+}
+
 int	main(void)
 {
 	t_mlx_data	mlx;
@@ -410,7 +423,8 @@ int	main(void)
 	{NULL, BLACK, NULL}
 	};
 	t_light	lights[] = {
-		{{5, -5, 5}, RED, 2}
+		{{5, -5, 5}, RED, 2},
+	//	{{-5, -5, 5}, RED, 2}
 	};
 	t_scene	scene = create_scene(&camera, GREY, objects, lights);
 
@@ -421,6 +435,9 @@ int	main(void)
 	mlx_hook(mlx.win, 6, 64, on_mouse_move, &scene);
 
 	render(&scene, scene.mlx->buf);
+	
+	mlx_hook(mlx.win, 17, 0, minirt_exit, &scene);
+	mlx_hook(mlx.win, 3, 2, on_key_up, &scene);
 
 	mlx_loop(mlx.ptr);
 	return (0);
