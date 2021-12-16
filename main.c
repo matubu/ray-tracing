@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
+/*   Updated: 2021/12/16 16:19:22 by mberger-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <math.h>
@@ -8,27 +20,33 @@
 #include <time.h>
 #include <stdio.h>
 
+//MODES
+//#define DEV_NO_SHADOW
+//#define DEV_SHOW_NORMAL
+//#define DEV_SHOW_DISTANCE
+
 //MATH CONSTANT
-#define	PI						3.1415926535
+#define PI						3.1415926535
 #define EPSILON					0.0001
 
 //CAMERA
-#define	WIDTH					1000
-#define	HEIGHT					1000
-#define	FIELD_OF_VIEW			PI / 2
-#define	CAMERA_CLIP_START		.1
+#define WIDTH					1000
+#define HEIGHT					1000
+#define FIELD_OF_VIEW			PI / 2
+#define CAMERA_CLIP_START		.01
 
 //COLORS
-#define	RED						0xf598af
-#define	GREEN					0xa2fac0
-#define	BLUE					0xaec9f0
-#define	WHITE					0xeeeeee
-#define	BLACK					0x191a1f
-#define	GREY					0x504d5e
+#define RED						0xf598af
+#define GREEN					0xa2fac0
+#define BLUE					0xaec9f0
+#define WHITE					0xeeeeee
+#define BLACK					0x191a1f
+#define GREY					0x504d5e
 
 //VECTOR
-#define	ORIGIN					(t_vec){ 0, 0, 0 }
-#define	UP						(t_vec){ 0, 0, 1 }
+#define ORIGIN					(t_vec){0, 0, 0}
+#define UP						(t_vec){0, 0, 1}
+#define LEFT					(t_vec){1, 0, 0}
 
 typedef struct s_vec {
 	float	x;
@@ -36,19 +54,8 @@ typedef struct s_vec {
 	float	z;
 }	t_vec;
 
-typedef struct s_sphere {
-	t_vec	pos;
-	float	rad;
-	float	srad;
-}	t_sphere;
-
-typedef enum e_obj_type {
-	END_OBJ    = 0,
-	SPHERE_OBJ = 1,
-}	t_obj_type;
-
 typedef struct s_obj {
-	t_obj_type	type;
+	void		(*func)();
 	int			color;
 	void		*data;
 }	t_obj;
@@ -81,17 +88,12 @@ typedef struct s_mlx_data {
 	int		*buf;
 }	t_mlx_data;
 
-typedef enum e_mouse {
-	LEFT_MOUSE=1,
-	MIDDLE_MOUSE=3
-}	t_mouse;
-
 typedef struct s_scene {
 	t_camera	*camera;
 	t_obj		*obj;
 	t_light 	*lights;
 	int			ambient_color;
-	t_mouse		button;
+	int			button;
 	t_mlx_data	*mlx;
 }	t_scene;
 
@@ -135,12 +137,14 @@ t_vec	reflect(t_vec *ray, t_vec *normal)
 	t_vec	tmp = mult(normal, 2 * dot(ray, normal));
 	return (sub(ray, &tmp));
 }
-/*
-inline float	sdist(t_vec *a)
+
+inline int	max(int a, int b)
 {
-	return (a->x * a->x + a->y * a->y + a->z * a->z);
+	if (a > b)
+		return (a);
+	return (b);
 }
-*/
+
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
 inline float	q_rsqrt(float y)
 {
@@ -152,8 +156,7 @@ inline float	q_rsqrt(float y)
 	i = *(int *)&y;
 	i = 0x5f3759df - (i >> 1);
 	y = *(float *)&i;
-	y = y * (threehalfs - (x2 * y * y));
-	return (y);
+	return (y * (threehalfs - (x2 * y * y)));
 }
 
 static inline t_vec	normalize(t_vec vec)
@@ -185,38 +188,42 @@ inline t_vec	radian_to_vector(t_vec *rot)
 	});;
 }
 
+typedef struct s_sphere {
+	t_vec	pos;
+	float	rad;
+	float	srad;
+}	t_sphere;
+
 static inline void	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit)
 {
-/*	t_vec	os;
-	t_vec	o;
-	float	d;
-
-	os = sub(&sphere->pos, orig);
-	//os = sub(orig, &sphere->pos);
-	os = cross(ray, &os);
-	d = os.x * os.x + os.y * os.y + os.z * os.z;
-	if (d > sphere->srad)
-	{
-		hit->dist = -1;
-		return ;
-	}
-	//o = mult(ray, -sqrtf(sphere->srad - d));
-	o = mult(ray, cos(sqrtf(d) / sphere->rad) * -sphere->rad);
-	hit->pos = add3(&sphere->pos, &os, &o);
-	hit->normal = normalize(sub(&hit->pos, &sphere->pos));
-	o = sub(&hit->pos, orig);
-	hit->dist = sqrt(o.x * o.x + o.y * o.y + o.z * o.z);*/
 	t_vec	oc = sub(orig, &sphere->pos);
 	float	a = dot(ray, ray);
 	float	b = dot(&oc, ray);
 	float	c = dot(&oc, &oc) - sphere->srad;
 	float	d = b * b - a * c;
-	if (d <= 0)
+	if (d <= EPSILON)
 		return ((void)(hit->dist = -1));
 	hit->dist = (-b - sqrt(b * b - a * c)) / a;
 	hit->pos = mult(ray, hit->dist);
 	hit->pos = add(orig, &hit->pos);
 	hit->normal = normalize(sub(&hit->pos, &sphere->pos));
+}
+
+typedef struct s_plane {
+	t_vec	pos;
+	t_vec	normal;
+}	t_plane;
+
+static inline void	ray_plane(t_vec *orig, t_vec *ray, t_plane *plane, t_hit *hit)
+{
+	float	d = dot(&plane->normal, ray);
+	if (d >= EPSILON && d <= EPSILON)
+		return ((void)(hit->dist = -1));
+	hit->pos = sub(&plane->pos, orig);
+	hit->dist = dot(&hit->pos, &plane->normal) / d;
+	hit->pos = mult(ray, hit->dist);
+	hit->pos = add(orig, &hit->pos);
+	hit->normal = plane->normal;
 }
 
 static inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
@@ -225,11 +232,10 @@ static inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *clos
 	register t_obj	*obj = scene->obj;
 
 	closest->dist = -1;
-	while (obj->type)
+	while (obj->func)
 	{
 		hit.dist = -1;
-		if (obj->type == SPHERE_OBJ)
-			ray_sphere(orig, ray, (t_sphere *)obj->data, &hit);
+		obj->func(orig, ray, obj->data, &hit);
 		if (hit.dist > CAMERA_CLIP_START
 				&& (closest->dist == -1 || hit.dist < closest->dist))
 		{
@@ -243,31 +249,31 @@ static inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *clos
 	return (closest->dist != -1);
 }
 
-unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
+static unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 {
 	t_hit	cam_hit, light_hit;
-	t_vec	cam_to_light;
 	t_vec	reflected;
 	t_vec	hit_to_light;
 
 	if (!ray_scene(orig, ray, scene, &cam_hit))
 		return (scene->ambient_color);
+	#ifdef DEV_SHOW_NORMAL
+	return ((int)(cam_hit.normal.x * 100 + 100)
+			| (int)(cam_hit.normal.y * 100 + 100) << 8
+			| (int)(cam_hit.normal.z * 100 + 100) << 16);
+	#endif
+	#ifdef DEV_SHOW_DISTANCE
+	return (rgbmult(WHITE, 1.0 / cam_hit.dist * 255));
+	#endif
+	#ifdef DEV_NO_SHADOW
+	return (cam_hit.obj->color);
+	#endif
 	reflected = reflect(ray, &cam_hit.normal);
-	//return (
-	//		(int)(cam_hit.normal.x * 100 + 100)
-	//		| (int)(cam_hit.normal.y * 100 + 100) << 8
-	//		| (int)(cam_hit.normal.z * 100 + 100) << 16
-	//		);
 	//TODO law of light + multi light + color disruption
 	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit)) //TODO check hit distance
-		return (rgbmult(cam_hit.obj->color, 100));
-	//	return (BLACK);//scene->ambient_color);
-	cam_to_light = normalize(sub(&scene->lights->pos, orig));
-	//printf("%f %d %x %x\n", dot(&cam_to_light, &cam_hit.normal), 240 - abs((int)(dot(&cam_to_light, &cam_hit.normal) * 120.0)), rgbmult(cam_hit.obj->color, 240 - abs((int)(dot(&cam_to_light, &cam_hit.normal) * 120.0))), cam_hit.obj->color);
-	//return (rgbmult(cam_hit.obj->color, abs((int)(dot(&cam_to_light, &reflected) * 120.0)) + 100));
-	//return (rgbmult(cam_hit.obj->color, 240 - abs((int)(dot(&cam_to_light, &cam_hit.normal) * 120.0))));
-	return (cam_hit.obj->color);
+		return (rgbmult(cam_hit.obj->color, 95));
+	return (rgbmult(cam_hit.obj->color, max((int)(dot(&hit_to_light, &cam_hit.normal) * 160.0), 0) + 95));
 }
 
 void	render(t_scene *scene, int *buf)
@@ -304,25 +310,12 @@ void	render(t_scene *scene, int *buf)
 t_camera	create_camera(int width, int height, 
 		t_vec pos, t_vec rot, float fov)
 {
-	t_camera	camera;
-
-	camera.width = width;
-	camera.height = height;
-	camera.pos = pos;
-	camera.rot = rot;
-	camera.fov_pixel = fov / width;
-	return (camera);
+	return ((t_camera){ pos, rot, width, height, fov / width });
 }
 
 t_scene	create_scene(t_camera *camera, int ambient_color, t_obj *obj, t_light *lights)
 {
-	t_scene	scene;
-
-	scene.camera = camera;
-	scene.ambient_color = ambient_color;
-	scene.obj = obj;
-	scene.lights = lights;
-	return (scene);
+	return ((t_scene){ camera, obj, lights, ambient_color, 0, NULL });
 }
 
 int	on_mouse_move(int x, int y, t_scene *scene)
@@ -332,15 +325,27 @@ int	on_mouse_move(int x, int y, t_scene *scene)
 
 	if (first)
 		first = 0;
-	else
+	else if (scene->button == 1)
 	{
-		if (scene->button == LEFT_MOUSE)
-		{
-			scene->camera->rot.z += (float)(last[0] - x) / 50.0;
-			scene->camera->rot.y += (float)(last[1] - y) / 50.0;
-		}
+		scene->camera->rot.z += (float)(last[0] - x) / 50.0;
+		scene->camera->rot.y += (float)(last[1] - y) / 50.0;
 		render(scene, scene->mlx->buf);
 	}
+	else if (scene->button == 3)
+	{
+		t_vec	mx = radian_to_vector(&scene->camera->rot);
+		t_vec	mz = mx;
+		t_vec	up = UP;
+		t_vec	left = LEFT;
+		mx = cross(&mx, &up);
+		mz = cross(&mz, &left);
+		mx = mult(&mx, (float)(last[0] - x) / 10.0);
+		mz = mult(&mz, (float)(last[1] - y) / 10.0);
+		scene->camera->pos = add3(&scene->camera->pos, &mx, &mz);
+		render(scene, scene->mlx->buf);
+	}
+	else
+		first = 1;
 	last[0] = x;
 	last[1] = y;
 	return (1);
@@ -348,18 +353,14 @@ int	on_mouse_move(int x, int y, t_scene *scene)
 
 int	on_button_down(int button, int x, int y, t_scene *scene)
 {
+	t_vec	rad;
+
 	(void)x;
 	(void)y;
 	scene->button = button;
-	t_vec rad;
 	rad = radian_to_vector(&scene->camera->rot);
 	if (button == 5)
-	//	scene->camera->fov_pixel /= .9;
 		rad = mult(&rad, -1);
-	//else if (button == 4)
-	//	rad = mult(&rad, .1);
-		//	scene->camera->fov_pixel *= .9;
-		//scene->camera->pos = sub(scene->camera->pos, mult(radian_to_vector(&scene->camera->rot), .1));
 	if (button == 4 || button == 5)
 	{
 		scene->camera->pos = sub(&scene->camera->pos, &rad);
@@ -377,28 +378,10 @@ int	on_button_up(int button, int x, int y, t_scene *scene)
 	return (1);
 }
 
-int	main()
+int	main(void)
 {
 	t_mlx_data	mlx;
 	int			null;
-
-	t_camera camera = create_camera(WIDTH, HEIGHT,
-			(t_vec){ 8, -4, 5.5 }, (t_vec){ -PI / 4, 0, PI / 4 }, FIELD_OF_VIEW);
-	t_sphere	sphere[] = {
-		{ (t_vec){ 0, 0, 0 }, 2.0, 4.0 },
-		{ (t_vec){ 0, 1, 0 }, 1.0, 1.0 },
-		{ (t_vec){ 4, -4, 3.5 }, .5, .25 }
-	};
-	t_obj	objects[] = {
-		{ SPHERE_OBJ, RED, (void *)(sphere + 0) },
-		{ SPHERE_OBJ, GREEN, (void *)(sphere + 1) },
-		{ SPHERE_OBJ, BLUE, (void *)(sphere + 2) },
-		{ END_OBJ, BLACK, NULL }
-	};
-	t_light	lights[] = {
-		{ { 5, -5, 5 }, RED, 2 }
-	};
-	t_scene	scene = create_scene(&camera, GREY, objects, lights);
 
 	mlx.ptr = mlx_init();
 	if (mlx.ptr == NULL)
@@ -408,6 +391,28 @@ int	main()
 		return (1);
 	mlx.img = mlx_new_image(mlx.ptr, WIDTH, HEIGHT);
 	mlx.buf = (int *)mlx_get_data_addr(mlx.img, &null, &null, &null);
+
+	t_camera camera = create_camera(WIDTH, HEIGHT,
+			(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4 }, FIELD_OF_VIEW);
+	t_sphere	spheres[] = {
+		{(t_vec){ 0, 0, 0 }, 2.0, 4.0},
+		{(t_vec){ 0, 5, 0 }, 1.0, 1.0},
+		{(t_vec){ 4, -4, 3.5 }, .5, .25}
+	};
+	t_plane	planes[] = {
+		{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}}
+	};
+	t_obj	objects[] = {
+	{ray_sphere, RED, (void *)(spheres + 0)},
+	{ray_sphere, GREEN, (void *)(spheres + 1)},
+	{ray_sphere, BLUE, (void *)(spheres + 2)},
+	{ray_plane, GREEN, (void *)(planes + 0)},
+	{NULL, BLACK, NULL}
+	};
+	t_light	lights[] = {
+		{{5, -5, 5}, RED, 2}
+	};
+	t_scene	scene = create_scene(&camera, GREY, objects, lights);
 
 	scene.mlx = &mlx;
 
