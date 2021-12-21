@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 13:53:21 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/21 13:57:31 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,12 +118,6 @@ inline t_vec	radian_to_vector(t_vec *rot)
 	});
 }
 
-typedef struct s_sphere {
-	t_vec	pos;
-	float	rad;
-	float	srad;
-}	t_sphere;
-
 void	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit)
 {
 	t_vec	oc = sub(orig, &sphere->pos);
@@ -140,12 +134,6 @@ void	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit)
 	hit->normal = normalize(sub(&hit->pos, &sphere->pos));
 }
 
-typedef struct s_plane {
-	t_vec		pos;
-	t_vec		normal;
-	t_bump_map	*bump_map;
-}	t_plane;
-
 void	ray_plane(t_vec *orig, t_vec *ray, t_plane *plane, t_hit *hit)
 {
 	float	d = dot(&plane->normal, ray);
@@ -158,15 +146,6 @@ void	ray_plane(t_vec *orig, t_vec *ray, t_plane *plane, t_hit *hit)
 	hit->pos = add(orig, &hit->pos);
 	hit->normal = plane->normal;
 }
-
-typedef struct s_cylinder
-{
-	t_vec	pos;
-	t_vec	normal;
-	float	rad;
-	float	srad;
-	float	height;
-}	t_cylinder;
 
 void	ray_cylinder(t_vec *orig, t_vec *ray, t_cylinder *cylinder, t_hit *hit)
 {
@@ -183,12 +162,6 @@ void	ray_cylinder(t_vec *orig, t_vec *ray, t_cylinder *cylinder, t_hit *hit)
 	hit->dist = t;
 }
 
-// radius/apex https://mrl.cs.nyu.edu/~dzorin/rend05/lecture2.pdf
-typedef struct s_cone
-{
-	t_vec	pos;
-	t_vec	dir;
-}	t_cone;
 
 void	ray_cone(t_vec *orig, t_vec *ray, t_cone *cone, t_hit *hit)
 {

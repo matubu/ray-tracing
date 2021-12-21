@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/21 13:36:00 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 13:57:31 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,5 +101,33 @@ typedef struct s_bump_map
 	int		width;
 	int		height;
 }	t_bump_map;
+
+typedef struct s_sphere {
+	t_vec	pos;
+	float	rad;
+	float	srad;
+}	t_sphere;
+
+typedef struct s_plane {
+	t_vec		pos;
+	t_vec		normal;
+	t_bump_map	*bump_map;
+}	t_plane;
+
+typedef struct s_cylinder
+{
+	t_vec	pos;
+	t_vec	normal;
+	float	rad;
+	float	srad;
+	float	height;
+}	t_cylinder;
+
+// radius/apex https://mrl.cs.nyu.edu/~dzorin/rend05/lecture2.pdf
+typedef struct s_cone
+{
+	t_vec	pos;
+	t_vec	dir;
+}	t_cone;
 
 #endif
