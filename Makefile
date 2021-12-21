@@ -1,9 +1,19 @@
-NAME = minirt
+NAME			:=	minirt
 
-OBJ = bin/main.o
+OBJECTS			:=	./bin
+INCLUDES		:=	./includes
+SOURCES			:=	./srcs
 
-BIN = bin
-FLAGS = -Wall -Wextra -Werror -O3 -Ofast -fno-strict-aliasing -fomit-frame-pointer -mtune=native -msse4.2 -mfpmath=sse -march=native -funsafe-math-optimizations -funroll-loops -ffast-math
+LIBFT			:=	./libft
+
+SRCS			:=	main.c
+
+OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
+
+CC				:=	gcc
+CFLAGS			:=	-Wall -Wextra -Werror -O3 -Ofast -fno-strict-aliasing -fomit-frame-pointer -mtune=native -msse4.2 -mfpmath=sse -march=native -funsafe-math-optimizations -funroll-loops -ffast-math
+CINCLUDES		:=	-I${INCLUDES} -I${LIBFT}/includes -I/usr/local/include
+
 
 OS = $$(uname -s)
 
@@ -18,26 +28,26 @@ all: $(NAME)
 
 run: all
 	@$(ECHO) "$(GRE)● Launching $(NAME) 💪$(EOC)"
-	@./$(NAME) maps/$(DEFAULT_MAP)
+	@./$(NAME)
 
-bin/%.o: src/%.c
+${OBJECTS}/%.o: ${SOURCES}/%.c
 	@$(ECHO) "$(BLU)● Compiling $^ 🔧$(EOC)"
-	@rm -rf $(NAME) $(OBJ_UNUSED)
-	@mkdir -p $(BIN)
-	@gcc $(FLAGS) -c -I/usr/local/include $^ -o $@
+	@rm -rf $(NAME)
+	@mkdir -p $(OBJECTS)
+	@$(CC) $(CFLAGS) -o $@ -c $< ${CINCLUDES}
 
-$(NAME): $(OBJ)
+$(NAME): $(OBJS)
 	@if [ $(OS) = 'Linux' ]; then \
 		$(ECHO) "$(GRE)● Compiling to binary ⚙️  $(GRA)(Linux 🐧 mode)$(EOC)"; \
-		gcc $(FLAGS) -L/usr/local/lib $(OBJ) -o $(NAME) -l m -l mlx -l Xext -l X11 -l z; \
+		${CC} $(CFLAGS) -L/usr/local/lib $(OBJS) -o $(NAME) -l m -l mlx -l Xext -l X11 -l z; \
 	else \
 		$(ECHO) "$(GRE)● Compiling to binary ⚙️  $(GRA)(macOS 🍎 mode)$(EOC)"; \
-		gcc $(FLAGS) -l mlx -framework OpenGL -framework AppKit $(OBJ) -o $(NAME) -lm; \
+		${CC} $(CFLAGS) -l mlx -framework OpenGL -framework AppKit $(OBJS) -o $(NAME) -lm; \
 	fi
 
 clean:
-	@$(ECHO) "$(RED)● Removing /$(BIN) 📁$(EOC)"
-	@rm -rf $(BIN)
+	@$(ECHO) "$(RED)● Removing $(OBJECTS) 📁$(EOC)"
+	@rm -rf $(OBJECTS)
 
 fclean: clean
 	@$(ECHO) "$(RED)● Removing binary ⚙️ $(EOC)"
