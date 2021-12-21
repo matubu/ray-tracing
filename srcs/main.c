@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 13:50:20 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/21 13:53:21 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,13 +221,8 @@ static inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *clos
 	return (closest->dist != -1);
 }
 
-static unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
-{
-	t_hit	cam_hit, light_hit;
-	t_vec	hit_to_light;
-
-	if (!ray_scene(orig, ray, scene, &cam_hit))
-		return (scene->ambient_color);
+/*
+	// DEV MODES
 	#ifdef DEV_SHOW_NORMAL
 
 	return ((int)(cam_hit.normal.x * 100 + 100)
@@ -242,7 +237,14 @@ static unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 
 	return (cam_hit.obj->color);
 	#endif
+*/
+static unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
+{
+	t_hit	cam_hit, light_hit;
+	t_vec	hit_to_light;
 
+	if (!ray_scene(orig, ray, scene, &cam_hit))
+		return (scene->ambient_color);
 	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))
 		return (rgbmult(cam_hit.obj->color, 95));
