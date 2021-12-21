@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:44:06 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/21 16:16:29 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/21 17:11:07 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void	window_update(t_window *window)
 		window->mlx, \
 		window->window, \
 		window->image, \
-		0, 0\
+		0, 0 \
 	);
 }
 

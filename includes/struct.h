@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 16:31:23 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/21 17:10:26 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,12 +75,12 @@ typedef struct s_window {
 }	t_window;
 
 typedef struct s_scene {
+	t_window	*window;
 	t_camera	*camera;
 	t_obj		*obj;
 	t_light		*lights;
 	int			ambient_color;
 	int			button;
-	t_window	*window;
 }	t_scene;
 
 typedef struct s_bump_map

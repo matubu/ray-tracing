@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 16:14:59 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/21 17:11:27 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,17 +92,6 @@ void	render(t_scene *scene, int *buf)
 	printf("rendering took %.2fms\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
-t_camera	create_camera(int width, int height,
-		t_vec pos, t_vec rot, float fov)
-{
-	return ((t_camera){ pos, rot, width, height, fov / width });
-}
-
-t_scene	create_scene(t_camera *camera, int ambient_color, t_obj *obj, t_light *lights)
-{
-	return ((t_scene){ camera, obj, lights, ambient_color, 0, NULL });
-}
-
 int	on_mouse_move(int x, int y, t_scene *scene)
 {
 	static int	first = 1;
@@ -172,59 +161,58 @@ int	on_key_up(int key, t_scene *scene)
 
 int	main(void)
 {
-	t_window	window;
+	t_scene	*scene;
 
-	window = window_open("MINIRT", WIDTH, HEIGHT);
-	t_camera	camera = create_camera(WIDTH, HEIGHT,
-			(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4}, M_PI_2);
+
+	scene = scene_init("MINIRT", WIDTH, HEIGHT);
+
+	t_bump_map	bump_maps[] = { \
+		load_bump_map(scene->window, "assets/test.xpm") \
+	};
+
+	t_sphere	spheres[] = { \
+		{(t_vec){0, 0, 0}, 2, 4}, \
+		{(t_vec){0, 5, 0}, 1, 1}, \
+		{(t_vec){4, -4, 3.5}, .5, .25} \
+	};
+
+	t_plane	planes[] = { \
+		{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL}, \
+		{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0} \
+	};
+
+	t_cylinder	cylinders[] = { \
+		{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1} \
+	};
+
+	t_cone	cones[] = { \
+		{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}} \
+	};
 	
-	t_bump_map	bump_maps[] = {
-		load_bump_map(&window, "assets/test.xpm")
+	t_obj	objects[] = { \
+		{ray_sphere, RED, (void *)(spheres + 0)}, \
+		{ray_sphere, GREEN, (void *)(spheres + 1)}, \
+		{ray_sphere, BLUE, (void *)(spheres + 2)}, \
+		{ray_plane, GREEN, (void *)(planes + 0)}, \
+		{ray_plane, RED, (void *)(planes + 1)}, \
+		{ray_cylinder, BLUE, (void *)(cylinders + 0)}, \
+		{ray_cone, RED, (void *)(cones + 0)}, \
+		{NULL, BLACK, NULL} \
 	};
+	scene->obj = objects;
 
-	t_sphere	spheres[] = {
-		{(t_vec){0, 0, 0}, 2, 4},
-		{(t_vec){0, 5, 0}, 1, 1},
-		{(t_vec){4, -4, 3.5}, .5, .25}
+	t_light	lights[] = {\
+		{{5, -5, 5}, RED, 2}\
 	};
-
-	t_plane	planes[] = {
-		{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL},
-		{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0}
-	};
-
-	t_cylinder	cylinders[] = {
-		{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1}
-	};
-
-	t_cone	cones[] = {
-		{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}}
-	};
+	scene->lights = lights;
 	
-	t_obj	objects[] = {
-		{ray_sphere, RED, (void *)(spheres + 0)},
-		{ray_sphere, GREEN, (void *)(spheres + 1)},
-		{ray_sphere, BLUE, (void *)(spheres + 2)},
-		{ray_plane, GREEN, (void *)(planes + 0)},
-		{ray_plane, RED, (void *)(planes + 1)},
-		{ray_cylinder, BLUE, (void *)(cylinders + 0)},
-		{ray_cone, RED, (void *)(cones + 0)},
-		{NULL, BLACK, NULL}
-	};
-
-	t_light	lights[] = {
-		{{5, -5, 5}, RED, 2}
-	};
-
-	t_scene	scene = create_scene(&camera, GREY, objects, lights);
-	scene.window = &window;
+	//mlx_hook(scene->window->mlx, 4, 1 << 2, on_button_down, &scene);
+	//mlx_hook(scene->window->mlx, 5, 1 << 3, on_button_up, &scene);
+	//mlx_hook(scene->window->mlx, 6, 64, on_mouse_move, &scene);
+	//mlx_hook(scene->window->mlx, 3, 2, on_key_up, &scene);
 	
-	mlx_hook(window.window, 4, 1 << 2, on_button_down, &scene);
-	mlx_hook(window.window, 5, 1 << 3, on_button_up, &scene);
-	mlx_hook(window.window, 6, 64, on_mouse_move, &scene);
-	mlx_hook(window.window, 3, 2, on_key_up, &scene);
-	
-	render(&scene, scene.window->buffer);
-	mlx_loop(window.mlx);
+	render(scene, scene->window->buffer);
+	mlx_loop(scene->window->mlx);
+	free(scene);
 	return (0);
 }
