@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 13:08:44 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/21 13:24:03 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,12 @@
 //#define DEV_SHOW_DISTANCE
 
 // MATH CONSTANT
-#define PI						3.1415926535
+#define PI						M_PI
 #define EPSILON					0.0001
 
 // CAMERA
 #define WIDTH					1000
 #define HEIGHT					1000
-#define FIELD_OF_VIEW			PI / 2
 #define CAMERA_CLIP_START		.01
 
 // COLORS
@@ -42,11 +41,6 @@
 #define WHITE					0xeeeeee
 #define BLACK					0x191a1f
 #define GREY					0x504d5e
-
-// VECTOR
-#define ORIGIN					(t_vec){0, 0, 0}
-#define UP						(t_vec){0, 0, 1}
-#define LEFT					(t_vec){1, 0, 0}
 
 typedef struct s_vec {
 	float	x;
@@ -62,10 +56,10 @@ typedef struct s_obj {
 
 typedef struct s_camera {
 	t_vec	pos;
-	t_vec	rot;// euler radian
+	t_vec	rot_euler;
 	int		width;
 	int		height;
-	float	fov_pixel;// field of view of a pixel
+	float	fov_pixel;
 }	t_camera;
 
 typedef struct s_light {
@@ -125,25 +119,21 @@ t_bump_map load_bump_map(t_mlx_data *mlx, char *filename)
 
 inline float	dot(t_vec *a, t_vec *b)
 {
-//	asm("dpps %xmm1, %xmm2, 11100000b" : "=a" (ret) : "a" (a) , "b" (b));
 	return (a->x * b->x + a->y * b->y + a->z * b->z);
 }
 
 inline t_vec	sub(t_vec *a, t_vec *b) 
 {;
-//	asm("subps");
 	return ((t_vec){ a->x - b->x, a->y - b->y, a->z - b->z });
 }
 
 inline t_vec	mult(t_vec *a, float fac)
 {
-//	asm();
 	return ((t_vec){ a->x * fac, a->y * fac, a->z * fac });
 }
 
 inline t_vec	add3(t_vec *a, t_vec *b, t_vec *c)
 {
-//	asm("addps");
 	return ((t_vec){ a->x + b->x + c->x, a->y + b->y + c->y, a->z + b->z + c->z });
 }
 
@@ -154,7 +144,6 @@ inline t_vec	add(t_vec *a, t_vec *b)
 
 inline t_vec	cross(t_vec *a, t_vec *b)
 {
-//	asm("VFMSUB132SS/VFMSUB213SS/VFMSUB231SS");
 	return ((t_vec){ a->y * b->z - a->z * b->y, a->z * b->x - a->x * b->z, a->x * b->y - a->y * b->x });
 }
 
@@ -280,11 +269,11 @@ void	ray_cylinder(t_vec *orig, t_vec *ray, t_cylinder *cylinder, t_hit *hit)
 	hit->dist = t;
 }
 
+// radius/apex https://mrl.cs.nyu.edu/~dzorin/rend05/lecture2.pdf
 typedef struct s_cone
 {
 	t_vec	pos;
 	t_vec	dir;
-	//rad ?
 }	t_cone;
 
 void	ray_cone(t_vec *orig, t_vec *ray, t_cone *cone, t_hit *hit)
@@ -336,11 +325,8 @@ static unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 	#ifdef DEV_NO_SHADOW
 	return (cam_hit.obj->color);
 	#endif
-	// reflected = reflect(ray, &cam_hit.normal);
-	// TODO law of light + multi light + color disruption
 	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))
-		// TODO check hit distance behind camera
 		return (rgbmult(cam_hit.obj->color, 95));
 	return (rgbmult(cam_hit.obj->color, max((int)(dot(&hit_to_light, &cam_hit.normal) * 160.0), 0) + 95));
 }
@@ -350,8 +336,8 @@ void	render(t_scene *scene, int *buf)
 {
 	clock_t	start = clock();
 
-	t_vec	up = UP;
-	t_vec	dir = radian_to_vector(&scene->camera->rot);
+	t_vec	up = {0, 0, 1};
+	t_vec	dir = radian_to_vector(&scene->camera->rot_euler);
 	t_vec	cv_right = normalize(cross(&dir, &up));
 	t_vec	cv_up = normalize(cross(&cv_right, &dir));
 	float	half_x = scene->camera->width / 2.0;
@@ -397,16 +383,16 @@ int	on_mouse_move(int x, int y, t_scene *scene)
 		first = 0;
 	else if (scene->button == 1)
 	{
-		scene->camera->rot.z += (float)(last[0] - x) / 50.0;
-		scene->camera->rot.y += (float)(last[1] - y) / 50.0;
+		scene->camera->rot_euler.z += (float)(last[0] - x) / 50.0;
+		scene->camera->rot_euler.y += (float)(last[1] - y) / 50.0;
 		render(scene, scene->mlx->buf);
 	}
 	else if (scene->button == 3)
 	{
-		t_vec	mx = radian_to_vector(&scene->camera->rot);
+		t_vec	mx = radian_to_vector(&scene->camera->rot_euler);
 		t_vec	mz = mx;
-		t_vec	up = UP;
-		t_vec	left = LEFT;
+		t_vec	up = {0, 0, 1};
+		t_vec	left = {1, 0, 0};
 		mx = cross(&mx, &up);
 		mz = cross(&mz, &left);
 		mx = mult(&mx, (float)(last[0] - x) / 10.0);
@@ -428,7 +414,7 @@ int	on_button_down(int button, int x, int y, t_scene *scene)
 	(void)x;
 	(void)y;
 	scene->button = button;
-	rad = radian_to_vector(&scene->camera->rot);
+	rad = radian_to_vector(&scene->camera->rot_euler);
 	if (button == 5)
 		rad = mult(&rad, -1);
 	if (button == 4 || button == 5)
@@ -477,38 +463,37 @@ int	main(void)
 	mlx.buf = (int *)mlx_get_data_addr(mlx.img, &null, &null, &null);
 
 	t_camera camera = create_camera(WIDTH, HEIGHT,
-			(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4 }, FIELD_OF_VIEW);
+		(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4}, M_PI_2);
 	t_bump_map	bump_maps[] = {
-		load_bump_map(&mlx, "assets/test.xpm")
+	load_bump_map(&mlx, "assets/test.xpm")
 	};
 	t_sphere	spheres[] = {
-		{(t_vec){ 0, 0, 0 }, 2, 4},
-		{(t_vec){ 0, 5, 0 }, 1, 1},
-		{(t_vec){ 4, -4, 3.5 }, .5, .25}
+	{(t_vec){0, 0, 0}, 2, 4},
+	{(t_vec){0, 5, 0}, 1, 1},
+	{(t_vec){4, -4, 3.5}, .5, .25}
 	};
 	t_plane	planes[] = {
-		{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL},
-		{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0}
+	{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL},
+	{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0}
 	};
-//	t_cylinder	cylinders[] = {
-//		{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1}
-//	};
-//	t_cone	cones[] = {
-//		{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}}
-//	};
+	t_cylinder	cylinders[] = {
+	{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1}
+	};
+	t_cone	cones[] = {
+	{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}}
+	};
 	t_obj	objects[] = {
-		{ray_sphere, RED, (void *)(spheres + 0)},
-		{ray_sphere, GREEN, (void *)(spheres + 1)},
-		{ray_sphere, BLUE, (void *)(spheres + 2)},
-		{ray_plane, GREEN, (void *)(planes + 0)},
-		{ray_plane, RED, (void *)(planes + 1)},
-//		{ray_cylinder, BLUE, (void *)(cylinders + 0)},
-//		{ray_cone, RED, (void *)(cones + 0)},
-		{NULL, BLACK, NULL}
+	{ray_sphere, RED, (void *)(spheres + 0)},
+	{ray_sphere, GREEN, (void *)(spheres + 1)},
+	{ray_sphere, BLUE, (void *)(spheres + 2)},
+	{ray_plane, GREEN, (void *)(planes + 0)},
+	{ray_plane, RED, (void *)(planes + 1)},
+	{ray_cylinder, BLUE, (void *)(cylinders + 0)},
+	{ray_cone, RED, (void *)(cones + 0)},
+	{NULL, BLACK, NULL}
 	};
 	t_light	lights[] = {
-		{{5, -5, 5}, RED, 2}
-		// TODO multilights
+	{{5, -5, 5}, RED, 2}
 	};
 	t_scene	scene = create_scene(&camera, GREY, objects, lights);
 
