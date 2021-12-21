@@ -37,6 +37,7 @@ ${OBJECTS}/%.o: ${SOURCES}/%.c
 	@$(CC) $(CFLAGS) -o $@ -c $< ${CINCLUDES}
 
 $(NAME): $(OBJS)
+	@make -C ${LIBFT}
 	@if [ $(OS) = 'Linux' ]; then \
 		$(ECHO) "$(GRE)● Compiling to binary ⚙️  $(GRA)(Linux 🐧 mode)$(EOC)"; \
 		${CC} $(CFLAGS) -L/usr/local/lib $(OBJS) -o $(NAME) -l m -l mlx -l Xext -l X11 -l z; \
@@ -47,10 +48,12 @@ $(NAME): $(OBJS)
 
 clean:
 	@$(ECHO) "$(RED)● Removing $(OBJECTS) 📁$(EOC)"
+	@make -C ${LIBFT} clean
 	@rm -rf $(OBJECTS)
 
 fclean: clean
 	@$(ECHO) "$(RED)● Removing binary ⚙️ $(EOC)"
+	@make -C ${LIBFT} fclean
 	@rm -rf $(NAME)
 
 re: fclean all
