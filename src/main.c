@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 13:24:03 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/21 13:31:07 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,13 +85,13 @@ typedef struct s_mlx_data {
 typedef struct s_scene {
 	t_camera	*camera;
 	t_obj		*obj;
-	t_light 	*lights;
+	t_light		*lights;
 	int			ambient_color;
 	int			button;
 	t_mlx_data	*mlx;
 }	t_scene;
 
-typedef struct	s_bump_map
+typedef struct s_bump_map
 {
 	void	*img;
 	int		*buf;
@@ -105,10 +105,10 @@ void	err(char *s)
 	exit(1);
 }
 
-t_bump_map load_bump_map(t_mlx_data *mlx, char *filename)
+t_bump_map	load_bump_map(t_mlx_data *mlx, char *filename)
 {
 	t_bump_map	img;
-	int		null;
+	int			null;
 
 	img.img = mlx_xpm_file_to_image(mlx->ptr, filename, &img.width, &img.height);
 	if (img.img == NULL)
@@ -122,34 +122,36 @@ inline float	dot(t_vec *a, t_vec *b)
 	return (a->x * b->x + a->y * b->y + a->z * b->z);
 }
 
-inline t_vec	sub(t_vec *a, t_vec *b) 
-{;
-	return ((t_vec){ a->x - b->x, a->y - b->y, a->z - b->z });
+inline t_vec	sub(t_vec *a, t_vec *b)
+{
+	return ((t_vec){a->x - b->x, a->y - b->y, a->z - b->z});
 }
 
 inline t_vec	mult(t_vec *a, float fac)
 {
-	return ((t_vec){ a->x * fac, a->y * fac, a->z * fac });
+	return ((t_vec){a->x * fac, a->y * fac, a->z * fac});
 }
 
 inline t_vec	add3(t_vec *a, t_vec *b, t_vec *c)
 {
-	return ((t_vec){ a->x + b->x + c->x, a->y + b->y + c->y, a->z + b->z + c->z });
+	return ((t_vec){a->x + b->x + c->x, a->y + b->y + c->y, a->z + b->z + c->z});
 }
 
 inline t_vec	add(t_vec *a, t_vec *b)
 {
-	return ((t_vec){ a->x + b->x, a->y + b->y, a->z + b->z });
+	return ((t_vec){a->x + b->x, a->y + b->y, a->z + b->z});
 }
 
 inline t_vec	cross(t_vec *a, t_vec *b)
 {
-	return ((t_vec){ a->y * b->z - a->z * b->y, a->z * b->x - a->x * b->z, a->x * b->y - a->y * b->x });
+	return ((t_vec){a->y * b->z - a->z * b->y, a->z * b->x - a->x * b->z, a->x * b->y - a->y * b->x});
 }
 
 t_vec	reflect(t_vec *ray, t_vec *normal)
 {
-	t_vec	tmp = mult(normal, 2 * dot(ray, normal));
+	t_vec	tmp;
+
+	tmp = mult(normal, 2 * dot(ray, normal));
 	return (sub(ray, &tmp));
 }
 
@@ -183,24 +185,24 @@ inline unsigned int	rgbmult(unsigned int color, int fac)
 {
 	return (
 		((((color & (255 << 16)) * fac) & (255 << 24))
-		| (((color & (255 << 8)) * fac) & (255 << 16))
-		| (((color & (255 << 0)) * fac) & (255 << 8))) >> 8
+			| (((color & (255 << 8)) * fac) & (255 << 16))
+			| (((color & (255 << 0)) * fac) & (255 << 8))) >> 8
 	);
 }
 
 inline t_vec	radian_to_vector(t_vec *rot)
 {
 	float	sin_z = sinf(rot->z),
-			cos_z = cosf(rot->z),
-			sin_y = sinf(rot->y),
-			sin_x = sinf(rot->x),
-			cos_x = cosf(rot->x);
+		cos_z = cosf(rot->z),
+		sin_y = sinf(rot->y),
+		sin_x = sinf(rot->x),
+		cos_x = cosf(rot->x);
 
 	return ((t_vec){
 		-cos_z * sin_y * sin_x - sin_z * cos_x,
 		-sin_z * sin_y * sin_x + cos_z * cos_x,
 		cosf(rot->y) * sin_x
-	});;
+	});
 }
 
 typedef struct s_sphere {
@@ -257,7 +259,7 @@ void	ray_cylinder(t_vec *orig, t_vec *ray, t_cylinder *cylinder, t_hit *hit)
 	float	b = 2 * (ray->x * (orig->x - cylinder->pos.x) + ray->z * (orig->z - cylinder->pos.z));
 	float	c = (orig->x - cylinder->pos.x) * (orig->x - cylinder->pos.x) + (orig->z - cylinder->pos.z) * (orig->z - cylinder->pos.z) - cylinder->srad;
 	
-	float delta = b * b - 4 * (a * c);
+	float	delta = b * b - 4 * (a * c);
 	if(fabs(delta) < 0.001 || delta < 0.0)
 		return ((void)(hit->dist = -1));
 	float	t = fmin((-b - sqrt(delta)) / (2 * a), (-b + sqrt(delta)) / (2 * a));
@@ -295,7 +297,7 @@ static inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *clos
 		hit.dist = -1;
 		obj->func(orig, ray, obj->data, &hit);
 		if (hit.dist > CAMERA_CLIP_START
-				&& (closest->dist == -1 || hit.dist < closest->dist))
+			&& (closest->dist == -1 || hit.dist < closest->dist))
 		{
 			closest->dist = hit.dist;
 			closest->pos = hit.pos;
