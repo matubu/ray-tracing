@@ -47,7 +47,7 @@ t_bump_map	load_bump_map(t_window *window, char *filename)
 	return (cam_hit.obj->color);
 	#endif
 */
-static unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
+static inline unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 {
 	t_hit	cam_hit, light_hit;
 	t_vec	hit_to_light;
