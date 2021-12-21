@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 13:57:31 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 14:08:44 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,43 +30,6 @@ t_bump_map	load_bump_map(t_mlx_data *mlx, char *filename)
 	return (img);
 }
 
-inline float	dot(t_vec *a, t_vec *b)
-{
-	return (a->x * b->x + a->y * b->y + a->z * b->z);
-}
-
-inline t_vec	sub(t_vec *a, t_vec *b)
-{
-	return ((t_vec){a->x - b->x, a->y - b->y, a->z - b->z});
-}
-
-inline t_vec	mult(t_vec *a, float fac)
-{
-	return ((t_vec){a->x * fac, a->y * fac, a->z * fac});
-}
-
-inline t_vec	add3(t_vec *a, t_vec *b, t_vec *c)
-{
-	return ((t_vec){a->x + b->x + c->x, a->y + b->y + c->y, a->z + b->z + c->z});
-}
-
-inline t_vec	add(t_vec *a, t_vec *b)
-{
-	return ((t_vec){a->x + b->x, a->y + b->y, a->z + b->z});
-}
-
-inline t_vec	cross(t_vec *a, t_vec *b)
-{
-	return ((t_vec){a->y * b->z - a->z * b->y, a->z * b->x - a->x * b->z, a->x * b->y - a->y * b->x});
-}
-
-t_vec	reflect(t_vec *ray, t_vec *normal)
-{
-	t_vec	tmp;
-
-	tmp = mult(normal, 2 * dot(ray, normal));
-	return (sub(ray, &tmp));
-}
 
 inline int	max(int a, int b)
 {
@@ -83,15 +46,10 @@ inline float	q_rsqrt(float y)
 	const float	threehalfs = 1.5F;
 
 	x2 = y * 0.5F;
-	i = *(int *)&y;
-	i = 0x5f3759df - (i >> 1);
+	i = *(int *)&y;				// EVIL POINT HACK
+	i = 0x5f3759df - (i >> 1);	// WHAT THE FUCK ?!
 	y = *(float *)&i;
 	return (y * (threehalfs - (x2 * y * y)));
-}
-
-static inline t_vec	normalize(t_vec vec)
-{
-	return (mult(&vec, q_rsqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z)));
 }
 
 inline unsigned int	rgbmult(unsigned int color, int fac)
@@ -101,97 +59,6 @@ inline unsigned int	rgbmult(unsigned int color, int fac)
 			| (((color & (255 << 8)) * fac) & (255 << 16))
 			| (((color & (255 << 0)) * fac) & (255 << 8))) >> 8
 	);
-}
-
-inline t_vec	radian_to_vector(t_vec *rot)
-{
-	float	sin_z = sinf(rot->z),
-		cos_z = cosf(rot->z),
-		sin_y = sinf(rot->y),
-		sin_x = sinf(rot->x),
-		cos_x = cosf(rot->x);
-
-	return ((t_vec){
-		-cos_z * sin_y * sin_x - sin_z * cos_x,
-		-sin_z * sin_y * sin_x + cos_z * cos_x,
-		cosf(rot->y) * sin_x
-	});
-}
-
-void	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit)
-{
-	t_vec	oc = sub(orig, &sphere->pos);
-	float	a = dot(ray, ray);
-	float	b = dot(&oc, ray);
-	float	c = dot(&oc, &oc) - sphere->srad;
-	float	d = b * b - a * c;
-
-	if (d <= EPSILON)
-		return ((void)(hit->dist = -1));
-	hit->dist = (-b - sqrt(b * b - a * c)) / a;
-	hit->pos = mult(ray, hit->dist);
-	hit->pos = add(orig, &hit->pos);
-	hit->normal = normalize(sub(&hit->pos, &sphere->pos));
-}
-
-void	ray_plane(t_vec *orig, t_vec *ray, t_plane *plane, t_hit *hit)
-{
-	float	d = dot(&plane->normal, ray);
-
-	if (d >= EPSILON && d <= EPSILON)
-		return ((void)(hit->dist = -1));
-	hit->pos = sub(&plane->pos, orig);
-	hit->dist = dot(&hit->pos, &plane->normal) / d;
-	hit->pos = mult(ray, hit->dist);
-	hit->pos = add(orig, &hit->pos);
-	hit->normal = plane->normal;
-}
-
-void	ray_cylinder(t_vec *orig, t_vec *ray, t_cylinder *cylinder, t_hit *hit)
-{
-	float	a = (ray->x * ray->x) + (ray->z * ray->z);
-	float	b = 2 * (ray->x * (orig->x - cylinder->pos.x) + ray->z * (orig->z - cylinder->pos.z));
-	float	c = (orig->x - cylinder->pos.x) * (orig->x - cylinder->pos.x) + (orig->z - cylinder->pos.z) * (orig->z - cylinder->pos.z) - cylinder->srad;
-	float	delta = b * b - 4 * (a * c);
-	if(fabs(delta) < 0.001 || delta < 0.0)
-		return ((void)(hit->dist = -1));
-	float	t = fmin((-b - sqrt(delta)) / (2 * a), (-b + sqrt(delta)) / (2 * a));
-	float	r = orig->y + t * ray->y;
-	if (!(r >= cylinder->pos.y) && (r <= cylinder->pos.y + cylinder->height))
-		return ((void)(hit->dist = -1));
-	hit->dist = t;
-}
-
-
-void	ray_cone(t_vec *orig, t_vec *ray, t_cone *cone, t_hit *hit)
-{
-	(void)orig;
-	(void)ray;
-	(void)cone;
-	hit->dist = 0;
-}
-
-static inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
-{
-	t_hit			hit;
-	register t_obj	*obj = scene->obj;
-
-	closest->dist = -1;
-	while (obj->func)
-	{
-		hit.dist = -1;
-		obj->func(orig, ray, obj->data, &hit);
-		if (hit.dist > CAMERA_CLIP_START
-			&& (closest->dist == -1 || hit.dist < closest->dist))
-		{
-			closest->dist = hit.dist;
-			closest->pos = hit.pos;
-			closest->normal = hit.normal;
-			closest->obj = obj;
-		}
-		obj++;
-	}
-	return (closest->dist != -1);
 }
 
 /*

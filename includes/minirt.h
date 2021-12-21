@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/21 13:57:31 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 14:20:51 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,5 +129,23 @@ typedef struct s_cone
 	t_vec	pos;
 	t_vec	dir;
 }	t_cone;
+
+void	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit);
+void	ray_plane(t_vec *orig, t_vec *ray, t_plane *plane, t_hit *hit);
+void	ray_cylinder(t_vec *orig, t_vec *ray, t_cylinder *cylinder, t_hit *hit);
+void	ray_cone(t_vec *orig, t_vec *ray, t_cone *cone, t_hit *hit);
+int		ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest);
+
+float	dot(t_vec *a, t_vec *b);
+t_vec	sub(t_vec *a, t_vec *b);
+t_vec	mult(t_vec *a, float fac);
+t_vec	add3(t_vec *a, t_vec *b, t_vec *c);
+t_vec	add(t_vec *a, t_vec *b);
+t_vec	cross(t_vec *a, t_vec *b);
+t_vec	normalize(t_vec vec);
+t_vec	radian_to_vector(t_vec *rot);
+t_vec	reflect(t_vec *ray, t_vec *normal);
+
+float	q_rsqrt(float y);
 
 #endif

@@ -6,7 +6,9 @@ SOURCES			:=	./srcs
 
 LIBFT			:=	./libft
 
-SRCS			:=	main.c
+SRCS			:=	main.c \
+					core/ray.c \
+					core/vector.c
 
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
 
@@ -32,8 +34,7 @@ run: all
 
 ${OBJECTS}/%.o: ${SOURCES}/%.c
 	@$(ECHO) "$(BLU)● Compiling $^ 🔧$(EOC)"
-	@rm -rf $(NAME)
-	@mkdir -p $(OBJECTS)
+	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -o $@ -c $< ${CINCLUDES}
 
 $(NAME): $(OBJS)
