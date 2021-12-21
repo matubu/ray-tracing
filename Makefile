@@ -9,14 +9,16 @@ LIBFT			:=	./libft
 SRCS			:=	main.c \
 					window.c \
 					scene.c \
-					camera.c
+					camera.c \
+					utils/utils.c \
+					parsing/check.c \
+					parsing/parse.c
 
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
 
 CC				:=	gcc
 CFLAGS			:=	-Wall -Wextra -Werror -O3 -Ofast -fno-strict-aliasing -fomit-frame-pointer -mtune=native -msse4.2 -mfpmath=sse -march=native -funsafe-math-optimizations -funroll-loops -ffast-math -flto -finline-functions -fsanitize=address
 CINCLUDES		:=	-I${INCLUDES} -I${LIBFT}/includes -I/usr/local/include
-
 
 OS = $$(uname -s)
 
@@ -42,10 +44,10 @@ $(NAME): $(OBJS)
 	@make -C ${LIBFT}
 	@if [ $(OS) = 'Linux' ]; then \
 		$(ECHO) "$(GRE)● Compiling to binary ⚙️  $(GRA)(Linux 🐧 mode)$(EOC)"; \
-		${CC} $(CFLAGS) -L/usr/local/lib $(OBJS) -o $(NAME) -l m -l mlx -l Xext -l X11 -l z; \
+		${CC} $(CFLAGS) -L/usr/local/lib $(OBJS) -o $(NAME) -L${LIBFT} -lft -lm -lmlx -lXext -lX11 -lz; \
 	else \
 		$(ECHO) "$(GRE)● Compiling to binary ⚙️  $(GRA)(macOS 🍎 mode)$(EOC)"; \
-		${CC} $(CFLAGS) -l mlx -framework OpenGL -framework AppKit $(OBJS) -o $(NAME) -lm; \
+		${CC} $(CFLAGS) -L${LIBFT} -lft -lmlx -framework OpenGL -framework AppKit $(OBJS) -o $(NAME) -lm; \
 	fi
 
 clean:

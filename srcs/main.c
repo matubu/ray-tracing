@@ -6,17 +6,11 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 17:11:27 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 17:17:50 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minirt.h"
-
-void	err(char *s)
-{
-	printf("\033[31mError: %s\033[0m\n", s);
-	exit(1);
-}
 
 t_bump_map	load_bump_map(t_window *window, char *filename)
 {
@@ -25,7 +19,7 @@ t_bump_map	load_bump_map(t_window *window, char *filename)
 
 	img.img = mlx_xpm_file_to_image(window->mlx, filename, &img.width, &img.height);
 	if (img.img == NULL)
-		err("could not load image");
+		print_err("could not load image", 0);
 	img.buf = (int *)mlx_get_data_addr(img.img, &null, &null, &null);
 	return (img);
 }
