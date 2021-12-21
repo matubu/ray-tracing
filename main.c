@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/16 18:53:10 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/21 13:05:13 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,26 +16,26 @@
 #include <stdlib.h>
 #include <mlx.h>
 
-//DEBUG LIBS
+// DEBUG LIBS
 #include <time.h>
 #include <stdio.h>
 
-//MODES
+// DEV MODES
 //#define DEV_NO_SHADOW
 //#define DEV_SHOW_NORMAL
 //#define DEV_SHOW_DISTANCE
 
-//MATH CONSTANT
+// MATH CONSTANT
 #define PI						3.1415926535
 #define EPSILON					0.0001
 
-//CAMERA
+// CAMERA
 #define WIDTH					1000
 #define HEIGHT					1000
 #define FIELD_OF_VIEW			PI / 2
 #define CAMERA_CLIP_START		.01
 
-//COLORS
+// COLORS
 #define RED						0xf598af
 #define GREEN					0xa2fac0
 #define BLUE					0xaec9f0
@@ -43,7 +43,7 @@
 #define BLACK					0x191a1f
 #define GREY					0x504d5e
 
-//VECTOR
+// VECTOR
 #define ORIGIN					(t_vec){0, 0, 0}
 #define UP						(t_vec){0, 0, 1}
 #define LEFT					(t_vec){1, 0, 0}
@@ -96,6 +96,32 @@ typedef struct s_scene {
 	int			button;
 	t_mlx_data	*mlx;
 }	t_scene;
+
+typedef struct	s_bump_map
+{
+	void	*img;
+	int		*buf;
+	int		width;
+	int		height;
+}	t_bump_map;
+
+void	err(char *s)
+{
+	printf("\033[31mError: %s\033[0m\n", s);
+	exit(1);
+}
+
+t_bump_map load_bump_map(t_mlx_data *mlx, char *filename)
+{
+	t_bump_map	img;
+	int		null;
+
+	img.img = mlx_xpm_file_to_image(mlx->ptr, filename, &img.width, &img.height);
+	if (img.img == NULL)
+		err("could not load image");
+	img.buf = (int *)mlx_get_data_addr(img.img, &null, &null, &null);
+	return (img);
+}
 
 inline float	dot(t_vec *a, t_vec *b)
 {
@@ -194,7 +220,7 @@ typedef struct s_sphere {
 	float	srad;
 }	t_sphere;
 
-static inline void	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit)
+void	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit)
 {
 	t_vec	oc = sub(orig, &sphere->pos);
 	float	a = dot(ray, ray);
@@ -210,11 +236,12 @@ static inline void	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *
 }
 
 typedef struct s_plane {
-	t_vec	pos;
-	t_vec	normal;
+	t_vec		pos;
+	t_vec		normal;
+	t_bump_map	*bump_map;
 }	t_plane;
 
-static inline void	ray_plane(t_vec *orig, t_vec *ray, t_plane *plane, t_hit *hit)
+void	ray_plane(t_vec *orig, t_vec *ray, t_plane *plane, t_hit *hit)
 {
 	float	d = dot(&plane->normal, ray);
 	if (d >= EPSILON && d <= EPSILON)
@@ -224,6 +251,48 @@ static inline void	ray_plane(t_vec *orig, t_vec *ray, t_plane *plane, t_hit *hit
 	hit->pos = mult(ray, hit->dist);
 	hit->pos = add(orig, &hit->pos);
 	hit->normal = plane->normal;
+}
+
+typedef struct s_cylinder
+{
+	t_vec	pos;
+	t_vec	normal;
+	float	rad;
+	float	srad;
+	float	height;
+}	t_cylinder;
+
+void	ray_cylinder(t_vec *orig, t_vec *ray, t_cylinder *cylinder, t_hit *hit)
+{
+	float	a = (ray->x * ray->x) + (ray->z * ray->z);
+	float	b = 2 * (ray->x * (orig->x - cylinder->pos.x) + ray->z * (orig->z - cylinder->pos.z));
+	float	c = (orig->x - cylinder->pos.x) * (orig->x - cylinder->pos.x) + (orig->z - cylinder->pos.z) * (orig->z - cylinder->pos.z) - cylinder->srad;
+	
+	float delta = b * b - 4 * (a * c);
+	if(fabs(delta) < 0.001 || delta < 0.0)
+		return ((void)(hit->dist = -1));
+	float	t = fmin((-b - sqrt(delta)) / (2 * a), (-b + sqrt(delta)) / (2 * a));
+	
+	float	r = orig->y + t * ray->y;
+	
+	if (!(r >= cylinder->pos.y) && (r <= cylinder->pos.y + cylinder->height))
+		return ((void)(hit->dist = -1));
+	hit->dist = t;
+}
+
+typedef struct s_cone
+{
+	t_vec	pos;
+	t_vec	dir;
+	//rad ?
+}	t_cone;
+
+void	ray_cone(t_vec *orig, t_vec *ray, t_cone *cone, t_hit *hit)
+{
+	(void)orig;
+	(void)ray;
+	(void)cone;
+	hit->dist = 0;
 }
 
 static inline int	ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest)
@@ -267,14 +336,16 @@ static unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 	#ifdef DEV_NO_SHADOW
 	return (cam_hit.obj->color);
 	#endif
-	//reflected = reflect(ray, &cam_hit.normal);
-	//TODO law of light + multi light + color disruption
+	// reflected = reflect(ray, &cam_hit.normal);
+	// TODO law of light + multi light + color disruption
 	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
-	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit)) //TODO check hit distance
+	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))
+		// TODO check hit distance behind camera
 		return (rgbmult(cam_hit.obj->color, 95));
 	return (rgbmult(cam_hit.obj->color, max((int)(dot(&hit_to_light, &cam_hit.normal) * 160.0), 0) + 95));
 }
 
+// TODO binary tree bounding box
 void	render(t_scene *scene, int *buf)
 {
 	clock_t	start = clock();
@@ -407,24 +478,37 @@ int	main(void)
 
 	t_camera camera = create_camera(WIDTH, HEIGHT,
 			(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4 }, FIELD_OF_VIEW);
+	t_bump_map	bump_maps[] = {
+		load_bump_map(&mlx, "test.xpm")
+	};
 	t_sphere	spheres[] = {
-		{(t_vec){ 0, 0, 0 }, 2.0, 4.0},
-		{(t_vec){ 0, 5, 0 }, 1.0, 1.0},
+		{(t_vec){ 0, 0, 0 }, 2, 4},
+		{(t_vec){ 0, 5, 0 }, 1, 1},
 		{(t_vec){ 4, -4, 3.5 }, .5, .25}
 	};
 	t_plane	planes[] = {
-		{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}}
+		{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL},
+		{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0}
 	};
+//	t_cylinder	cylinders[] = {
+//		{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1}
+//	};
+//	t_cone	cones[] = {
+//		{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}}
+//	};
 	t_obj	objects[] = {
-	{ray_sphere, RED, (void *)(spheres + 0)},
-	{ray_sphere, GREEN, (void *)(spheres + 1)},
-	{ray_sphere, BLUE, (void *)(spheres + 2)},
-	{ray_plane, GREEN, (void *)(planes + 0)},
-	{NULL, BLACK, NULL}
+		{ray_sphere, RED, (void *)(spheres + 0)},
+		{ray_sphere, GREEN, (void *)(spheres + 1)},
+		{ray_sphere, BLUE, (void *)(spheres + 2)},
+		{ray_plane, GREEN, (void *)(planes + 0)},
+		{ray_plane, RED, (void *)(planes + 1)},
+//		{ray_cylinder, BLUE, (void *)(cylinders + 0)},
+//		{ray_cone, RED, (void *)(cones + 0)},
+		{NULL, BLACK, NULL}
 	};
 	t_light	lights[] = {
-		{{5, -5, 5}, RED, 2},
-	//	{{-5, -5, 5}, RED, 2}
+		{{5, -5, 5}, RED, 2}
+		// TODO multilights
 	};
 	t_scene	scene = create_scene(&camera, GREY, objects, lights);
 
@@ -433,11 +517,10 @@ int	main(void)
 	mlx_hook(mlx.win, 4, 1 << 2, on_button_down, &scene);
 	mlx_hook(mlx.win, 5, 1 << 3, on_button_up, &scene);
 	mlx_hook(mlx.win, 6, 64, on_mouse_move, &scene);
-
-	render(&scene, scene.mlx->buf);
-	
 	mlx_hook(mlx.win, 17, 0, minirt_exit, &scene);
 	mlx_hook(mlx.win, 3, 2, on_key_up, &scene);
+
+	render(&scene, scene.mlx->buf);
 
 	mlx_loop(mlx.ptr);
 	return (0);
