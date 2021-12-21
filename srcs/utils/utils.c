@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:51:25 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/21 17:14:41 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 17:28:44 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,5 @@ int	print_err(char *message, int code)
 
 size_t	rgb_to_hex(int r, int g, int b)
 {
-	return (r & 255) << 16 | (g & 255) << 8 | (b & 255);
+	return ((r & 255) << 16 | (g & 255) << 8 | (b & 255));
 }
-

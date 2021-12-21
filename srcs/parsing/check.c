@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:15 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/21 13:42:35 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 17:28:05 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 int	check_args(int ac, char **av)
 {
 	(void) av;
-
 	if (ac < 2)
 		return (print_err("too few arguments.", 0));
 	if (ac > 2)
