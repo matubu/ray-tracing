@@ -3,7 +3,6 @@ NAME			:=	minirt
 OBJECTS			:=	./bin
 INCLUDES		:=	./includes
 SOURCES			:=	./srcs
-
 LIBFT			:=	./libft
 
 SRCS			:=	main.c \
@@ -17,7 +16,13 @@ SRCS			:=	main.c \
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
 
 CC				:=	gcc
-CFLAGS			:=	-Wall -Wextra -Werror -O3 -Ofast -fno-strict-aliasing -fomit-frame-pointer -mtune=native -msse4.2 -mfpmath=sse -march=native -funsafe-math-optimizations -funroll-loops -ffast-math -flto -finline-functions -fsanitize=address
+CFLAGS			:=	-Wall -Wextra -Werror \
+					-O3 -Ofast -fno-strict-aliasing \
+					-fomit-frame-pointer -mtune=native \
+					-msse4.2 -mfpmath=sse -march=native \
+					-funsafe-math-optimizations -funroll-loops \
+					-ffast-math -flto -finline-functions \
+					-fsanitize=address
 CINCLUDES		:=	-I${INCLUDES} -I${LIBFT}/includes -I/usr/local/include
 
 OS = $$(uname -s)
