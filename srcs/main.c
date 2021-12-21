@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 13:36:56 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 13:45:45 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -358,7 +358,8 @@ int	minirt_exit(t_scene *scene)
 
 int	on_key_up(int key, t_scene *scene)
 {
-	if (key == 12)
+
+	if (key == 12 || key == 53 || key == 65307)
 		minirt_exit(scene);
 	return (1);
 }
@@ -377,10 +378,10 @@ int	main(void)
 	mlx.img = mlx_new_image(mlx.ptr, WIDTH, HEIGHT);
 	mlx.buf = (int *)mlx_get_data_addr(mlx.img, &null, &null, &null);
 
-	t_camera camera = create_camera(WIDTH, HEIGHT,
-		(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4}, M_PI_2);
+	t_camera	camera = create_camera(WIDTH, HEIGHT,
+			(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4}, M_PI_2);
 	t_bump_map	bump_maps[] = {
-	load_bump_map(&mlx, "assets/test.xpm")
+		load_bump_map(&mlx, "assets/test.xpm")
 	};
 	t_sphere	spheres[] = {
 	{(t_vec){0, 0, 0}, 2, 4},
