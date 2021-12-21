@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 13:45:45 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/21 13:50:20 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,7 @@ void	ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit)
 	float	b = dot(&oc, ray);
 	float	c = dot(&oc, &oc) - sphere->srad;
 	float	d = b * b - a * c;
+
 	if (d <= EPSILON)
 		return ((void)(hit->dist = -1));
 	hit->dist = (-b - sqrt(b * b - a * c)) / a;
@@ -148,6 +149,7 @@ typedef struct s_plane {
 void	ray_plane(t_vec *orig, t_vec *ray, t_plane *plane, t_hit *hit)
 {
 	float	d = dot(&plane->normal, ray);
+
 	if (d >= EPSILON && d <= EPSILON)
 		return ((void)(hit->dist = -1));
 	hit->pos = sub(&plane->pos, orig);
@@ -171,14 +173,11 @@ void	ray_cylinder(t_vec *orig, t_vec *ray, t_cylinder *cylinder, t_hit *hit)
 	float	a = (ray->x * ray->x) + (ray->z * ray->z);
 	float	b = 2 * (ray->x * (orig->x - cylinder->pos.x) + ray->z * (orig->z - cylinder->pos.z));
 	float	c = (orig->x - cylinder->pos.x) * (orig->x - cylinder->pos.x) + (orig->z - cylinder->pos.z) * (orig->z - cylinder->pos.z) - cylinder->srad;
-	
 	float	delta = b * b - 4 * (a * c);
 	if(fabs(delta) < 0.001 || delta < 0.0)
 		return ((void)(hit->dist = -1));
 	float	t = fmin((-b - sqrt(delta)) / (2 * a), (-b + sqrt(delta)) / (2 * a));
-	
 	float	r = orig->y + t * ray->y;
-	
 	if (!(r >= cylinder->pos.y) && (r <= cylinder->pos.y + cylinder->height))
 		return ((void)(hit->dist = -1));
 	hit->dist = t;
@@ -230,16 +229,20 @@ static unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
 	if (!ray_scene(orig, ray, scene, &cam_hit))
 		return (scene->ambient_color);
 	#ifdef DEV_SHOW_NORMAL
+
 	return ((int)(cam_hit.normal.x * 100 + 100)
 			| (int)(cam_hit.normal.y * 100 + 100) << 8
 			| (int)(cam_hit.normal.z * 100 + 100) << 16);
 	#endif
 	#ifdef DEV_SHOW_DISTANCE
+
 	return (rgbmult(WHITE, 1.0 / cam_hit.dist * 255));
 	#endif
 	#ifdef DEV_NO_SHADOW
+
 	return (cam_hit.obj->color);
 	#endif
+
 	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))
 		return (rgbmult(cam_hit.obj->color, 95));
@@ -274,11 +277,10 @@ void	render(t_scene *scene, int *buf)
 		}
 	}
 	mlx_put_image_to_window(scene->mlx->ptr, scene->mlx->win, scene->mlx->img, 0, 0);
-
 	printf("rendering took %.2fms\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
-t_camera	create_camera(int width, int height, 
+t_camera	create_camera(int width, int height,
 		t_vec pos, t_vec rot, float fov)
 {
 	return ((t_camera){ pos, rot, width, height, fov / width });
@@ -358,7 +360,6 @@ int	minirt_exit(t_scene *scene)
 
 int	on_key_up(int key, t_scene *scene)
 {
-
 	if (key == 12 || key == 53 || key == 65307)
 		minirt_exit(scene);
 	return (1);
@@ -377,7 +378,6 @@ int	main(void)
 		return (1);
 	mlx.img = mlx_new_image(mlx.ptr, WIDTH, HEIGHT);
 	mlx.buf = (int *)mlx_get_data_addr(mlx.img, &null, &null, &null);
-
 	t_camera	camera = create_camera(WIDTH, HEIGHT,
 			(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4}, M_PI_2);
 	t_bump_map	bump_maps[] = {
@@ -412,17 +412,13 @@ int	main(void)
 	{{5, -5, 5}, RED, 2}
 	};
 	t_scene	scene = create_scene(&camera, GREY, objects, lights);
-
 	scene.mlx = &mlx;
-
 	mlx_hook(mlx.win, 4, 1 << 2, on_button_down, &scene);
 	mlx_hook(mlx.win, 5, 1 << 3, on_button_up, &scene);
 	mlx_hook(mlx.win, 6, 64, on_mouse_move, &scene);
 	mlx_hook(mlx.win, 17, 0, minirt_exit, &scene);
 	mlx_hook(mlx.win, 3, 2, on_key_up, &scene);
-
 	render(&scene, scene.mlx->buf);
-
 	mlx_loop(mlx.ptr);
 	return (0);
 }
