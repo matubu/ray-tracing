@@ -8,7 +8,8 @@ LIBFT			:=	./libft
 
 SRCS			:=	main.c \
 					core/ray.c \
-					core/vector.c
+					core/vector.c \
+					core/window.c
 
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
 

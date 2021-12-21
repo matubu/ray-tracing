@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 14:08:44 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 15:55:53 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,12 @@ void	err(char *s)
 	exit(1);
 }
 
-t_bump_map	load_bump_map(t_mlx_data *mlx, char *filename)
+t_bump_map	load_bump_map(t_window *window, char *filename)
 {
 	t_bump_map	img;
 	int			null;
 
-	img.img = mlx_xpm_file_to_image(mlx->ptr, filename, &img.width, &img.height);
+	img.img = mlx_xpm_file_to_image(window->mlx, filename, &img.width, &img.height);
 	if (img.img == NULL)
 		err("could not load image");
 	img.buf = (int *)mlx_get_data_addr(img.img, &null, &null, &null);
@@ -118,7 +118,8 @@ void	render(t_scene *scene, int *buf)
 			*buf++ = ray_scene_color(&scene->camera->pos, &ray, scene);
 		}
 	}
-	mlx_put_image_to_window(scene->mlx->ptr, scene->mlx->win, scene->mlx->img, 0, 0);
+	mlx_put_image_to_window(scene->window->mlx, scene->window->window, \
+			scene->window->image, 0, 0);
 	printf("rendering took %.2fms\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
@@ -144,7 +145,7 @@ int	on_mouse_move(int x, int y, t_scene *scene)
 	{
 		scene->camera->rot_euler.z += (float)(last[0] - x) / 50.0;
 		scene->camera->rot_euler.y += (float)(last[1] - y) / 50.0;
-		render(scene, scene->mlx->buf);
+		render(scene, scene->window->buffer);
 	}
 	else if (scene->button == 3)
 	{
@@ -157,7 +158,7 @@ int	on_mouse_move(int x, int y, t_scene *scene)
 		mx = mult(&mx, (float)(last[0] - x) / 10.0);
 		mz = mult(&mz, (float)(last[1] - y) / 10.0);
 		scene->camera->pos = add3(&scene->camera->pos, &mx, &mz);
-		render(scene, scene->mlx->buf);
+		render(scene, scene->window->buffer);
 	}
 	else
 		first = 1;
@@ -179,7 +180,7 @@ int	on_button_down(int button, int x, int y, t_scene *scene)
 	if (button == 4 || button == 5)
 	{
 		scene->camera->pos = sub(&scene->camera->pos, &rad);
-		render(scene, scene->mlx->buf);
+		render(scene, scene->window->buffer);
 	}
 	return (1);
 }
@@ -195,7 +196,7 @@ int	on_button_up(int button, int x, int y, t_scene *scene)
 
 int	minirt_exit(t_scene *scene)
 {
-	mlx_destroy_window(scene->mlx->ptr, scene->mlx->win);
+	mlx_destroy_window(scene->window->mlx, scene->window->window);
 	exit(0);
 	return (1);
 }
@@ -209,21 +210,13 @@ int	on_key_up(int key, t_scene *scene)
 
 int	main(void)
 {
-	t_mlx_data	mlx;
-	int			null;
+	t_window	window;
 
-	mlx.ptr = mlx_init();
-	if (mlx.ptr == NULL)
-		return (1);
-	mlx.win = mlx_new_window(mlx.ptr, WIDTH, HEIGHT, "MINIRT");
-	if (mlx.win == NULL)
-		return (1);
-	mlx.img = mlx_new_image(mlx.ptr, WIDTH, HEIGHT);
-	mlx.buf = (int *)mlx_get_data_addr(mlx.img, &null, &null, &null);
+	window = window_open("MINIRT", WIDTH, HEIGHT);
 	t_camera	camera = create_camera(WIDTH, HEIGHT,
 			(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4}, M_PI_2);
 	t_bump_map	bump_maps[] = {
-		load_bump_map(&mlx, "assets/test.xpm")
+		load_bump_map(&window, "assets/test.xpm")
 	};
 	t_sphere	spheres[] = {
 	{(t_vec){0, 0, 0}, 2, 4},
@@ -254,13 +247,13 @@ int	main(void)
 	{{5, -5, 5}, RED, 2}
 	};
 	t_scene	scene = create_scene(&camera, GREY, objects, lights);
-	scene.mlx = &mlx;
-	mlx_hook(mlx.win, 4, 1 << 2, on_button_down, &scene);
-	mlx_hook(mlx.win, 5, 1 << 3, on_button_up, &scene);
-	mlx_hook(mlx.win, 6, 64, on_mouse_move, &scene);
-	mlx_hook(mlx.win, 17, 0, minirt_exit, &scene);
-	mlx_hook(mlx.win, 3, 2, on_key_up, &scene);
-	render(&scene, scene.mlx->buf);
-	mlx_loop(mlx.ptr);
+	scene.window = &window;
+	mlx_hook(window.window, 4, 1 << 2, on_button_down, &scene);
+	mlx_hook(window.window, 5, 1 << 3, on_button_up, &scene);
+	mlx_hook(window.window, 6, 64, on_mouse_move, &scene);
+	mlx_hook(window.window, 17, 0, minirt_exit, &scene);
+	mlx_hook(window.window, 3, 2, on_key_up, &scene);
+	render(&scene, scene.window->buffer);
+	mlx_loop(window.mlx);
 	return (0);
 }
