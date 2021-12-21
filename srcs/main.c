@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 15:59:01 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 16:01:44 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,43 +208,53 @@ int	main(void)
 	window = window_open("MINIRT", WIDTH, HEIGHT);
 	t_camera	camera = create_camera(WIDTH, HEIGHT,
 			(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4}, M_PI_2);
+	
 	t_bump_map	bump_maps[] = {
 		load_bump_map(&window, "assets/test.xpm")
 	};
+
 	t_sphere	spheres[] = {
-	{(t_vec){0, 0, 0}, 2, 4},
-	{(t_vec){0, 5, 0}, 1, 1},
-	{(t_vec){4, -4, 3.5}, .5, .25}
+		{(t_vec){0, 0, 0}, 2, 4},
+		{(t_vec){0, 5, 0}, 1, 1},
+		{(t_vec){4, -4, 3.5}, .5, .25}
 	};
+
 	t_plane	planes[] = {
-	{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL},
-	{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0}
+		{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL},
+		{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0}
 	};
+
 	t_cylinder	cylinders[] = {
-	{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1}
+		{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1}
 	};
+
 	t_cone	cones[] = {
-	{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}}
+		{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}}
 	};
+	
 	t_obj	objects[] = {
-	{ray_sphere, RED, (void *)(spheres + 0)},
-	{ray_sphere, GREEN, (void *)(spheres + 1)},
-	{ray_sphere, BLUE, (void *)(spheres + 2)},
-	{ray_plane, GREEN, (void *)(planes + 0)},
-	{ray_plane, RED, (void *)(planes + 1)},
-	{ray_cylinder, BLUE, (void *)(cylinders + 0)},
-	{ray_cone, RED, (void *)(cones + 0)},
-	{NULL, BLACK, NULL}
+		{ray_sphere, RED, (void *)(spheres + 0)},
+		{ray_sphere, GREEN, (void *)(spheres + 1)},
+		{ray_sphere, BLUE, (void *)(spheres + 2)},
+		{ray_plane, GREEN, (void *)(planes + 0)},
+		{ray_plane, RED, (void *)(planes + 1)},
+		{ray_cylinder, BLUE, (void *)(cylinders + 0)},
+		{ray_cone, RED, (void *)(cones + 0)},
+		{NULL, BLACK, NULL}
 	};
+
 	t_light	lights[] = {
-	{{5, -5, 5}, RED, 2}
+		{{5, -5, 5}, RED, 2}
 	};
+
 	t_scene	scene = create_scene(&camera, GREY, objects, lights);
 	scene.window = &window;
+	
 	mlx_hook(window.window, 4, 1 << 2, on_button_down, &scene);
 	mlx_hook(window.window, 5, 1 << 3, on_button_up, &scene);
 	mlx_hook(window.window, 6, 64, on_mouse_move, &scene);
 	mlx_hook(window.window, 3, 2, on_key_up, &scene);
+	
 	render(&scene, scene.window->buffer);
 	mlx_loop(window.mlx);
 	return (0);

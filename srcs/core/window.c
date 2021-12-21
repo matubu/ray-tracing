@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:44:06 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/21 15:58:18 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 16:02:32 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ void	window_loop(t_scene *game, int (*hook)())
 {
 	if (game == NULL || game->window == NULL)
 		return ;
-
 	mlx_loop_hook(game->window->mlx, hook, game);
 	mlx_loop(game->window->mlx);
 }
@@ -39,7 +38,6 @@ void	window_update(t_window *window)
 {
 	if (window == NULL)
 		return ;
-
 	mlx_put_image_to_window(\
 		window->mlx, \
 		window->window, \
