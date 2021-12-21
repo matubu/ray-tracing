@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 15:55:53 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 15:59:01 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,18 +194,11 @@ int	on_button_up(int button, int x, int y, t_scene *scene)
 	return (1);
 }
 
-int	minirt_exit(t_scene *scene)
-{
-	mlx_destroy_window(scene->window->mlx, scene->window->window);
-	exit(0);
-	return (1);
-}
-
 int	on_key_up(int key, t_scene *scene)
 {
 	if (key == 12 || key == 53 || key == 65307)
-		minirt_exit(scene);
-	return (1);
+		window_close(scene->window);
+	return (0);
 }
 
 int	main(void)
@@ -251,7 +244,6 @@ int	main(void)
 	mlx_hook(window.window, 4, 1 << 2, on_button_down, &scene);
 	mlx_hook(window.window, 5, 1 << 3, on_button_up, &scene);
 	mlx_hook(window.window, 6, 64, on_mouse_move, &scene);
-	mlx_hook(window.window, 17, 0, minirt_exit, &scene);
 	mlx_hook(window.window, 3, 2, on_key_up, &scene);
 	render(&scene, scene.window->buffer);
 	mlx_loop(window.mlx);
