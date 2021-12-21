@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:44:06 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/21 17:11:07 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 17:26:35 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,12 @@ t_window	window_open(char *title, int width, int height)
 	return (window);
 }
 
-void	window_loop(t_scene *game, int (*hook)())
+void	window_loop(t_scene *scene, int (*hook)())
 {
-	if (game == NULL || game->window == NULL)
+	if (scene == NULL || scene->window == NULL)
 		return ;
-	mlx_loop_hook(game->window->mlx, hook, game);
-	mlx_loop(game->window->mlx);
+	mlx_loop_hook(scene->window->mlx, hook, scene);
+	mlx_loop(scene->window->mlx);
 }
 
 void	window_update(t_window *window)
@@ -44,15 +44,6 @@ void	window_update(t_window *window)
 		window->image, \
 		0, 0 \
 	);
-}
-
-void	window_clear(t_window *window, int color)
-{
-	int	x;
-
-	x = window->width * window->height;
-	while (--x >= 0)
-		window->buffer[x] = color;
 }
 
 void	window_close(t_window *window)
