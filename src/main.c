@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 13:05:13 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/21 13:08:44 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -479,7 +479,7 @@ int	main(void)
 	t_camera camera = create_camera(WIDTH, HEIGHT,
 			(t_vec){8, -4, 5.5}, (t_vec){-PI / 4, 0, PI / 4 }, FIELD_OF_VIEW);
 	t_bump_map	bump_maps[] = {
-		load_bump_map(&mlx, "test.xpm")
+		load_bump_map(&mlx, "assets/test.xpm")
 	};
 	t_sphere	spheres[] = {
 		{(t_vec){ 0, 0, 0 }, 2, 4},
