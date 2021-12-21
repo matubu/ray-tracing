@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/21 15:53:40 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 16:15:40 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,6 @@ typedef struct s_cylinder
 	float	height;
 }	t_cylinder;
 
-// radius/apex https://mrl.cs.nyu.edu/~dzorin/rend05/lecture2.pdf
 typedef struct s_cone
 {
 	t_vec	pos;
@@ -138,23 +137,190 @@ void		window_update(t_window *window);
 void		window_clear(t_window *window, int color);
 void		window_close(t_window *window);
 
-void		ray_sphere(t_vec *orig, t_vec *ray, t_sphere *sphere, t_hit *hit);
-void		ray_plane(t_vec *orig, t_vec *ray, t_plane *plane, t_hit *hit);
-void		ray_cylinder(t_vec *orig, t_vec *ray, \
-		t_cylinder *cylinder, t_hit *hit);
-void		ray_cone(t_vec *orig, t_vec *ray, t_cone *cone, t_hit *hit);
-int			ray_scene(t_vec *orig, t_vec *ray, t_scene *scene, t_hit *closest);
+static inline int	max(int a, int b)
+{
+	if (a > b)
+		return (a);
+	return (b);
+}
 
-float		dot(t_vec *a, t_vec *b);
-t_vec		sub(t_vec *a, t_vec *b);
-t_vec		mult(t_vec *a, float fac);
-t_vec		add3(t_vec *a, t_vec *b, t_vec *c);
-t_vec		add(t_vec *a, t_vec *b);
-t_vec		cross(t_vec *a, t_vec *b);
-t_vec		normalize(t_vec vec);
-t_vec		radian_to_vector(t_vec *rot);
-t_vec		reflect(t_vec *ray, t_vec *normal);
+static inline float	q_rsqrt(float y)
+{
+	int			i;
+	float		x2;
+	const float	threehalfs = 1.5F;
 
-float		q_rsqrt(float y);
+	x2 = y * 0.5F;
+	i = *(int *)&y;
+	i = 0x5f3759df - (i >> 1);
+	y = *(float *)&i;
+	return (y * (threehalfs - (x2 * y * y)));
+}
+
+static inline unsigned int	rgbmult(unsigned int color, int fac)
+{
+	return (
+		((((color & (255 << 16)) * fac) & (255 << 24))
+			| (((color & (255 << 8)) * fac) & (255 << 16))
+			| (((color & (255 << 0)) * fac) & (255 << 8))) >> 8
+	);
+}
+
+static inline float	dot(const t_vec *a, const t_vec *b)
+{
+	return (a->x * b->x + a->y * b->y + a->z * b->z);
+}
+
+static inline t_vec	sub(const t_vec *a, const t_vec *b)
+{
+	return ((t_vec){a->x - b->x, a->y - b->y, a->z - b->z});
+}
+
+static inline t_vec	mult(const t_vec *a, const float fac)
+{
+	return ((t_vec){a->x * fac, a->y * fac, a->z * fac});
+}
+
+static inline t_vec	add3(const t_vec *a, const t_vec *b, const t_vec *c)
+{
+	return ((t_vec){
+		a->x + b->x + c->x,
+		a->y + b->y + c->y,
+		a->z + b->z + c->z
+	});
+}
+
+static inline t_vec	add(const t_vec *a, const t_vec *b)
+{
+	return ((t_vec){a->x + b->x, a->y + b->y, a->z + b->z});
+}
+
+static inline t_vec	cross(const t_vec *a, const t_vec *b)
+{
+	return ((t_vec){
+		a->y * b->z - a->z * b->y,
+		a->z * b->x - a->x * b->z,
+		a->x * b->y - a->y * b->x
+	});
+}
+
+static inline t_vec	reflect(const t_vec *ray, const t_vec *normal)
+{
+	t_vec	tmp;
+
+	tmp = mult(normal, 2 * dot(ray, normal));
+	return (sub(ray, &tmp));
+}
+
+static inline t_vec	normalize(const t_vec vec)
+{
+	return (mult(&vec, q_rsqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z)));
+}
+
+static inline t_vec	radian_to_vector(const t_vec *rot)
+{
+	float	sin_z;
+	float	cos_z;
+	float	sin_y;
+	float	sin_x;
+	float	cos_x;
+
+	sin_z = sinf(rot->z);
+	cos_z = cosf(rot->z);
+	sin_y = sinf(rot->y);
+	sin_x = sinf(rot->x);
+	cos_x = cosf(rot->x);
+	return ((t_vec){
+		-cos_z * sin_y * sin_x - sin_z * cos_x,
+		-sin_z * sin_y * sin_x + cos_z * cos_x,
+		cosf(rot->y) * sin_x
+	});
+}
+
+static inline void	ray_sphere(t_vec *orig, t_vec *ray,
+		t_sphere *sphere, t_hit *hit)
+{
+	const t_vec	oc = sub(orig, &sphere->pos);
+	const float	a = dot(ray, ray);
+	const float	b = dot(&oc, ray);
+	const float	c = dot(&oc, &oc) - sphere->srad;
+	const float	d = b * b - a * c;
+
+	if (d <= EPSILON)
+		return ((void)(hit->dist = -1));
+	hit->dist = (-b - sqrt(b * b - a * c)) / a;
+	hit->pos = mult(ray, hit->dist);
+	hit->pos = add(orig, &hit->pos);
+	hit->normal = normalize(sub(&hit->pos, &sphere->pos));
+}
+
+static inline void	ray_plane(t_vec *orig, t_vec *ray,
+		t_plane *plane, t_hit *hit)
+{
+	const float	d = dot(&plane->normal, ray);
+
+	if (d >= EPSILON && d <= EPSILON)
+		return ((void)(hit->dist = -1));
+	hit->pos = sub(&plane->pos, orig);
+	hit->dist = dot(&hit->pos, &plane->normal) / d;
+	hit->pos = mult(ray, hit->dist);
+	hit->pos = add(orig, &hit->pos);
+	hit->normal = plane->normal;
+}
+
+static inline void	ray_cylinder(t_vec *orig, t_vec *ray,
+		t_cylinder *cylinder, t_hit *hit)
+{
+	const float	a = (ray->x * ray->x) + (ray->z * ray->z);
+	const float	b = 2 * (ray->x * (orig->x - cylinder->pos.x)
+			+ ray->z * (orig->z - cylinder->pos.z));
+	const float	c = (orig->x - cylinder->pos.x) * (orig->x - cylinder->pos.x)
+		+ (orig->z - cylinder->pos.z) * (orig->z - cylinder->pos.z)
+		- cylinder->srad;
+	const float	delta = b * b - 4 * (a * c);
+	float		r;
+
+	if (fabs(delta) < 0.001 || delta < 0.0)
+		return ((void)(hit->dist = -1));
+	hit->dist = fmin((-b - sqrt(delta)) / (2 * a),
+			(-b + sqrt(delta)) / (2 * a));
+	r = orig->y + hit->dist * ray->y;
+	if (!(r >= cylinder->pos.y) && (r <= cylinder->pos.y + cylinder->height))
+		return ((void)(hit->dist = -1));
+}
+
+// radius/apex https://mrl.cs.nyu.edu/~dzorin/rend05/lecture2.pdf
+static inline void	ray_cone(t_vec *orig, t_vec *ray, t_cone *cone, t_hit *hit)
+{
+	(void)orig;
+	(void)ray;
+	(void)cone;
+	hit->dist = 0;
+}
+
+static inline int	ray_scene(t_vec *orig, t_vec *ray,
+		t_scene *scene, t_hit *closest)
+{
+	t_hit			hit;
+	register t_obj	*obj;
+
+	obj = scene->obj;
+	closest->dist = -1;
+	while (obj->func)
+	{
+		hit.dist = -1;
+		obj->func(orig, ray, obj->data, &hit);
+		if (hit.dist > CAMERA_CLIP_START
+			&& (closest->dist == -1 || hit.dist < closest->dist))
+		{
+			closest->dist = hit.dist;
+			closest->pos = hit.pos;
+			closest->normal = hit.normal;
+			closest->obj = obj;
+		}
+		obj++;
+	}
+	return (closest->dist != -1);
+}
 
 #endif

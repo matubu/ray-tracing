@@ -7,14 +7,12 @@ SOURCES			:=	./srcs
 LIBFT			:=	./libft
 
 SRCS			:=	main.c \
-					core/ray.c \
-					core/vector.c \
-					core/window.c
+					window.c
 
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
 
 CC				:=	gcc
-CFLAGS			:=	-Wall -Wextra -Werror -O3 -Ofast -fno-strict-aliasing -fomit-frame-pointer -mtune=native -msse4.2 -mfpmath=sse -march=native -funsafe-math-optimizations -funroll-loops -ffast-math
+CFLAGS			:=	-Wall -Wextra -Werror -O3 -Ofast -fno-strict-aliasing -fomit-frame-pointer -mtune=native -msse4.2 -mfpmath=sse -march=native -funsafe-math-optimizations -funroll-loops -ffast-math -flto -finline-functions
 CINCLUDES		:=	-I${INCLUDES} -I${LIBFT}/includes -I/usr/local/include
 
 

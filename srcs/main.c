@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 16:01:44 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/21 16:14:59 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,37 +28,6 @@ t_bump_map	load_bump_map(t_window *window, char *filename)
 		err("could not load image");
 	img.buf = (int *)mlx_get_data_addr(img.img, &null, &null, &null);
 	return (img);
-}
-
-
-inline int	max(int a, int b)
-{
-	if (a > b)
-		return (a);
-	return (b);
-}
-
-// https://en.wikipedia.org/wiki/Fast_inverse_square_root
-inline float	q_rsqrt(float y)
-{
-	int			i;
-	float		x2;
-	const float	threehalfs = 1.5F;
-
-	x2 = y * 0.5F;
-	i = *(int *)&y;				// EVIL POINT HACK
-	i = 0x5f3759df - (i >> 1);	// WHAT THE FUCK ?!
-	y = *(float *)&i;
-	return (y * (threehalfs - (x2 * y * y)));
-}
-
-inline unsigned int	rgbmult(unsigned int color, int fac)
-{
-	return (
-		((((color & (255 << 16)) * fac) & (255 << 24))
-			| (((color & (255 << 8)) * fac) & (255 << 16))
-			| (((color & (255 << 0)) * fac) & (255 << 8))) >> 8
-	);
 }
 
 /*
