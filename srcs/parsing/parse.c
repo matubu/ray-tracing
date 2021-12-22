@@ -113,10 +113,10 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 		;
 	else
 		return ((void)printf("\033[33mWarning\033[0m: unrecognized type: %s\n", type));
-	printf("%s", type);
+	printf("%2s", type);
 	i = -1;
 	while (arg[++i])
-		printf("\t[%s]", arg[i]);
+		printf("  [%-15s]", arg[i]);
 	printf("\n");
 }
 
@@ -136,7 +136,8 @@ t_scene	parse(int ac, char **av)
 		if (s == NULL)
 			break ;
 		splits = split(s, ' ');
-		parse_line(*splits, splits + 1, &scene);
+		if (splits && *splits)
+			parse_line(*splits, splits + 1, &scene);
 		free_splits(splits, -1);
 	}
 
