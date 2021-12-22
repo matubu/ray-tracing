@@ -15,7 +15,7 @@
 
 void	err(char *s)
 {
-	printf("\033[31mError\033[0m: %s\n", s);
+	printf("\033[31mError\033[0m\n%s\n", s);
 	exit(1);
 }
 
