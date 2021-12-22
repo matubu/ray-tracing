@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/22 13:08:36 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/22 18:50:42 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ t_bump_map	load_bump_map(t_window *window, char *filename)
 
 	img.img = mlx_xpm_file_to_image(window->mlx, filename, &img.width, &img.height);
 	if (img.img == NULL)
-		err("could not load image");
+		err("could            not load image");
 	img.buf = (int *)mlx_get_data_addr(img.img, &null, &null, &null);
 	return (img);
 }
@@ -61,7 +61,6 @@ float	getfloat(char *s)
 	float	v;
 	int		neg;
 
-	printf("\t(\033[35mfloat\033[0m) \033[92m\"%s\"\033[0m\n", s);
 	if (s == NULL)
 		err("not enough arguments");
 	v = 0;
@@ -74,6 +73,7 @@ float	getfloat(char *s)
 		else
 			err("invalid number");
 	//parse after .
+	printf("-> %f\n", v);
 	if (!neg)
 		return (-v);
 	return (v);
@@ -84,7 +84,6 @@ t_vec	getvec(char *s)
 	char	**splits;
 	t_vec	vec;
 
-	printf("\t(\033[35mvector\033[0m) \033[92m\"%s\"\033[0m\n", s);
 	if (s == NULL)
 		err("not enough arguments");
 	splits = split(s, ',');
@@ -92,7 +91,6 @@ t_vec	getvec(char *s)
 		err("vector not properly formated");
 	vec = (t_vec){getfloat(splits[0]), getfloat(splits[1]), getfloat(splits[2])};
 	free_splits(splits, -1);
-	printf("\t{\033[33m%f\033[0m \033[33m%f\033[0m \033[33m%f\033[0m}\n", vec.x, vec.y, vec.z);
 	return (vec);
 
 }
@@ -102,7 +100,6 @@ int	getcolor(char *s)
 	char	**splits;
 	int		color;
 
-	printf("\t(\033[35mcolor\033[0m) \033[92m\"%s\"\033[0m\n", s);
 	if (s == NULL)
 		err("not enough arguments");
 	splits = split(s, ',');
@@ -111,7 +108,6 @@ int	getcolor(char *s)
 	color = ((int)getfloat(splits[0]) & 255) << 16
 		| ((int)getfloat(splits[1]) & 255) << 8
 		| ((int)getfloat(splits[2]) & 255) << 0;
-	printf("\t\033[94mrgb\033[0m(\033[33m%f\033[0m \033[33m%f\033[0m \033[33m%f\033[0m) -> \033[33m#%08x\033[0m\n", getfloat(splits[0]), getfloat(splits[1]), getfloat(splits[2]), color);
 	free_splits(splits, -1);
 	return (color);
 }
@@ -129,7 +125,7 @@ void	new_obj(t_scene *scene, t_obj obj)
 
 void	parse_line(char *type, char **arg, t_scene *scene)
 {
-	printf("< \033[32m%s\033[0m >\n", type);
+	//printf("< \033[32m%s\033[0m >\n", type);
 	if (type[0] == 'A' && type[1] == '\0')
 		scene->ambient = (t_ambient){getfloat(arg[0]), getcolor(arg[1])};
 	else if (type[0] == 'C' && type[1] == '\0')
