@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/22 12:53:25 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/22 13:08:36 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,31 +81,28 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 
 	(void)scene;
 	if (type[0] == 'A' && type[1] == '\0')
-		;
-	else if (type[0] == 'C' && type[1] == '\0')
-		;
-	else if (type[0] == 'L' && type[1] == '\0')
-		;
-	else if (type[0] == 's' && type[1] == 'p' && type[2] == '\0')
-		;
-	else if (type[0] == 'p' && type[1] == 'l' && type[2] == '\0')
-		;
-	else if (type[0] == 'c' && type[1] == 'y' && type[2] == '\0')
-		;
-	else if (type[0] == 'c' && type[1] == 'o' && type[2] == '\0')
-		;
-	else
-		return ((void)warn("unrecognized type", type));
-	printf("%2s", type);
-	i = -1;
-	while (arg[++i])
-		printf("  [%-15s]", arg[i]);
-	printf("\n");
+		return ;
+	if (type[0] == 'C' && type[1] == '\0')
+		return ;
+	if (type[0] == 'L' && type[1] == '\0')
+		return ;
+	if (type[0] == 's' && type[1] == 'p' && type[2] == '\0')
+		return ;
+	if (type[0] == 'p' && type[1] == 'l' && type[2] == '\0')
+		return ;
+	if (type[0] == 'c' && type[1] == 'y' && type[2] == '\0')
+		return ;
+	if (type[0] == 'c' && type[1] == 'o' && type[2] == '\0')
+		return ;
+	return ((void)warn("unrecognized type", type));
 }
 
+//TODO initialize scene at first
+//TODO remove hard codded scene initialization
+//		and replace by check of number of camera, lights, ambient light ...
 t_scene	parse(int argc, char **argv)
 {
-	t_scene		scene;//TODO initialize every thing at first
+	t_scene		scene;
 	const int	fd = open_file(argc, argv);
 	char		*s;
 	char		**splits;
@@ -121,8 +118,6 @@ t_scene	parse(int argc, char **argv)
 		free_splits(splits, -1);
 	}
 	close(fd);
-
-	//TODO remove this and replace by check number of camera ...
 	scene.win = window_open("miniRT", WIDTH, HEIGHT);
 	scene.cam.pos = (t_vec){8, -4, 5.5};
 	scene.cam.rot_euler = (t_vec){-PI / 4, 0, PI / 4};
