@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/22 14:11:51 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/22 14:18:33 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,9 @@ static inline unsigned int	ray_scene_color(const t_vec *orig,
 }
 
 // TODO binary tree bounding box
-void	render(const t_scene *scene, const t_camera *cam, int *buf)
+void	render(const t_scene *scene, const t_window *win,
+		const t_camera *cam, int *buf)
 {
-	const clock_t	start = clock();
 	const t_vec		up = {0, 0, 1};
 	const t_vec		dir = radian_to_vector(&cam->rot_euler);
 	const t_vec		cv_right = normalize(cross(&dir, &up));
@@ -73,10 +73,7 @@ void	render(const t_scene *scene, const t_camera *cam, int *buf)
 			*buf++ = ray_scene_color(&cam->pos, &ray, scene);
 		}
 	}
-	mlx_put_image_to_window(scene->win.ptr,
-		scene->win.win, scene->win.img, 0, 0);
-	printf("rendering took %.2fms\n",
-		(double)(clock() - start) / CLOCKS_PER_SEC * 1000);
+	mlx_put_image_to_window(win->ptr, win->win, win->img, 0, 0);
 }
 
 //HOOKS
@@ -87,8 +84,11 @@ void	render(const t_scene *scene, const t_camera *cam, int *buf)
 int	main(int argc, char **argv)
 {
 	const t_scene	scene = parse(argc, argv);
+	const clock_t	start = clock();
 
-	render(&scene, &scene.cam, scene.win.buf);
+	render(&scene, &scene.win, &scene.cam, scene.win.buf);
+	printf("rendering took %.3fms\n",
+		(double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 	mlx_hook(scene.win.win, 17, 0, hook_close, (void *)&scene);
 	mlx_hook(scene.win.win, 3, 2, hook_key_up, (void *)&scene);
 	mlx_loop(scene.win.ptr);
