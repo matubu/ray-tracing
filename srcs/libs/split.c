@@ -53,7 +53,7 @@ char	**split(const char *s, char c)
 	unsigned int	size;
 	unsigned int	n;
 
-	if (ft_malloc_splits(&out, s, c))
+	if (s == NULL || ft_malloc_splits(&out, s, c))
 		return (NULL);
 	n = 0;
 	while (*s)

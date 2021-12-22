@@ -117,15 +117,13 @@ t_scene	parse(int argc, char **argv)
 {
 	t_scene		scene;
 	const int	fd = open_file(argc, argv);
-	char		*s;
 	char		**splits;
 
 	while (1)
 	{
-		s = gnl(fd);
-		if (s == NULL)
+		splits = split(gnl(fd), ' ');
+		if (splits == NULL)
 			break ;
-		splits = split(s, ' ');
 		if (splits && *splits)
 			parse_line(*splits, splits + 1, &scene);
 		free_splits(splits, -1);

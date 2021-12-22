@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/22 14:02:28 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/22 14:11:51 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@
 	return (cam_hit.obj->color);
 	#endif
 */
-static inline unsigned int	ray_scene_color(const t_vec *orig, const t_vec *ray, const t_scene *scene)
+static inline unsigned int	ray_scene_color(const t_vec *orig,
+		const t_vec *ray, const t_scene *scene)
 {
 	t_hit	cam_hit;
 	t_hit	light_hit;
@@ -40,7 +41,8 @@ static inline unsigned int	ray_scene_color(const t_vec *orig, const t_vec *ray, 
 	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))
 		return (rgbmult(cam_hit.obj->color, 95));
-	return (rgbmult(cam_hit.obj->color, max((int)(dot(&hit_to_light, &cam_hit.normal) * 160.0), 0) + 95));
+	return (rgbmult(cam_hit.obj->color,
+			max((int)(dot(&hit_to_light, &cam_hit.normal) * 160.0), 0) + 95));
 }
 
 // TODO binary tree bounding box
@@ -71,8 +73,10 @@ void	render(const t_scene *scene, const t_camera *cam, int *buf)
 			*buf++ = ray_scene_color(&cam->pos, &ray, scene);
 		}
 	}
-	mlx_put_image_to_window(scene->win.ptr, scene->win.win, scene->win.img, 0, 0);
-	printf("rendering took %.2fms\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
+	mlx_put_image_to_window(scene->win.ptr,
+		scene->win.win, scene->win.img, 0, 0);
+	printf("rendering took %.2fms\n",
+		(double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
 //HOOKS
