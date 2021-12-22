@@ -67,16 +67,16 @@ typedef struct s_hit {
 
 typedef struct s_window {
 	void	*mlx;
-	void	*window;
-	void	*image;
-	int		*buffer;
+	void	*win;
+	void	*img;
+	int		*buf;
 	int		width;
 	int		height;
 }	t_window;
 
 typedef struct s_scene {
-	t_window	*window;
-	t_camera	*camera;
+	t_window	win;
+	t_camera	cam;
 	t_obj		*obj;
 	t_light		*lights;
 	int			ambient_color;

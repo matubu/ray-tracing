@@ -3,14 +3,9 @@ NAME			:=	minirt
 OBJECTS			:=	./bin
 INCLUDES		:=	./includes
 SOURCES			:=	./srcs
-LIBFT			:=	./libft
 
 SRCS			:=	main.c \
-					window.c \
 					scene.c \
-					camera.c \
-					utils/utils.c \
-					parsing/check.c \
 					parsing/parse.c
 
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
@@ -23,7 +18,6 @@ CFLAGS			:=	-Wall -Wextra -Werror \
 					-funsafe-math-optimizations -funroll-loops \
 					-ffast-math -flto -finline-functions \
 					-fsanitize=address
-CINCLUDES		:=	-I${INCLUDES} -I${LIBFT}/includes -I/usr/local/include
 
 OS = $$(uname -s)
 
@@ -43,26 +37,23 @@ run: all
 ${OBJECTS}/%.o: ${SOURCES}/%.c
 	@$(ECHO) "$(BLU)● Compiling $^ 🔧$(EOC)"
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -o $@ -c $< ${CINCLUDES}
+	@$(CC) $(CFLAGS) -o $@ -c $^ -I${INCLUDES}
 
 $(NAME): $(OBJS)
-	@make -C ${LIBFT}
 	@if [ $(OS) = 'Linux' ]; then \
 		$(ECHO) "$(GRE)● Compiling to binary ⚙️  $(GRA)(Linux 🐧 mode)$(EOC)"; \
-		${CC} $(CFLAGS) -L/usr/local/lib $(OBJS) -o $(NAME) -L${LIBFT} -lft -lm -lmlx -lXext -lX11 -lz; \
+		${CC} $(CFLAGS) -L/usr/local/lib $(OBJS) -o $(NAME) -lm -lmlx -lXext -lX11 -lz; \
 	else \
 		$(ECHO) "$(GRE)● Compiling to binary ⚙️  $(GRA)(macOS 🍎 mode)$(EOC)"; \
-		${CC} $(CFLAGS) -L${LIBFT} -lft -lmlx -framework OpenGL -framework AppKit $(OBJS) -o $(NAME) -lm; \
+		${CC} $(CFLAGS) -lmlx -framework OpenGL -framework AppKit $(OBJS) -o $(NAME) -lm; \
 	fi
 
 clean:
 	@$(ECHO) "$(RED)● Removing $(OBJECTS) 📁$(EOC)"
-	@make -C ${LIBFT} clean
 	@rm -rf $(OBJECTS)
 
 fclean: clean
 	@$(ECHO) "$(RED)● Removing binary ⚙️ $(EOC)"
-	@make -C ${LIBFT} fclean
 	@rm -rf $(NAME)
 
 re: fclean all
