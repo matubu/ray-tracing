@@ -77,8 +77,7 @@ t_light				g_lights[] = {
 
 void	parse_line(char *type, char **arg, t_scene *scene)
 {
-	int	i;
-
+	(void)arg;
 	(void)scene;
 	if (type[0] == 'A' && type[1] == '\0')
 		return ;
