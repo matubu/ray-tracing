@@ -34,7 +34,7 @@
 char				*gnl(int fd);
 int					free_splits(char **splits, int n);
 char				**split(const char *s, char c);
-t_scene				parse(int ac, char **av);
+t_scene				parse(int argc, char **argv);
 
 void				warn(char *err, char *s);
 void				err(char *s);

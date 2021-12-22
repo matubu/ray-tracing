@@ -12,22 +12,17 @@
 
 #include "minirt.h"
 
-void	check_args(int argc, char **argv)
-{
-	(void) argv;
-	if (argc != 2)
-		err("usage: ./minirt [minirtfile]");
-}
-
-int	open_file(char *filename)
+int	open_file(int argc, char **argv)
 {
 	int	fd;
 
-	fd = open(filename, O_DIRECTORY);
+	if (argc != 2)
+		err("usage: ./minirt [minirtfile]");
+	fd = open(argv[1], O_DIRECTORY);
 	if (fd != -1)
 		err("file is a directory");
 	close(fd);
-	fd = open(filename, O_RDONLY);
+	fd = open(argv[1], O_RDONLY);
 	if (fd == -1)
 		err("file can't be open");
 	return (fd);
@@ -108,15 +103,12 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 	printf("\n");
 }
 
-t_scene	parse(int ac, char **av)
+t_scene	parse(int argc, char **argv)
 {
-	t_scene	scene;//TODO initialize every thing at first
-	int		fd;
-	char	*s;
-	char	**splits;
-
-	check_args(ac, av);
-	fd = open_file(av[1]);
+	t_scene		scene;//TODO initialize every thing at first
+	const int	fd = open_file(argc, argv);
+	char		*s;
+	char		**splits;
 
 	while (1)
 	{

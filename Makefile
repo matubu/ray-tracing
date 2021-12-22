@@ -5,10 +5,10 @@ INCLUDES		:=	./includes
 SOURCES			:=	./srcs
 
 SRCS			:=	main.c \
-					parsing/err.c \
+					libs/err.c \
 					parsing/parse.c \
-					parsing/gnl.c \
-					parsing/split.c
+					libs/gnl.c \
+					libs/split.c
 
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
 
