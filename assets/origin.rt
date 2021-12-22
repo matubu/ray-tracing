@@ -1,7 +1,10 @@
+A    1          235,235,235
 
-	//scene.cam.pos = (t_vec){8, -4, 5.5};
-	//scene.cam.rot_euler = (t_vec){-PI / 4, 0, PI / 4};
-	//scene.cam.width = WIDTH;
-	//scene.cam.height = HEIGHT;
-	//scene.cam.fov_pixel = M_PI_2 / WIDTH;
-	//scene.ambient_color = 0xebebeb;
+C    8,-4,5.5   -0.78539816339,0,0.78539816339 6.28318530718
+L    5,-5,5     2     255,0,0
+sp   0,0,0      2     255,0,0
+sp   0,5,0      1     0,255,0
+sp   4,-4,3.5   .5    0,0,255
+pl   0,0,-4     0,0,1 0,255,0
+cy   5,5,0      0,0,1 2 1 0,0,255
+#co 255,0,0  0,0,1

@@ -55,41 +55,6 @@ t_bump_map	load_bump_map(t_window *window, char *filename)
 	return (img);
 }
 */
-
-// HARD CODDED DATA TO REMOVE
-//const t_bump_map	bump_maps[] = {
-//	load_bump_map(scene.window, "assets/test.xpm")
-//};
-/*
-const t_sphere		g_spheres[] = {
-{(t_vec){0, 0, 0}, 2, 4},
-{(t_vec){0, 5, 0}, 1, 1},
-{(t_vec){4, -4, 3.5}, .5, .25}
-};
-//{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0}
-const t_plane		g_planes[] = {
-{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL},
-};
-const t_cylinder	g_cylinders[] = {
-{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1}
-};
-const t_cone		g_cones[] = {
-{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}}
-};
-t_obj				g_objects[] = {
-{ray_sphere, RED, (void *)(g_spheres + 0)},
-{ray_sphere, GREEN, (void *)(g_spheres + 1)},
-{ray_sphere, BLUE, (void *)(g_spheres + 2)},
-{ray_plane, GREEN, (void *)(g_planes + 0)},
-{ray_cylinder, BLUE, (void *)(g_cylinders + 0)},
-{ray_cone, RED, (void *)(g_cones + 0)},
-{NULL, BLACK, NULL}
-};
-t_light				g_lights[] = {
-{{5, -5, 5}, RED, 2}
-};
-//end of hard codded data
-*/
 //actual parse after floating point
 float	getfloat(char *s)
 {
