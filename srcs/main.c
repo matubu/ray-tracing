@@ -45,32 +45,42 @@ static inline unsigned int	ray_scene_color(const t_vec *orig,
 			max((int)(dot(&hit_to_light, &cam_hit.normal) * 160.0), 0) + 95));
 }
 
+typedef struct s_trash
+{
+	t_vec	dir;
+	t_vec	cam_right;
+	t_vec	cam_up;
+	float	half_x;
+	float	half_y;
+	t_vec	ray;
+	t_vec	yr;
+	t_vec	xr;
+}	t_trash;
+
 // TODO binary tree bounding box
 void	render(const t_scene *scene, const t_window *win,
 		const t_camera *cam, int *buf)
 {
 	const t_vec		up = {0, 0, 1};
-	const t_vec		dir = radian_to_vector(&cam->rot_euler);
-	const t_vec		cv_right = normalize(cross(&dir, &up));
-	const t_vec		cv_up = normalize(cross(&cv_right, &dir));
-	const float		half_x = cam->width / 2.0;
-	const float		half_y = cam->height / 2.0;
-	t_vec			ray;
-	t_vec			yr;
-	t_vec			xr;
+	t_trash			t;
 	register int	y;
 	register int	x;
 
+	t.dir = radian_to_vector(&cam->rot_euler);
+	t.cam_right = normalize(cross(&t.dir, &up));
+	t.cam_up = normalize(cross(&t.cam_right, &t.dir));
+	t.half_x = cam->width / 2.0;
+	t.half_y = cam->height / 2.0;
 	y = cam->height;
 	while (y--)
 	{
-		yr = mult(&cv_up, (y - half_y) * cam->fov_pixel);
+		t.yr = mult(&t.cam_up, (y - t.half_y) * cam->fov_pixel);
 		x = cam->width;
 		while (x--)
 		{
-			xr = mult(&cv_right, (half_x - x) * cam->fov_pixel);
-			ray = normalize(add3(&dir, &xr, &yr));
-			*buf++ = ray_scene_color(&cam->pos, &ray, scene);
+			t.xr = mult(&t.cam_right, (t.half_x - x) * cam->fov_pixel);
+			t.ray = normalize(add3(&t.dir, &t.xr, &t.yr));
+			*buf++ = ray_scene_color(&cam->pos, &t.ray, scene);
 		}
 	}
 	mlx_put_image_to_window(win->ptr, win->win, win->img, 0, 0);
