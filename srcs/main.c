@@ -37,7 +37,7 @@ static inline unsigned int	ray_scene_color(const t_vec *orig,
 	t_vec	hit_to_light;
 
 	if (!ray_scene(orig, ray, scene, &cam_hit))
-		return (scene->ambient_color);
+		return (scene->ambient.color);
 	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
 	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))
 		return (rgbmult(cam_hit.obj->color, 95));

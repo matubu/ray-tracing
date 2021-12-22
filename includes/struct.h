@@ -38,12 +38,6 @@ typedef struct s_vec {
 	float	z;
 }	t_vec;
 
-typedef struct s_obj {
-	void		(*func)();
-	int			color;
-	void		*data;
-}	t_obj;
-
 typedef struct s_camera {
 	t_vec	pos;
 	t_vec	rot_euler;
@@ -58,12 +52,10 @@ typedef struct s_light {
 	int		color;
 }	t_light;
 
-typedef struct s_hit {
-	t_vec	pos;
-	t_vec	normal;
-	float	dist;
-	t_obj	*obj;
-}	t_hit;
+typedef struct s_ambient {
+	float	intensity;
+	int		color;
+}	t_ambient;
 
 typedef struct s_window {
 	void	*ptr;
@@ -74,14 +66,6 @@ typedef struct s_window {
 	int		height;
 }	t_window;
 
-typedef struct s_scene {
-	t_window	win;
-	t_camera	cam;
-	t_obj		*obj;
-	t_light		*lights;
-	int			ambient_color;
-	int			button;
-}	t_scene;
 
 typedef struct s_bump_map
 {
@@ -94,13 +78,13 @@ typedef struct s_bump_map
 typedef struct s_sphere {
 	t_vec	pos;
 	float	rad;
-	float	srad;
+//	float	srad;
 }	t_sphere;
 
 typedef struct s_plane {
 	t_vec		pos;
 	t_vec		normal;
-	t_bump_map	*bump_map;
+	//t_bump_map	*bump_map;
 }	t_plane;
 
 typedef struct s_cylinder
@@ -108,7 +92,7 @@ typedef struct s_cylinder
 	t_vec	pos;
 	t_vec	normal;
 	float	rad;
-	float	srad;
+//	float	srad;
 	float	height;
 }	t_cylinder;
 
@@ -117,5 +101,39 @@ typedef struct s_cone
 	t_vec	pos;
 	t_vec	dir;
 }	t_cone;
+
+typedef struct s_obj {
+	void		(*func)();
+	union {
+		t_sphere	sphere;
+		t_plane		plane;
+		t_cylinder	cylinder;
+		t_cone		cone;
+	};
+	int			color;
+}	t_obj;
+/*
+typedef struct s_obj {
+	void		(*func)();
+	int			color;
+	void		*data;
+}	t_obj;*/
+
+typedef struct s_hit {
+	t_vec	pos;
+	t_vec	normal;
+	float	dist;
+	t_obj	*obj;
+}	t_hit;
+
+typedef struct s_scene {
+	t_window	win;
+	t_camera	cam;
+	t_obj		obj[1024];
+	int			obj_count;
+	t_light		lights[64];
+	t_ambient	ambient;
+	int			button;
+}	t_scene;
 
 #endif

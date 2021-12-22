@@ -1,0 +1,7 @@
+
+	//scene.cam.pos = (t_vec){8, -4, 5.5};
+	//scene.cam.rot_euler = (t_vec){-PI / 4, 0, PI / 4};
+	//scene.cam.width = WIDTH;
+	//scene.cam.height = HEIGHT;
+	//scene.cam.fov_pixel = M_PI_2 / WIDTH;
+	//scene.ambient_color = 0xebebeb;
