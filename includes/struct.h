@@ -66,7 +66,7 @@ typedef struct s_hit {
 }	t_hit;
 
 typedef struct s_window {
-	void	*mlx;
+	void	*ptr;
 	void	*win;
 	void	*img;
 	int		*buf;

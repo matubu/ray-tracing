@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 12:42:08 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/22 12:42:09 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/22 13:55:30 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,15 +70,18 @@ int	on_button_up(int button, int x, int y, t_scene *scene)
 	(void)button;
 	scene->button = 0;
 	return (1);
-}
+}*/
 
-int	on_key_up(int key, t_scene *scene)
+int	hook_close(t_scene *scene)
 {
-	if (key == 12 || key == 53 || key == 65307)
-	{
-		mlx_destroy_window(scene->win.mlx, scene->win.win);
-		exit(EXIT_SUCCESS);
-	}
+	mlx_destroy_window(scene->win.ptr, scene->win.win);
+	exit(0);
 	return (0);
 }
-*/
+
+int	hook_key_up(int key, t_scene *scene)
+{
+	if (key == 12 || key == 53 || key == 65307)
+		hook_close(scene);
+	return (0);
+}

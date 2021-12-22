@@ -35,9 +35,9 @@ t_window	window_open(char *name, int width, int height)
 
 	win.width = width;
 	win.height = height;
-	win.mlx = mlx_init();
-	win.win = mlx_new_window(win.mlx, width, height, name);
-	win.img = mlx_new_image(win.mlx, width, height);
+	win.ptr = mlx_init();
+	win.win = mlx_new_window(win.ptr, width, height, name);
+	win.img = mlx_new_image(win.ptr, width, height);
 	win.buf = (int *)mlx_get_data_addr(win.img, &null, &null, &null);
 	return (win);
 }
@@ -95,6 +95,20 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 		return ;
 	return ((void)warn("unrecognized type", type));
 }
+
+/*
+t_bump_map	load_bump_map(t_window *window, char *filename)
+{
+	t_bump_map	img;
+	int			null;
+
+	img.img = mlx_xpm_file_to_image(window->mlx, filename, &img.width, &img.height);
+	if (img.img == NULL)
+		err("could not load image");
+	img.buf = (int *)mlx_get_data_addr(img.img, &null, &null, &null);
+	return (img);
+}
+*/
 
 //TODO initialize scene at first
 //TODO remove hard codded scene initialization
