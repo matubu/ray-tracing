@@ -31,11 +31,10 @@
 //# define DEV_SHOW_NORMAL
 //# define DEV_SHOW_DISTANCE
 
-//t_window			window_open(char *title, int width, int height);
-
-t_scene				scene_init(char *title, int width, int height);
-
-//t_scene				parse(int ac, char **av);
+char				*gnl(int fd);
+int					free_splits(char **splits, int n);
+char				**split(const char *s, char c);
+t_scene				parse(int ac, char **av);
 
 void err(char *s);
 

@@ -5,8 +5,9 @@ INCLUDES		:=	./includes
 SOURCES			:=	./srcs
 
 SRCS			:=	main.c \
-					scene.c \
-					parsing/parse.c
+					parsing/parse.c \
+					parsing/gnl.c \
+					parsing/split.c
 
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
 
@@ -16,8 +17,7 @@ CFLAGS			:=	-Wall -Wextra -Werror \
 					-fomit-frame-pointer -mtune=native \
 					-msse4.2 -mfpmath=sse -march=native \
 					-funsafe-math-optimizations -funroll-loops \
-					-ffast-math -flto -finline-functions \
-					-fsanitize=address
+					-ffast-math -flto -finline-functions
 
 OS = $$(uname -s)
 
@@ -32,7 +32,7 @@ all: $(NAME)
 
 run: all
 	@$(ECHO) "$(GRE)● Launching $(NAME) 💪$(EOC)"
-	@./$(NAME)
+	@./$(NAME) assets/minimal.rt
 
 ${OBJECTS}/%.o: ${SOURCES}/%.c
 	@$(ECHO) "$(BLU)● Compiling $^ 🔧$(EOC)"

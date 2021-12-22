@@ -16,8 +16,8 @@
 # include "struct.h"
 # include "vector.h"
 
-static inline void	ray_sphere(t_vec *orig, t_vec *ray,
-		t_sphere *sphere, t_hit *hit)
+static inline void	ray_sphere(const t_vec *orig, const t_vec *ray,
+		const t_sphere *sphere, t_hit *hit)
 {
 	const t_vec	oc = sub(orig, &sphere->pos);
 	const float	a = dot(ray, ray);
@@ -33,8 +33,8 @@ static inline void	ray_sphere(t_vec *orig, t_vec *ray,
 	hit->normal = normalize(sub(&hit->pos, &sphere->pos));
 }
 
-static inline void	ray_plane(t_vec *orig, t_vec *ray,
-		t_plane *plane, t_hit *hit)
+static inline void	ray_plane(const t_vec *orig, const t_vec *ray,
+		const t_plane *plane, t_hit *hit)
 {
 	const float	d = dot(&plane->normal, ray);
 
@@ -47,8 +47,8 @@ static inline void	ray_plane(t_vec *orig, t_vec *ray,
 	hit->normal = plane->normal;
 }
 
-static inline void	ray_cylinder(t_vec *orig, t_vec *ray,
-		t_cylinder *cylinder, t_hit *hit)
+static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
+		const t_cylinder *cylinder, t_hit *hit)
 {
 	const float	a = (ray->x * ray->x) + (ray->z * ray->z);
 	const float	b = 2 * (ray->x * (orig->x - cylinder->pos.x)
@@ -69,7 +69,7 @@ static inline void	ray_cylinder(t_vec *orig, t_vec *ray,
 }
 
 // radius/apex https://mrl.cs.nyu.edu/~dzorin/rend05/lecture2.pdf
-static inline void	ray_cone(t_vec *orig, t_vec *ray, t_cone *cone, t_hit *hit)
+static inline void	ray_cone(const t_vec *orig, const t_vec *ray, const t_cone *cone, t_hit *hit)
 {
 	(void)orig;
 	(void)ray;
@@ -77,8 +77,8 @@ static inline void	ray_cone(t_vec *orig, t_vec *ray, t_cone *cone, t_hit *hit)
 	hit->dist = 0;
 }
 
-static inline int	ray_scene(t_vec *orig, t_vec *ray,
-		t_scene *scene, t_hit *closest)
+static inline int	ray_scene(const t_vec *orig, const t_vec *ray,
+		const t_scene *scene, t_hit *closest)
 {
 	t_hit			hit;
 	register t_obj	*obj;

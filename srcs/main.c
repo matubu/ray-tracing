@@ -41,7 +41,7 @@ t_bump_map	load_bump_map(t_window *window, char *filename)
 	return (cam_hit.obj->color);
 	#endif
 */
-static inline unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *scene)
+static inline unsigned int	ray_scene_color(const t_vec *orig, const t_vec *ray, const t_scene *scene)
 {
 	t_hit	cam_hit, light_hit;
 	t_vec	hit_to_light;
@@ -54,7 +54,8 @@ static inline unsigned int	ray_scene_color(t_vec *orig, t_vec *ray, t_scene *sce
 	return (rgbmult(cam_hit.obj->color, max((int)(dot(&hit_to_light, &cam_hit.normal) * 160.0), 0) + 95));
 }
 
-void	render(t_scene *scene, t_camera *cam, int *buf)
+// TODO binary tree bounding box
+void	render(const t_scene *scene, const t_camera *cam, int *buf)
 {
 	clock_t	start = clock();
 
@@ -85,52 +86,10 @@ void	render(t_scene *scene, t_camera *cam, int *buf)
 	printf("rendering took %.2fms\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
-int	main(void)
+int	main(int argc, char **argv)
 {
-	t_scene	scene;
+	const t_scene	scene = parse(argc, argv);
 
-	scene = scene_init("MINIRT", WIDTH, HEIGHT);
-
-	//t_bump_map	bump_maps[] = {
-	//	load_bump_map(scene.window, "assets/test.xpm")
-	//};
-
-	t_sphere	spheres[] = {
-		{(t_vec){0, 0, 0}, 2, 4},
-		{(t_vec){0, 5, 0}, 1, 1},
-		{(t_vec){4, -4, 3.5}, .5, .25}
-	};
-
-	t_plane	planes[] = {
-		{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL},
-		//{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0}
-	};
-
-	t_cylinder	cylinders[] = {
-		{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1}
-	};
-
-	t_cone	cones[] = {
-		{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}}
-	};
-	
-	t_obj	objects[] = {
-		{ray_sphere, RED, (void *)(spheres + 0)},
-		{ray_sphere, GREEN, (void *)(spheres + 1)},
-		{ray_sphere, BLUE, (void *)(spheres + 2)},
-		{ray_plane, GREEN, (void *)(planes + 0)},
-		//{ray_plane, RED, (void *)(planes + 1)},
-		{ray_cylinder, BLUE, (void *)(cylinders + 0)},
-		{ray_cone, RED, (void *)(cones + 0)},
-		{NULL, BLACK, NULL}
-	};
-	scene.obj = objects;
-
-	t_light	lights[] = {
-		{{5, -5, 5}, RED, 2}
-	};
-	scene.lights = lights;
-	
 	//mlx_hook(scene->window->mlx, 4, 1 << 2, on_button_down, &scene);
 	//mlx_hook(scene->window->mlx, 5, 1 << 3, on_button_up, &scene);
 	//mlx_hook(scene->window->mlx, 6, 64, on_mouse_move, &scene);
