@@ -5,6 +5,7 @@ INCLUDES		:=	./includes
 SOURCES			:=	./srcs
 
 SRCS			:=	main.c \
+					parsing/err.c \
 					parsing/parse.c \
 					parsing/gnl.c \
 					parsing/split.c

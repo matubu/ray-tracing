@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 16:31:32 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/22 12:42:44 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,8 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 }
 
 // radius/apex https://mrl.cs.nyu.edu/~dzorin/rend05/lecture2.pdf
-static inline void	ray_cone(const t_vec *orig, const t_vec *ray, const t_cone *cone, t_hit *hit)
+static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
+		const t_cone *cone, t_hit *hit)
 {
 	(void)orig;
 	(void)ray;

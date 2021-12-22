@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   split.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/22 12:40:55 by mberger-          #+#    #+#             */
+/*   Updated: 2021/12/22 12:41:04 by mberger-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <stdlib.h>
 
 static int	ft_malloc_splits(char ***splits, const char *s, char c)
@@ -18,12 +30,12 @@ static int	ft_malloc_splits(char ***splits, const char *s, char c)
 //put -1 to free every thing
 int	free_splits(char **splits, int n)
 {
-    if (n == -1)
-        while (splits[++n])
-            free(splits[n]);
-    else
-        while (n--)
-            free(splits[n]);
+	if (n == -1)
+		while (splits[++n])
+			free(splits[n]);
+	else
+		while (n--)
+			free(splits[n]);
 	free(splits);
 	return (1);
 }

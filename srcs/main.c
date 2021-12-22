@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/22 10:46:56 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/22 12:44:16 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,8 @@ t_bump_map	load_bump_map(t_window *window, char *filename)
 */
 static inline unsigned int	ray_scene_color(const t_vec *orig, const t_vec *ray, const t_scene *scene)
 {
-	t_hit	cam_hit, light_hit;
+	t_hit	cam_hit;
+	t_hit	light_hit;
 	t_vec	hit_to_light;
 
 	if (!ray_scene(orig, ray, scene, &cam_hit))
@@ -86,15 +87,15 @@ void	render(const t_scene *scene, const t_camera *cam, int *buf)
 	printf("rendering took %.2fms\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
+//HOOKS
+//mlx_hook(scene->window->mlx, 4, 1 << 2, on_button_down, &scene);
+//mlx_hook(scene->window->mlx, 5, 1 << 3, on_button_up, &scene);
+//mlx_hook(scene->window->mlx, 6, 64, on_mouse_move, &scene);
+//mlx_hook(scene->window->mlx, 3, 2, on_key_up, &scene);
 int	main(int argc, char **argv)
 {
 	const t_scene	scene = parse(argc, argv);
 
-	//mlx_hook(scene->window->mlx, 4, 1 << 2, on_button_down, &scene);
-	//mlx_hook(scene->window->mlx, 5, 1 << 3, on_button_up, &scene);
-	//mlx_hook(scene->window->mlx, 6, 64, on_mouse_move, &scene);
-	//mlx_hook(scene->window->mlx, 3, 2, on_key_up, &scene);
-	
 	render(&scene, &scene.cam, scene.win.buf);
 	mlx_loop(scene.win.mlx);
 	return (0);

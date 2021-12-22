@@ -6,17 +6,11 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/21 17:29:59 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/22 12:53:25 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minirt.h"
-
-void err(char *s)
-{
-	printf("\033[31mError\033[0m: %s\n", s);
-	exit(1);
-}
 
 void	check_args(int argc, char **argv)
 {
@@ -53,44 +47,38 @@ t_window	window_open(char *name, int width, int height)
 	return (win);
 }
 
-
-//t_bump_map	bump_maps[] = {
+// HARD CODDED DATA TO REMOVE
+//const t_bump_map	bump_maps[] = {
 //	load_bump_map(scene.window, "assets/test.xpm")
 //};
-
-t_sphere	spheres[] = {
-	{(t_vec){0, 0, 0}, 2, 4},
-	{(t_vec){0, 5, 0}, 1, 1},
-	{(t_vec){4, -4, 3.5}, .5, .25}
+const t_sphere		g_spheres[] = {
+{(t_vec){0, 0, 0}, 2, 4},
+{(t_vec){0, 5, 0}, 1, 1},
+{(t_vec){4, -4, 3.5}, .5, .25}
 };
-
-t_plane	planes[] = {
-	{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL},
-	//{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0}
+//{(t_vec){0, 10, 0}, (t_vec){0, 1, 0}, bump_maps + 0}
+const t_plane		g_planes[] = {
+{(t_vec){0, 0, -4}, (t_vec){0, 0, 1}, NULL},
 };
-
-t_cylinder	cylinders[] = {
-	{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1}
+const t_cylinder	g_cylinders[] = {
+{(t_vec){5, 5, 0}, (t_vec){0, 0, 1}, 2, 4, 1}
 };
-
-t_cone	cones[] = {
-	{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}}
+const t_cone		g_cones[] = {
+{(t_vec){1, 1, 0}, (t_vec){0, 0, 1}}
 };
-
-t_obj	objects[] = {
-	{ray_sphere, RED, (void *)(spheres + 0)},
-	{ray_sphere, GREEN, (void *)(spheres + 1)},
-	{ray_sphere, BLUE, (void *)(spheres + 2)},
-	{ray_plane, GREEN, (void *)(planes + 0)},
-	//{ray_plane, RED, (void *)(planes + 1)},
-	{ray_cylinder, BLUE, (void *)(cylinders + 0)},
-	{ray_cone, RED, (void *)(cones + 0)},
-	{NULL, BLACK, NULL}
+t_obj				g_objects[] = {
+{ray_sphere, RED, (void *)(g_spheres + 0)},
+{ray_sphere, GREEN, (void *)(g_spheres + 1)},
+{ray_sphere, BLUE, (void *)(g_spheres + 2)},
+{ray_plane, GREEN, (void *)(g_planes + 0)},
+{ray_cylinder, BLUE, (void *)(g_cylinders + 0)},
+{ray_cone, RED, (void *)(g_cones + 0)},
+{NULL, BLACK, NULL}
 };
-t_light	lights[] = {
-	{{5, -5, 5}, RED, 2}
+t_light				g_lights[] = {
+{{5, -5, 5}, RED, 2}
 };
-
+//end of hard codded data
 
 void	parse_line(char *type, char **arg, t_scene *scene)
 {
@@ -112,7 +100,7 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 	else if (type[0] == 'c' && type[1] == 'o' && type[2] == '\0')
 		;
 	else
-		return ((void)printf("\033[33mWarning\033[0m: unrecognized type: %s\n", type));
+		return ((void)warn("unrecognized type", type));
 	printf("%2s", type);
 	i = -1;
 	while (arg[++i])
@@ -122,14 +110,14 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 
 t_scene	parse(int ac, char **av)
 {
-	t_scene	scene;// initialize every thing at first
+	t_scene	scene;//TODO initialize every thing at first
 	int		fd;
 	char	*s;
 	char	**splits;
 
 	check_args(ac, av);
 	fd = open_file(av[1]);
-	
+
 	while (1)
 	{
 		s = gnl(fd);
@@ -140,12 +128,10 @@ t_scene	parse(int ac, char **av)
 			parse_line(*splits, splits + 1, &scene);
 		free_splits(splits, -1);
 	}
+	close(fd);
 
-	//check need camera ambient and light
-	//here parsing stuff
-
+	//TODO remove this and replace by check number of camera ...
 	scene.win = window_open("miniRT", WIDTH, HEIGHT);
-
 	scene.cam.pos = (t_vec){8, -4, 5.5};
 	scene.cam.rot_euler = (t_vec){-PI / 4, 0, PI / 4};
 	scene.cam.width = WIDTH;
@@ -153,10 +139,7 @@ t_scene	parse(int ac, char **av)
 	scene.cam.fov_pixel = M_PI_2 / WIDTH;
 	scene.ambient_color = 0xebebeb;
 	scene.button = 0;
-
-	scene.obj = objects;
-	scene.lights = lights;
-
-	close(fd);
+	scene.obj = g_objects;
+	scene.lights = g_lights;
 	return (scene);
 }
