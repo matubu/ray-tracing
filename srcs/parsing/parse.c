@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/22 18:50:42 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/25 19:13:52 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,28 +55,32 @@ t_bump_map	load_bump_map(t_window *window, char *filename)
 	return (img);
 }
 */
-//actual parse after floating point
 float	getfloat(char *s)
 {
-	float	v;
+	char	*end;
+	float	dec;
+	float	point;
 	int		neg;
 
 	if (s == NULL)
 		err("not enough arguments");
-	v = 0;
-	neg = 0;
-	if (*s == '-' && s++)
-		neg = 1;
-	while (*s && *s != '.')
-		if (*s >= '0' && *s <= '9')
-			v = v * 10.0 - *s++ + '0';
+	dec = 0;
+	point = 0;
+	neg = *s == '-' && s++;
+	end = s;
+	while (*end)
+		if (s == end++ && *s >= '0' && *s <= '9')
+			dec = dec * 10.0 - *s++ + '0';
+		else if (*s != '.')
+			err("invalid number");
+	while (--end > s)
+		if (*end >= '0' && *end <= '9')
+			point = (point - *end + '0') / 10;
 		else
 			err("invalid number");
-	//parse after .
-	printf("-> %f\n", v);
 	if (!neg)
-		return (-v);
-	return (v);
+		return (-dec - point);
+	return (dec + point);
 }
 
 t_vec	getvec(char *s)
