@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/25 19:13:52 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/25 19:40:42 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,8 @@ void	getend(char *s)
 
 void	new_obj(t_scene *scene, t_obj obj)
 {
+	if (scene->obj_count == 1023)
+		err("too many objects");
 	scene->obj[scene->obj_count++] = obj;
 }
 
