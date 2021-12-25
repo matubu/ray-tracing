@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/25 19:40:42 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/25 19:42:05 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,7 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 	else if (type[0] == 'C' && type[1] == '\0')
 		scene->cam = (t_camera){getvec(arg[0]), getvec(arg[1]), WIDTH, HEIGHT, getfloat(arg[2]) / WIDTH};
 	else if (type[0] == 'L' && type[1] == '\0')
+		//new_light + check not too many lights
 		scene->lights[0] = (t_light){getvec(arg[0]), getfloat(arg[1]), getcolor(arg[2])};
 	else if (type[0] == 's' && type[1] == 'p' && type[2] == '\0')
 		new_obj(scene, (t_obj){
@@ -184,15 +185,7 @@ t_scene	parse(int argc, char **argv)
 	}
 	close(fd);
 	scene.win = window_open("miniRT", scene.cam.width, scene.cam.height);
-	//scene.cam.pos = (t_vec){8, -4, 5.5};
-	//scene.cam.rot_euler = (t_vec){-PI / 4, 0, PI / 4};
-	//scene.cam.width = WIDTH;
-	//scene.cam.height = HEIGHT;
-	//scene.cam.fov_pixel = M_PI_2 / WIDTH;
-	//scene.ambient_color = 0xebebeb;
 	scene.button = 0;
 	scene.obj[scene.obj_count].func = NULL;
-	//scene.obj = g_objects;
-	//scene.lights = g_lights;
 	return (scene);
 }
