@@ -6,44 +6,76 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/26 22:39:19 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/27 00:33:01 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minirt.h"
 
-/*
-	// DEV MODES
-	#ifdef DEV_SHOW_NORMAL
-
-	return ((int)(cam_hit.normal.x * 100 + 100)
-			| (int)(cam_hit.normal.y * 100 + 100) << 8
-			| (int)(cam_hit.normal.z * 100 + 100) << 16);
-	#endif
-	#ifdef DEV_SHOW_DISTANCE
-
-	return (rgbmult(WHITE, 1.0 / cam_hit.dist * 255));
-	#endif
-	#ifdef DEV_NO_SHADOW
-
-	return (cam_hit.obj->color);
-	#endif
-*/
+#ifdef DEV_SHOW_NORMAL
 static inline unsigned int	ray_scene_color(const t_vec *orig,
 		const t_vec *ray, const t_scene *scene)
 {
-	t_hit	cam_hit;
-	t_hit	light_hit;
-	t_vec	hit_to_light;
+	t_hit	hit;
 
-	if (!ray_scene(orig, ray, scene, &cam_hit))
-		return (scene->ambient.color);
-	hit_to_light = normalize(sub(&scene->lights->pos, &cam_hit.pos));
-	if (ray_scene(&cam_hit.pos, &hit_to_light, scene, &light_hit))
-		return (rgbmult(cam_hit.obj->color, 95));
-	return (rgbmult(cam_hit.obj->color,
-			max((int)(dot(&hit_to_light, &cam_hit.normal) * 160.0), 0) + 95));
+	hit.normal = (t_vec){0, 0, 0};
+	if (!ray_scene(orig, ray, scene, &hit))
+		return (0x0);
+	return ((int)(hit.normal.x * 100 + 100)
+			| (int)(hit.normal.y * 100 + 100) << 8
+			| (int)(hit.normal.z * 100 + 100) << 16);
 }
+#elif defined(DEV_SHOW_DISTANCE)
+static int	range(int a, int b, float fac)
+{
+	return (
+		((int)((float)(b & (255 << 0)) * fac
+			+ (float)(a & (255 << 0)) * (1.0 - fac)) & (255 << 0))
+		| ((int)((float)(b & (255 << 8)) * fac
+				+ (float)(a & (255 << 8)) * (1.0 - fac)) & (255 << 8))
+		| ((int)((float)(b & (255 << 16)) * fac
+				+ (float)(a & (255 << 16)) * (1.0 - fac)) & (255 << 16))
+			);
+}
+
+static int	dist(float fac)
+{
+	if (fac < .5)
+		return (range(0x000000, 0x512372, fac * 2.0));
+	else
+		return (range(0x512372, 0xe1536f, fac * 2.0 - 1.0));
+}
+
+static inline unsigned int	ray_scene_color(const t_vec *orig,
+		const t_vec *ray, const t_scene *scene)
+{
+	t_hit	hit;
+
+	if (!ray_scene(orig, ray, scene, &hit))
+		return (0x0);
+	return (dist(1.0 - fmin(hit.dist / 80.0, 1.0)));
+}
+#else
+static inline unsigned int	ray_scene_color(const t_vec *orig,
+		const t_vec *ray, const t_scene *scene)
+{
+	t_hit	hit;
+	t_hit	null;
+	t_vec	to_light;
+	//t_vec	reflected;
+
+	if (!ray_scene(orig, ray, scene, &hit))
+		return (scene->ambient.color);
+	//reflected = reflect(ray, &hit.normal);
+	//if (!ray_scene(&hit.pos, &reflected, scene, &null))
+	//	return (0xffffff);
+	to_light = normalize(sub(&scene->lights->pos, &hit.pos));
+	if (ray_scene(&hit.pos, &to_light, scene, &null))
+		return (rgbmult(hit.obj->color, 95));
+	return (rgbmult(hit.obj->color,
+			max((int)(dot(&to_light, &hit.normal) * 160.0), 0) + 95));
+}
+#endif
 
 typedef struct s_trash
 {

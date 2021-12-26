@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 12:42:08 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/26 22:37:32 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/27 00:21:41 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ int	hook_mouse_move(int x, int y, t_scene *scene)
 		scene->cam.rot_euler.y += (float)(last[1] - y) / 50.0;
 		render(scene, &scene->win, &scene->cam, scene->win.buf);
 	}
-	else if (scene->button == 3)
+	else if (scene->button == 3 || scene->button == 2)
 	{
 		t_vec	mx = radian_to_vector(&scene->cam.rot_euler);
 		t_vec	mz = mx;

@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/26 22:35:09 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/27 00:32:02 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,7 @@
 # include <time.h>
 # include <stdio.h>
 
-//# define DEV_NO_SHADOW
-//# define DEV_SHOW_NORMAL
+# define DEV_SHOW_NORMAL
 //# define DEV_SHOW_DISTANCE
 
 char	*gnl(int fd);
