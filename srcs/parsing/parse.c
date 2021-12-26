@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/26 20:42:38 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/26 20:59:56 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,10 @@ t_bump_map	load_bump_map(t_window *window, char *filename)
 	return (img);
 }
 */
+
+//pf
+//pv
+//pc
 float	getfloat(char *s)
 {
 	char	*end;
@@ -119,7 +123,7 @@ int	getcolor(char *s)
 void	getend(char *s)
 {
 	if (s)
-		err("too many arguments");
+		err("too many field");
 }
 
 void	new_obj(t_scene *scene, t_obj obj)
@@ -132,35 +136,31 @@ void	new_obj(t_scene *scene, t_obj obj)
 void	parse_line(char *type, char **arg, t_scene *scene)
 {
 	if (type[0] == 'A' && type[1] == '\0')
-		scene->ambient = (t_ambient){getfloat(arg[0]), getcolor(arg[1])};
+		scene->ambient = (t_ambient){getfloat(*arg++), getcolor(*arg++)};
 	else if (type[0] == 'C' && type[1] == '\0')
-		scene->cam = (t_camera){getvec(arg[0]), getvec(arg[1]), WIDTH, HEIGHT, getfloat(arg[2]) / WIDTH};
+		scene->cam = (t_camera){getvec(*arg++), getvec(*arg++), WIDTH, HEIGHT, getfloat(*arg++) / WIDTH};
 	else if (type[0] == 'L' && type[1] == '\0')
 		//new_light + check not too many lights
-		scene->lights[0] = (t_light){getvec(arg[0]), getfloat(arg[1]), getcolor(arg[2])};
+		scene->lights[0] = (t_light){getvec(*arg++), getfloat(*arg++), getcolor(*arg++)};
 	else if (type[0] == 's' && type[1] == 'p' && type[2] == '\0')
-		new_obj(scene, (t_obj){
-			.func = ray_sphere,
-			.sphere = (t_sphere){getvec(arg[0]), getfloat(arg[1])}, 
-			.color = getcolor(arg[2])});
+		new_obj(scene, (t_obj){.func = ray_sphere,
+			.sphere = (t_sphere){getvec(*arg++), getfloat(*arg++)}, 
+			.color = getcolor(*arg++)});
 	else if (type[0] == 'p' && type[1] == 'l' && type[2] == '\0')
-		new_obj(scene, (t_obj){
-			.func = ray_plane,
-			.plane = (t_plane){getvec(arg[0]), getvec(arg[1])},
-			.color = getcolor(arg[2])});
+		new_obj(scene, (t_obj){.func = ray_plane,
+			.plane = (t_plane){getvec(*arg++), getvec(*arg++)},
+			.color = getcolor(*arg++)});
 	else if (type[0] == 'c' && type[1] == 'y' && type[2] == '\0')
-		new_obj(scene, (t_obj){
-			.func = ray_cylinder,
-			.cylinder = (t_cylinder){getvec(arg[0]), getvec(arg[1]), getfloat(arg[2]), getfloat(arg[3])},
-			.color = getcolor(arg[4])});
+		new_obj(scene, (t_obj){.func = ray_cylinder,
+			.cylinder = (t_cylinder){getvec(*arg++), getvec(*arg++), getfloat(*arg++), getfloat(*arg++)},
+			.color = getcolor(*arg++)});
 	else if (type[0] == 'c' && type[1] == 'o' && type[2] == '\0')
-		new_obj(scene, (t_obj){
-			.func = ray_cone,
-			.cone = (t_cone){getvec(arg[0]), getvec(arg[1])},
-			.color = getcolor(arg[2])});
+		new_obj(scene, (t_obj){.func = ray_cone,
+			.cone = (t_cone){getvec(*arg++), getvec(*arg++)},
+			.color = getcolor(*arg++)});
 	else
 		err("invalid object type");
-	//TODO getend(*arg)
+	getend(*arg);
 }
 
 //TODO initialize scene at first
