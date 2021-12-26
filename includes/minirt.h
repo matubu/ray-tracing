@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/22 14:00:22 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/26 20:48:07 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ int		free_splits(char **splits, int n);
 char	**split(const char *s, char c);
 t_scene	parse(int argc, char **argv);
 
-void	warn(char *err, char *s);
 void	err(char *s);
 
 int		hook_close(t_scene *scene);

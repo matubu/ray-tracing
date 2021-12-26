@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 17:10:26 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/26 20:44:28 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,12 +112,6 @@ typedef struct s_obj {
 	};
 	int			color;
 }	t_obj;
-/*
-typedef struct s_obj {
-	void		(*func)();
-	int			color;
-	void		*data;
-}	t_obj;*/
 
 typedef struct s_hit {
 	t_vec	pos;

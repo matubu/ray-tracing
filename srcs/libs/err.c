@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 12:56:24 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/22 12:56:25 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/26 20:48:23 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,4 @@ void	err(char *s)
 {
 	printf("\033[31mError\033[0m\n%s\n", s);
 	exit(1);
-}
-
-void	warn(char *err, char *s)
-{
-	printf("\033[33mWarning\033[0m: %s: %s\n", err, s);
 }

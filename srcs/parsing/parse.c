@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/25 19:42:05 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/26 20:42:38 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ float	getfloat(char *s)
 	int		neg;
 
 	if (s == NULL)
-		err("not enough arguments");
+		err("missing float");
 	dec = 0;
 	point = 0;
 	neg = *s == '-' && s++;
@@ -89,10 +89,10 @@ t_vec	getvec(char *s)
 	t_vec	vec;
 
 	if (s == NULL)
-		err("not enough arguments");
+		err("missing vector");
 	splits = split(s, ',');
 	if (!splits || !splits[0] || !splits[1] || !splits[2] || splits[3])
-		err("vector not properly formated");
+		err("invalid vector");
 	vec = (t_vec){getfloat(splits[0]), getfloat(splits[1]), getfloat(splits[2])};
 	free_splits(splits, -1);
 	return (vec);
@@ -105,10 +105,10 @@ int	getcolor(char *s)
 	int		color;
 
 	if (s == NULL)
-		err("not enough arguments");
+		err("missing color");
 	splits = split(s, ',');
 	if (!splits || !splits[0] || !splits[1] || !splits[2] || splits[3])
-		err("color not properly formated");
+		err("invalid color");
 	color = ((int)getfloat(splits[0]) & 255) << 16
 		| ((int)getfloat(splits[1]) & 255) << 8
 		| ((int)getfloat(splits[2]) & 255) << 0;
@@ -131,7 +131,6 @@ void	new_obj(t_scene *scene, t_obj obj)
 
 void	parse_line(char *type, char **arg, t_scene *scene)
 {
-	//printf("< \033[32m%s\033[0m >\n", type);
 	if (type[0] == 'A' && type[1] == '\0')
 		scene->ambient = (t_ambient){getfloat(arg[0]), getcolor(arg[1])};
 	else if (type[0] == 'C' && type[1] == '\0')
@@ -160,7 +159,7 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 			.cone = (t_cone){getvec(arg[0]), getvec(arg[1])},
 			.color = getcolor(arg[2])});
 	else
-		return ((void)warn("unrecognized type", type));
+		err("invalid object type");
 	//TODO getend(*arg)
 }
 
