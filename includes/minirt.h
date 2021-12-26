@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/26 20:48:07 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/26 21:07:14 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,9 @@
 char	*gnl(int fd);
 int		free_splits(char **splits, int n);
 char	**split(const char *s, char c);
+
 t_scene	parse(int argc, char **argv);
+void	parse_line(char *type, char **arg, t_scene *scene);
 
 void	err(char *s);
 

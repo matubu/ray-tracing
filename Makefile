@@ -8,6 +8,7 @@ SRCS			:=	main.c \
 					hook.c \
 					libs/err.c \
 					parsing/parse.c \
+					parsing/line.c \
 					libs/gnl.c \
 					libs/split.c
 
