@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/22 14:18:33 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/26 22:39:19 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,10 +57,12 @@ typedef struct s_trash
 	t_vec	xr;
 }	t_trash;
 
-// TODO binary tree bounding box
 void	render(const t_scene *scene, const t_window *win,
 		const t_camera *cam, int *buf)
 {
+	const clock_t	start = clock();
+	// ----- DEBUG -----
+
 	const t_vec		up = {0, 0, 1};
 	t_trash			t;
 	register int	y;
@@ -84,22 +86,22 @@ void	render(const t_scene *scene, const t_window *win,
 		}
 	}
 	mlx_put_image_to_window(win->ptr, win->win, win->img, 0, 0);
+
+	// ----- DEBUG -----
+	printf("rendering took %.3fms\n",
+		(double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 }
 
-//HOOKS
-//mlx_hook(scene->window->mlx, 4, 1 << 2, on_button_down, &scene);
-//mlx_hook(scene->window->mlx, 5, 1 << 3, on_button_up, &scene);
-//mlx_hook(scene->window->mlx, 6, 64, on_mouse_move, &scene);
-//mlx_hook(scene->window->mlx, 3, 2, on_key_up, &scene);
 int	main(int argc, char **argv)
 {
 	const t_scene	scene = parse(argc, argv);
-	const clock_t	start = clock();
 
 	render(&scene, &scene.win, &scene.cam, scene.win.buf);
-	printf("rendering took %.3fms\n",
-		(double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 	mlx_hook(scene.win.win, 17, 0, hook_close, (void *)&scene);
+	mlx_hook(scene.win.win, 3, 2, hook_key_up, (void *)&scene);
+	mlx_hook(scene.win.win, 4, 1 << 2, hook_button_down, (void *)&scene);
+	mlx_hook(scene.win.win, 5, 1 << 3, hook_button_up, (void *)&scene);
+	mlx_hook(scene.win.win, 6, 64, hook_mouse_move, (void *)&scene);
 	mlx_hook(scene.win.win, 3, 2, hook_key_up, (void *)&scene);
 	mlx_loop(scene.win.ptr);
 	return (0);

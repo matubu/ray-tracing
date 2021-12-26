@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/26 21:07:14 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/26 22:35:09 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,12 @@ void	err(char *s);
 
 int		hook_close(t_scene *scene);
 int		hook_key_up(int key, t_scene *scene);
+int		hook_mouse_move(int x, int y, t_scene *scene);
+int		hook_button_down(int button, int x, int y, t_scene *scene);
+int		hook_button_up(int button, int x, int y, t_scene *scene);
+
+void	render(const t_scene *scene, const t_window *win,
+		const t_camera *cam, int *buf);
 
 static inline t_vec	radian_to_vector(const t_vec *rot)
 {
