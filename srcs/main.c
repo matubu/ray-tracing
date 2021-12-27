@@ -6,14 +6,14 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/27 00:33:01 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/27 21:47:52 by matubu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minirt.h"
 
 #ifdef DEV_SHOW_NORMAL
-static inline unsigned int	ray_scene_color(const t_vec *orig,
+static inline unsigned int	ray_color(const t_vec *orig,
 		const t_vec *ray, const t_scene *scene)
 {
 	t_hit	hit;
@@ -56,7 +56,7 @@ static inline unsigned int	ray_scene_color(const t_vec *orig,
 	return (dist(1.0 - fmin(hit.dist / 80.0, 1.0)));
 }
 #else
-static inline unsigned int	ray_scene_color(const t_vec *orig,
+static inline unsigned int	ray_color(const t_vec *orig,
 		const t_vec *ray, const t_scene *scene)
 {
 	t_hit	hit;
@@ -114,7 +114,7 @@ void	render(const t_scene *scene, const t_window *win,
 		{
 			t.xr = mult(&t.cam_right, (t.half_x - x) * cam->fov_pixel);
 			t.ray = normalize(add3(&t.dir, &t.xr, &t.yr));
-			*buf++ = ray_scene_color(&cam->pos, &t.ray, scene);
+			*buf++ = ray_color(&cam->pos, &t.ray, scene);
 		}
 	}
 	mlx_put_image_to_window(win->ptr, win->win, win->img, 0, 0);
