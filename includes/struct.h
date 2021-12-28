@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/28 13:18:23 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/28 13:51:25 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,6 @@ typedef struct s_window {
 	int		width;
 	int		height;
 }	t_window;
-
 
 typedef struct s_bump_map
 {
