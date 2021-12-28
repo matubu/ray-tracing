@@ -33,6 +33,8 @@ EOC = \033[0m
 
 all: $(NAME)
 
+bonus: all
+
 run: all
 	@$(ECHO) "💪 $(GRE)Execution de $(NAME)$(EOC)"
 	@./$(NAME) assets/minimal.rt

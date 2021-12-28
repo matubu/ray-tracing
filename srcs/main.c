@@ -6,12 +6,12 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/27 21:47:52 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/28 14:47:05 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minirt.h"
-
+/*
 #ifdef DEV_SHOW_NORMAL
 static inline unsigned int	ray_color(const t_vec *orig,
 		const t_vec *ray, const t_scene *scene)
@@ -55,27 +55,31 @@ static inline unsigned int	ray_scene_color(const t_vec *orig,
 		return (0x0);
 	return (dist(1.0 - fmin(hit.dist / 80.0, 1.0)));
 }
-#else
+#else*/
 static inline unsigned int	ray_color(const t_vec *orig,
 		const t_vec *ray, const t_scene *scene)
 {
 	t_hit	hit;
 	t_hit	null;
 	t_vec	to_light;
-	//t_vec	reflected;
+	int		count;
+	float	fac;
 
 	if (!ray_scene(orig, ray, scene, &hit))
 		return (scene->ambient.color);
-	//reflected = reflect(ray, &hit.normal);
-	//if (!ray_scene(&hit.pos, &reflected, scene, &null))
-	//	return (0xffffff);
-	to_light = normalize(sub(&scene->lights->pos, &hit.pos));
-	if (ray_scene(&hit.pos, &to_light, scene, &null))
-		return (rgbmult(hit.obj->color, 95));
-	return (rgbmult(hit.obj->color,
-			max((int)(dot(&to_light, &hit.normal) * 160.0), 0) + 95));
+	fac = 0;
+	count = scene->lights_count;
+	while (count--)
+	{
+		to_light = normalize(sub(&scene->lights[count].pos, &hit.pos));
+		if (ray_scene(&hit.pos, &to_light, scene, &null))// && hit.dist <= dist(&scene->lights->pos, &hit.pos))
+			fac += scene->ambient.intensity;
+		else
+			fac += fmin(fmax(dot(&to_light, &hit.normal) * scene->lights[count].intensity, 0) + scene->ambient.intensity, 1.0);
+	}
+	return (rgbmult(hit.obj->color, 255.0 * fac / scene->lights_count));
 }
-#endif
+//#endif
 
 typedef struct s_trash
 {

@@ -6,13 +6,13 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:34:02 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 16:37:49 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/28 14:47:19 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MATHS_H
 # define MATHS_H
-
+/*
 static inline int	max(int a, int b)
 {
 	if (a > b)
@@ -20,6 +20,13 @@ static inline int	max(int a, int b)
 	return (b);
 }
 
+static inline int	min(int a, int b)
+{
+	if (a < b)
+		return (a);
+	return (b);
+}
+*/
 static inline float	q_rsqrt(float y)
 {
 	int			i;
