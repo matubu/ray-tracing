@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/28 15:30:41 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/28 16:48:29 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,13 +71,12 @@ typedef struct s_bump_map
 typedef struct s_sphere {
 	t_vec	pos;
 	float	rad;
-//	float	srad;
 }	t_sphere;
 
+//t_bump_map	*bump_map;
 typedef struct s_plane {
 	t_vec		pos;
 	t_vec		normal;
-	//t_bump_map	*bump_map;
 }	t_plane;
 
 typedef struct s_cylinder
@@ -85,7 +84,6 @@ typedef struct s_cylinder
 	t_vec	pos;
 	t_vec	normal;
 	float	rad;
-//	float	srad;
 	float	height;
 }	t_cylinder;
 

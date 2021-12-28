@@ -6,11 +6,11 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 12:40:55 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/22 12:41:04 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/28 18:30:56 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
+#include "minirt.h"
 
 static int	ft_malloc_splits(char ***splits, const char *s, char c)
 {
@@ -18,11 +18,11 @@ static int	ft_malloc_splits(char ***splits, const char *s, char c)
 	int	i;
 
 	size = 1;
-	i = -1;
-	while (s[++i])
-		if (s[i] != c && size++)
-			while (s[i] && s[++i] != c)
-				;
+	i = 0;
+	while (s[i])
+		if (s[i++] != c && size++)
+			while (s[i] && s[i] != c)
+				i++;
 	*splits = malloc(size * sizeof(char *));
 	return (*splits == NULL);
 }
@@ -63,7 +63,7 @@ char	**split(const char *s, char c)
 			size = 1;
 			while (*s && *s != c && size++)
 				s++;
-			out[n] = malloc(size + 1);
+			out[n] = malloc(sizeof(char) * (size + 1));
 			if (out[n] == NULL && free_splits(out, n))
 				return (NULL);
 			cpy(out[n++], s - size, size + 1);

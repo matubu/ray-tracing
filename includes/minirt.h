@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/28 13:50:45 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/28 16:52:52 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,11 @@
 char	*gnl(int fd);
 int		free_splits(char **splits, int n);
 char	**split(const char *s, char c);
+
+void	push_obj(t_scene *scene, t_obj obj);
+void	push_light(t_scene *scene, t_light light);
+void	push_camera(t_scene *scene, t_camera cam);
+void	push_ambient(t_scene *scene, t_ambient ambient);
 
 t_scene	parse(int argc, char **argv);
 void	parse_line(char *type, char **arg, t_scene *scene);

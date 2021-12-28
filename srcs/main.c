@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/28 15:47:01 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/28 19:44:22 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,13 +56,13 @@ static inline unsigned int	ray_scene_color(const t_vec *orig,
 	return (dist(1.0 - fmin(hit.dist / 80.0, 1.0)));
 }
 #else*/
-/*
+
 static inline float	dist(const t_vec *a, const t_vec *b)
 {
 	return (sqrt((a->x - b->x) * (a->x - b->x)
 			+ (a->y - b->y) * (a->y - b->y)
 			+ (a->z - b->z) * (a->z - b->z)));
-}*/
+}
 
 static inline unsigned int	ray_color(const t_vec *orig,
 		const t_vec *ray, const t_scene *scene)
@@ -80,10 +80,13 @@ static inline unsigned int	ray_color(const t_vec *orig,
 	while (count--)
 	{
 		to_light = normalize(sub(&scene->lights[count].pos, &hit.pos));
-		if (ray_scene(&hit.pos, &to_light, scene, &hit_light))// && hit_light.dist < dist(&scene->lights[count].pos, &hit.pos))
+		if (ray_scene(&hit.pos, &to_light, scene, &hit_light)
+			&& hit_light.dist < dist(&scene->lights[count].pos, &hit.pos))
 			fac += scene->ambient.intensity;
 		else
-			fac += fmin(fmax(dot(&to_light, &hit.normal) * scene->lights[count].intensity, 0) + scene->ambient.intensity, 1.0);
+			fac += fmin(fmax(dot(&to_light, &hit.normal)
+						* scene->lights[count].intensity, 0.0)
+					+ scene->ambient.intensity, 1.0);
 	}
 	return (rgbmult(hit.obj->color, 255.0 * fac / scene->lights_count));
 }
@@ -106,7 +109,6 @@ void	render(const t_scene *scene, const t_window *win,
 {
 	const clock_t	start = clock();
 	// ----- DEBUG -----
-
 	const t_vec		up = {0, 0, 1};
 	t_trash			t;
 	register int	y;
@@ -130,7 +132,6 @@ void	render(const t_scene *scene, const t_window *win,
 		}
 	}
 	mlx_put_image_to_window(win->ptr, win->win, win->img, 0, 0);
-
 	// ----- DEBUG -----
 	printf("rendering took %.3fms\n",
 		(double)(clock() - start) / CLOCKS_PER_SEC * 1000);

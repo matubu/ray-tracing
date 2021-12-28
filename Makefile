@@ -9,6 +9,7 @@ SRCS			:=	main.c \
 					libs/err.c \
 					parsing/parse.c \
 					parsing/line.c \
+					parsing/push.c \
 					libs/gnl.c \
 					libs/split.c
 
