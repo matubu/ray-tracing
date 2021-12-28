@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 12:42:08 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/27 00:21:41 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/28 13:55:46 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@ int	hook_mouse_move(int x, int y, t_scene *scene)
 {
 	static int	first = 1;
 	static int	last[2];
+	t_vec		mx;
+	t_vec		mz;
 
 	if (first)
 		first = 0;
@@ -27,12 +29,9 @@ int	hook_mouse_move(int x, int y, t_scene *scene)
 	}
 	else if (scene->button == 3 || scene->button == 2)
 	{
-		t_vec	mx = radian_to_vector(&scene->cam.rot_euler);
-		t_vec	mz = mx;
-		t_vec	up = {0, 0, 1};
-		t_vec	left = {1, 0, 0};
-		mx = cross(&mx, &up);
-		mz = cross(&mz, &left);
+		mx = radian_to_vector(&scene->cam.rot_euler);
+		mz = cross(&mx, &((t_vec){1, 0, 0}));
+		mx = cross(&mx, &((t_vec){0, 0, 1}));
 		mx = mult(&mx, (float)(last[0] - x) / 10.0);
 		mz = mult(&mz, (float)(last[1] - y) / 10.0);
 		scene->cam.pos = add3(&scene->cam.pos, &mx, &mz);
