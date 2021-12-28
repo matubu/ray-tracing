@@ -6,7 +6,7 @@
 /*   By: matubu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/26 21:05:43 by matubu            #+#    #+#             */
-/*   Updated: 2021/12/28 14:22:00 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/28 14:25:32 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,10 +98,18 @@ static void	push_camera(t_scene *scene, t_camera cam)
 	scene->cam_count++;
 }
 
+static void	push_ambient(t_scene *scene, t_ambient ambient)
+{
+	if (scene->ambient_count == 1)
+		err("too many ambient lights");
+	scene->ambient = ambient;
+	scene->ambient_count++;
+}
+
 void	parse_line(char *type, char **arg, t_scene *scene)
 {
 	if (type[0] == 'A' && type[1] == '\0')
-		scene->ambient = (t_ambient){num(*arg), col(arg[1])}, arg += 2;
+		push_ambient(scene, (t_ambient){num(*arg), col(arg[1])}), arg += 2;
 	else if (type[0] == 'C' && type[1] == '\0')
 		push_camera(scene, (t_camera){vec(*arg), vec(arg[1]),
 			WIDTH, HEIGHT, num(arg[2]) / WIDTH}), arg += 3;

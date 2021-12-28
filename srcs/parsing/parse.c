@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/28 14:21:37 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/28 14:27:47 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ t_scene	parse(int argc, char **argv)
 	scene.obj_count = 0;
 	scene.lights_count = 0;
 	scene.cam_count = 0;
+	scene.ambient_count = 0;
 	while (1)
 	{
 		splits = split(gnl(fd), ' ');
@@ -82,6 +83,8 @@ t_scene	parse(int argc, char **argv)
 		err("not enough lights");
 	if (scene.cam_count < 1)
 		err("a camera is missing");
+	if (scene.ambient_count < 1)
+		err("not enough ambient lights");
 	scene.win = window_open("miniRT", scene.cam.width, scene.cam.height);
 	scene.button = 0;
 	scene.obj[scene.obj_count].func = NULL;
