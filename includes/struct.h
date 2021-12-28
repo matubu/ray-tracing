@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/28 13:51:25 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/28 14:19:03 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,7 @@ typedef struct s_hit {
 typedef struct s_scene {
 	t_window	win;
 	t_camera	cam;
+	int			cam_count;
 	t_obj		obj[1024];
 	int			obj_count;
 	t_light		lights[64];

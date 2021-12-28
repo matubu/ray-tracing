@@ -6,7 +6,7 @@
 /*   By: matubu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/26 21:05:43 by matubu            #+#    #+#             */
-/*   Updated: 2021/12/28 14:01:59 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/28 14:22:00 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,13 +90,21 @@ static void	push_light(t_scene *scene, t_light light)
 	scene->lights[scene->lights_count++] = light;
 }
 
+static void	push_camera(t_scene *scene, t_camera cam)
+{
+	if (scene->cam_count == 1)
+		err("too many camera");
+	scene->cam = cam;
+	scene->cam_count++;
+}
+
 void	parse_line(char *type, char **arg, t_scene *scene)
 {
 	if (type[0] == 'A' && type[1] == '\0')
 		scene->ambient = (t_ambient){num(*arg), col(arg[1])}, arg += 2;
 	else if (type[0] == 'C' && type[1] == '\0')
-		scene->cam = (t_camera){vec(*arg), vec(arg[1]),
-			WIDTH, HEIGHT, num(arg[2]) / WIDTH}, arg += 3;
+		push_camera(scene, (t_camera){vec(*arg), vec(arg[1]),
+			WIDTH, HEIGHT, num(arg[2]) / WIDTH}), arg += 3;
 	else if (type[0] == 'L' && type[1] == '\0')
 		push_light(scene, (t_light){vec(*arg), num(arg[1]), col(arg[2])}), arg += 3;
 	else if (type[0] == 's' && type[1] == 'p' && type[2] == '\0')
