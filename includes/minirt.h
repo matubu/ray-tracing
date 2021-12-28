@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/27 20:10:57 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/28 13:50:45 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int		hook_button_down(int button, int x, int y, t_scene *scene);
 int		hook_button_up(int button, int x, int y, t_scene *scene);
 
 void	render(const t_scene *scene, const t_window *win,
-		const t_camera *cam, int *buf);
+			const t_camera *cam, int *buf);
 
 static inline t_vec	radian_to_vector(const t_vec *rot)
 {
