@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/28 14:25:52 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/28 15:30:41 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,21 +16,15 @@
 # include <math.h>
 
 // MATH CONSTANT
-# define PI					M_PI
+# define PI					3.14159265358979323846264338327950288
+# define TWO_PI				6.28318530717958647692528676655900577
+# define PI_TWO				1.57079632679489661923132169163975144
 # define EPSILON			0.0001
 
 // CAMERA
-# define WIDTH				1000
-# define HEIGHT				1000
+# define WIDTH				1080
+# define HEIGHT				720
 # define CAMERA_CLIP_START	.01
-
-// COLORS
-# define RED				0xf598af
-# define GREEN				0xa2fac0
-# define BLUE				0xaec9f0
-# define WHITE				0xeeeeee
-# define BLACK				0x191a1f
-# define GREY				0x504d5e
 
 typedef struct s_vec {
 	float	x;
