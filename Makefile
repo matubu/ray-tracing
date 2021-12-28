@@ -34,29 +34,29 @@ EOC = \033[0m
 all: $(NAME)
 
 run: all
-	@$(ECHO) "$(GRE)● Launching $(NAME) 💪$(EOC)"
+	@$(ECHO) "💪 $(GRE)Execution de $(NAME)$(EOC)"
 	@./$(NAME) assets/minimal.rt
 
 ${OBJECTS}/%.o: ${SOURCES}/%.c
-	@$(ECHO) "$(BLU)● Compiling $^ 🔧$(EOC)"
+	@$(ECHO) "🔧 Compilation de $(BLU)${notdir $<}$(EOC)."
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -o $@ -c $^ -I${INCLUDES}
 
 $(NAME): $(OBJS)
 	@if [ $(OS) = 'Linux' ]; then \
-		$(ECHO) "$(GRE)● Compiling to binary ⚙️  $(GRA)(Linux 🐧 mode)$(EOC)"; \
+		$(ECHO) "⚙️  $(GRE)Compilation de ${NAME}... $(GRA)(Linux 🐧 mode)$(EOC)"; \
 		${CC} $(CFLAGS) -L/usr/local/lib $(OBJS) -o $(NAME) -lm -lmlx -lXext -lX11 -lz; \
 	else \
-		$(ECHO) "$(GRE)● Compiling to binary ⚙️  $(GRA)(macOS 🍎 mode)$(EOC)"; \
+		$(ECHO) "⚙️  $(GRE)Compilation de ${NAME}... $(GRA)(macOS 🍎 mode)$(EOC)"; \
 		${CC} $(CFLAGS) -lmlx -framework OpenGL -framework AppKit $(OBJS) -o $(NAME) -lm; \
 	fi
 
 clean:
-	@$(ECHO) "$(RED)● Removing $(OBJECTS) 📁$(EOC)"
+	@echo "$(RED)📁 Supression des fichiers de $(OBJECTS)...$(EOC)"
 	@rm -rf $(OBJECTS)
 
 fclean: clean
-	@$(ECHO) "$(RED)● Removing binary ⚙️ $(EOC)"
+	@echo "$(RED)⚙️  Supression de l'executable...$(EOC)"
 	@rm -rf $(NAME)
 
 re: fclean all
