@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/22 12:42:44 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/28 13:50:09 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,8 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	const float	a = (ray->x * ray->x) + (ray->z * ray->z);
 	const float	b = 2 * (ray->x * (orig->x - obj->cylinder.pos.x)
 			+ ray->z * (orig->z - obj->cylinder.pos.z));
-	const float	c = (orig->x - obj->cylinder.pos.x) * (orig->x - obj->cylinder.pos.x)
+	const float	c = (orig->x - obj->cylinder.pos.x)
+		* (orig->x - obj->cylinder.pos.x)
 		+ (orig->z - obj->cylinder.pos.z) * (orig->z - obj->cylinder.pos.z)
 		- obj->cylinder.rad * obj->cylinder.rad;
 	const float	delta = b * b - 4 * (a * c);
@@ -64,7 +65,8 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	hit->dist = fmin((-b - sqrt(delta)) / (2 * a),
 			(-b + sqrt(delta)) / (2 * a));
 	r = orig->y + hit->dist * ray->y;
-	if (!(r >= obj->cylinder.pos.y) && (r <= obj->cylinder.pos.y + obj->cylinder.height))
+	if (!(r >= obj->cylinder.pos.y)
+		&& (r <= obj->cylinder.pos.y + obj->cylinder.height))
 		return ((void)(hit->dist = -1));
 }
 
