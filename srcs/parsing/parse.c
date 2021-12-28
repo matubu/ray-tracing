@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/26 21:04:07 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/28 13:19:31 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ t_scene	parse(int argc, char **argv)
 	char		**splits;
 
 	scene.obj_count = 0;
+	scene.lights_count = 0;
 	while (1)
 	{
 		splits = split(gnl(fd), ' ');

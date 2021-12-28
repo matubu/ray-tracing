@@ -6,7 +6,7 @@
 /*   By: matubu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/26 21:05:43 by matubu            #+#    #+#             */
-/*   Updated: 2021/12/26 22:21:13 by matubu           ###   ########.fr       */
+/*   Updated: 2021/12/28 13:19:13 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,11 +77,18 @@ static int	col(char *s)
 }
 
 //push a new object in scene
-static void	obj(t_scene *scene, t_obj obj)
+static void	push_obj(t_scene *scene, t_obj obj)
 {
 	if (scene->obj_count == 1023)
 		err("too many objects");
 	scene->obj[scene->obj_count++] = obj;
+}
+
+static void	push_light(t_scene *scene, t_light light)
+{
+	if (scene->lights_count == 63)
+		err("too many lights");
+	scene->lights[scene->lights_count++] = light;
 }
 
 void	parse_line(char *type, char **arg, t_scene *scene)
@@ -94,18 +101,18 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 	else if (type[0] == 'L' && type[1] == '\0')
 		scene->lights[0] = (t_light){vec(*arg++), num(*arg++), col(*arg++)};
 	else if (type[0] == 's' && type[1] == 'p' && type[2] == '\0')
-		obj(scene, (t_obj){.func = ray_sphere, .sphere
+		push_obj(scene, (t_obj){.func = ray_sphere, .sphere
 				= (t_sphere){vec(*arg++), num(*arg++)}, .color = col(*arg++)});
 	else if (type[0] == 'p' && type[1] == 'l' && type[2] == '\0')
-		obj(scene, (t_obj){.func = ray_plane,
+		push_obj(scene, (t_obj){.func = ray_plane,
 			.plane = (t_plane){vec(*arg++), vec(*arg++)},
 			.color = col(*arg++)});
 	else if (type[0] == 'c' && type[1] == 'y' && type[2] == '\0')
-		obj(scene, (t_obj){.func = ray_cylinder,
+		push_obj(scene, (t_obj){.func = ray_cylinder,
 			.cylinder = (t_cylinder){vec(*arg++), vec(*arg++), num(*arg++),
 			num(*arg++)}, .color = col(*arg++)});
 	else if (type[0] == 'c' && type[1] == 'o' && type[2] == '\0')
-		obj(scene, (t_obj){.func = ray_cone,
+		push_obj(scene, (t_obj){.func = ray_cone,
 			.cone = (t_cone){vec(*arg++), vec(*arg++)}, .color = col(*arg++)});
 	else
 		err("invalid object type");
