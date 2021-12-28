@@ -6,7 +6,7 @@
 /*   By: matubu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/26 21:05:43 by matubu            #+#    #+#             */
-/*   Updated: 2021/12/28 13:21:08 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/28 13:35:43 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,26 +94,30 @@ static void	push_light(t_scene *scene, t_light light)
 void	parse_line(char *type, char **arg, t_scene *scene)
 {
 	if (type[0] == 'A' && type[1] == '\0')
-		scene->ambient = (t_ambient){num(*arg++), col(*arg++)};
+		scene->ambient = (t_ambient){num(*arg), col(arg[1])}, arg += 1;
 	else if (type[0] == 'C' && type[1] == '\0')
-		scene->cam = (t_camera){vec(*arg++), vec(*arg++),
-			WIDTH, HEIGHT, num(*arg++) / WIDTH};
+		scene->cam = (t_camera){vec(*arg), vec(arg[1]),
+			WIDTH, HEIGHT, num(arg[2]) / WIDTH}, arg += 2;
 	else if (type[0] == 'L' && type[1] == '\0')
-		push_light(scene, (t_light){vec(*arg++), num(*arg++), col(*arg++)});
+		push_light(scene, (t_light){vec(*arg), num(arg[1]), col(arg[2])}), arg += 2;
 	else if (type[0] == 's' && type[1] == 'p' && type[2] == '\0')
 		push_obj(scene, (t_obj){.func = ray_sphere, .sphere
-				= (t_sphere){vec(*arg++), num(*arg++)}, .color = col(*arg++)});
+			= (t_sphere){vec(*arg), num(arg[1])}, .color = col(arg[2])
+		}), arg += 3;
 	else if (type[0] == 'p' && type[1] == 'l' && type[2] == '\0')
-		push_obj(scene, (t_obj){.func = ray_plane,
-			.plane = (t_plane){vec(*arg++), vec(*arg++)},
-			.color = col(*arg++)});
+		push_obj(scene, (t_obj){
+			.func = ray_plane,
+			.plane = (t_plane){vec(*arg), vec(arg[1])},
+			.color = col(arg[2])}), arg += 3;
 	else if (type[0] == 'c' && type[1] == 'y' && type[2] == '\0')
-		push_obj(scene, (t_obj){.func = ray_cylinder,
-			.cylinder = (t_cylinder){vec(*arg++), vec(*arg++), num(*arg++),
-			num(*arg++)}, .color = col(*arg++)});
+		push_obj(scene, (t_obj){
+			.func = ray_cylinder,
+			.cylinder = (t_cylinder){vec(*arg), vec(arg[1]), num(arg[2]),
+			num(arg[3])}, .color = col(arg[4])}), arg += 5;
 	else if (type[0] == 'c' && type[1] == 'o' && type[2] == '\0')
 		push_obj(scene, (t_obj){.func = ray_cone,
-			.cone = (t_cone){vec(*arg++), vec(*arg++)}, .color = col(*arg++)});
+			.cone = (t_cone){vec(*arg), vec(arg[1])}, .color = col(arg[2])}),
+			arg += 3;
 	else
 		err("invalid object type");
 	if (*arg)

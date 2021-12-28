@@ -15,7 +15,7 @@ SRCS			:=	main.c \
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
 
 CC				:=	gcc
-CFLAGS			:=	-Wall -Wextra \
+CFLAGS			:=	-Wall -Wextra -Werror \
 					-Ofast -fno-strict-aliasing \
 					-fomit-frame-pointer -mtune=native \
 					-msse4.2 -mfpmath=sse -march=native \
