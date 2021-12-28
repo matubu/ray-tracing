@@ -6,7 +6,7 @@
 /*   By: matubu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/26 21:05:43 by matubu            #+#    #+#             */
-/*   Updated: 2021/12/28 13:59:23 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/28 14:01:59 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,17 +76,16 @@ static int	col(char *s)
 	return (color);
 }
 
-//push a new object in scene
 static void	push_obj(t_scene *scene, t_obj obj)
 {
-	if (scene->obj_count == 1023)
+	if (scene->obj_count == 1022)
 		err("too many objects");
 	scene->obj[scene->obj_count++] = obj;
 }
 
 static void	push_light(t_scene *scene, t_light light)
 {
-	if (scene->lights_count == 63)
+	if (scene->lights_count == 62)
 		err("too many lights");
 	scene->lights[scene->lights_count++] = light;
 }
