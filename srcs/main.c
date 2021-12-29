@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 19:49:18 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 20:25:40 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,14 @@ static inline unsigned int	ray_color(const t_vec *orig,
 
 	if (!ray_scene(orig, ray, scene, &hit))
 		return (scene->ambient.color);
+	if (hit.obj->bump_map.buf)
+	{
+		t_vec	displace = mult(&hit.normal, -(float)hit.obj->bump_map.buf[
+					abs((int)fmod(hit.pos.y * 10, hit.obj->bump_map.height)) * hit.obj->bump_map.width
+					+ abs((int)fmod(hit.pos.x * 10, hit.obj->bump_map.width))
+				] / 50000.0 + .5);
+		hit.pos = add(&hit.pos, &displace);
+	}
 	count = scene->lights_count;
 	total = scene->ambient.intensity * hit.obj->ka; 
 	while (count--)

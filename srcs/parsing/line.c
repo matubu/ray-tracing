@@ -6,7 +6,7 @@
 /*   By: matubu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/26 21:05:43 by matubu            #+#    #+#             */
-/*   Updated: 2021/12/29 16:16:18 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 20:23:14 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,8 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 		push_light(scene, (t_light){vec(&arg), num(&arg), col(&arg)});
 	else if (type[0] == 's' && type[1] == 'p' && type[2] == '\0')
 		push_obj(scene, (t_obj){.func = ray_sphere, .sphere
-			= (t_sphere){vec(&arg), num(&arg)}, .color = col(&arg)});
+			= (t_sphere){vec(&arg), num(&arg)}, .color = col(&arg),
+			.bump_map = load_bump_map(scene, &arg)});
 	else if (type[0] == 'p' && type[1] == 'l' && type[2] == '\0')
 		push_obj(scene, (t_obj){.func = ray_plane,
 			.plane = (t_plane){vec(&arg), vec(&arg)}, .color = col(&arg),
