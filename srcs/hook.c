@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 12:42:08 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 13:46:13 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 13:52:26 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,13 +56,10 @@ int	hook_close(t_scene *scene)
 
 int	hook_key_down(int key, t_scene *scene)
 {
-	scene->keys[key] = 1;
-	return (0);
+	return (scene->keys[key] = 1);
 }
 
 int	hook_key_up(int key, t_scene *scene)
 {
-	(void) scene;
-	scene->keys[key] = 0;
-	return (0);
+	return (scene->keys[key] = 0);
 }
