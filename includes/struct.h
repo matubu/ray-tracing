@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 17:24:55 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 18:51:19 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,9 @@ typedef struct s_cone
 	t_vec	dir;
 }	t_cone;
 
+/*
+https://fr.wikipedia.org/wiki/Ombrage_de_Phong
+*/
 typedef struct s_obj {
 	void		(*func)();
 	union {
@@ -119,6 +122,10 @@ typedef struct s_obj {
 		t_cylinder	cylinder;
 		t_cone		cone;
 	};
+	float		ka;
+	float		kd;
+	float		ks;
+	float		shinyness;
 	int			color;
 	t_bump_map	bump_map;
 }	t_obj;

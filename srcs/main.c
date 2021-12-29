@@ -6,17 +6,27 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 17:25:18 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 18:51:30 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minirt.h"
 
-static inline float	dist(const t_vec *a, const t_vec *b)
+static inline float	ray_reflect(const t_light light, const t_vec *ray,
+		const t_hit hit, const t_vec L)
 {
-	return (sqrt((a->x - b->x) * (a->x - b->x)
-			+ (a->y - b->y) * (a->y - b->y)
-			+ (a->z - b->z) * (a->z - b->z)));
+	float	I_diff;
+	float	I_spec;
+	float	R_dot;
+	t_vec	R;
+	t_vec	V;
+
+	I_diff = light.intensity * hit.obj->kd * dot(&L, &hit.normal);
+	I_spec = light.intensity * hit.obj->ks;	
+	R = reflect(ray, &hit.normal);
+	V = mult(ray, -1.0f);
+	R_dot = dot(&R, ray);
+	return (I_diff + I_spec * powf(R_dot, hit.obj->shinyness));
 }
 
 static inline unsigned int	ray_color(const t_vec *orig,
@@ -24,26 +34,21 @@ static inline unsigned int	ray_color(const t_vec *orig,
 {
 	t_hit	hit;
 	t_hit	hit_light;
-	t_vec	to_light;
+	t_vec	L;
 	int		count;
-	float	fac;
+	float	total;
 
 	if (!ray_scene(orig, ray, scene, &hit))
 		return (scene->ambient.color);
-	fac = 0;
 	count = scene->lights_count;
+	total = scene->ambient.intensity * hit.obj->ka; 
 	while (count--)
 	{
-		to_light = normalize(sub(&scene->lights[count].pos, &hit.pos));
-		if (ray_scene(&hit.pos, &to_light, scene, &hit_light)
-			&& hit_light.dist < dist(&scene->lights[count].pos, &hit.pos))
-			fac += scene->ambient.intensity;
-		else
-			fac += fmin(fmax(dot(&to_light, &hit.normal)
-						* scene->lights[count].intensity, 0.0)
-					+ scene->ambient.intensity, 1.0);
+		L = normalize(sub(&scene->lights[count].pos, &hit.pos));
+		ray_scene(&hit.pos, &L, scene, &hit_light);
+		total += ray_reflect(scene->lights[count], ray, hit, L);
 	}
-	return (rgbmult(hit.obj->color, 255.0 * fac / scene->lights_count));
+	return (rgbmult(hit.obj->color, 255.0 * total));
 }
 
 typedef struct s_trash
