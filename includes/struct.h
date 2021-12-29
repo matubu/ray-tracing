@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/28 16:48:29 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 12:49:07 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,25 @@
 # define WIDTH				1080
 # define HEIGHT				720
 # define CAMERA_CLIP_START	.01
+
+# define MOUSE_LEFT			1
+# define MOUSE_RIGHT		2
+# define MOUSE_WHEEL		3
+# define MOUSE_SCROLL_UP	4
+# define MOUSE_SCROLL_DOWN	5
+# define MOUSE_SCROLL_LEFT	6
+# define MOUSE_SCROLL_RIGHT	7
+
+# define KEY_A				0
+# define KEY_S				1
+# define KEY_D				2
+# define KEY_W				13
+
+# define KEY_ESCAPE			53
+# define KEY_LEFT			123
+# define KEY_UP				126
+# define KEY_RIGHT			124
+# define KEY_DOWN			125
 
 typedef struct s_vec {
 	float	x;
@@ -122,6 +141,7 @@ typedef struct s_scene {
 	t_ambient	ambient;
 	int			ambient_count;
 	int			button;
+	int			keys[256];
 }	t_scene;
 
 #endif

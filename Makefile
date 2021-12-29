@@ -6,6 +6,7 @@ SOURCES			:=	./srcs
 
 SRCS			:=	main.c \
 					hook.c \
+					controls.c \
 					libs/err.c \
 					parsing/parse.c \
 					parsing/line.c \

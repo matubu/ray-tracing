@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/28 13:50:09 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 12:15:42 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	const float	delta = b * b - 4 * (a * c);
 	float		r;
 
-	if (fabs(delta) < 0.001 || delta < 0.0)
+	if (delta < 0.001)
 		return ((void)(hit->dist = -1));
 	hit->dist = fmin((-b - sqrt(delta)) / (2 * a),
 			(-b + sqrt(delta)) / (2 * a));

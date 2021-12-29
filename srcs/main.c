@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/28 19:44:22 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 13:00:26 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,15 +139,18 @@ void	render(const t_scene *scene, const t_window *win,
 
 int	main(int argc, char **argv)
 {
-	const t_scene	scene = parse(argc, argv);
-
+	t_scene	scene;
+	
+	scene = parse(argc, argv);
+	controls_init(&scene);
 	render(&scene, &scene.win, &scene.cam, scene.win.buf);
 	mlx_hook(scene.win.win, 17, 0, hook_close, (void *)&scene);
-	mlx_hook(scene.win.win, 3, 2, hook_key_up, (void *)&scene);
 	mlx_hook(scene.win.win, 4, 1 << 2, hook_button_down, (void *)&scene);
 	mlx_hook(scene.win.win, 5, 1 << 3, hook_button_up, (void *)&scene);
 	mlx_hook(scene.win.win, 6, 64, hook_mouse_move, (void *)&scene);
-	mlx_hook(scene.win.win, 3, 2, hook_key_up, (void *)&scene);
+	mlx_hook(scene.win.win, 2, 1L << 0, hook_key_down, (void *)&scene);
+	mlx_hook(scene.win.win, 3, 1L << 1, hook_key_up, (void *)&scene);
+	mlx_loop_hook(scene.win.ptr, controls_listen, &scene);
 	mlx_loop(scene.win.ptr);
 	return (0);
 }

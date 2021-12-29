@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/28 16:52:52 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 13:30:25 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,8 @@
 # include <stdlib.h>
 # include <mlx.h>
 
-// DEBUG LIBS
 # include <time.h>
 # include <stdio.h>
-
-//# define DEV_SHOW_NORMAL
-//# define DEV_SHOW_DISTANCE
 
 char	*gnl(int fd);
 int		free_splits(char **splits, int n);
@@ -45,10 +41,17 @@ void	parse_line(char *type, char **arg, t_scene *scene);
 void	err(char *s);
 
 int		hook_close(t_scene *scene);
+int		hook_key_down(int key, t_scene *scene);
 int		hook_key_up(int key, t_scene *scene);
 int		hook_mouse_move(int x, int y, t_scene *scene);
 int		hook_button_down(int button, int x, int y, t_scene *scene);
 int		hook_button_up(int button, int x, int y, t_scene *scene);
+
+void	controls_init(t_scene *scene);
+int		controls_listen(t_scene *scene);
+void	make_straight_move(t_scene *scene, int direction);
+void	make_side_move(t_scene *scene, int direction);
+void	make_rotation(t_scene *scene, int direction);
 
 void	render(const t_scene *scene, const t_window *win,
 			const t_camera *cam, int *buf);
