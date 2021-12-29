@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 14:06:18 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 17:24:55 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ typedef struct s_vec {
 
 typedef struct s_camera {
 	t_vec	pos;
-	t_vec	rot_euler;
+	t_vec	rot;
 	int		width;
 	int		height;
 	float	fov_pixel;
@@ -92,7 +92,6 @@ typedef struct s_sphere {
 	float	rad;
 }	t_sphere;
 
-//t_bump_map	*bump_map;
 typedef struct s_plane {
 	t_vec		pos;
 	t_vec		normal;
@@ -121,6 +120,7 @@ typedef struct s_obj {
 		t_cone		cone;
 	};
 	int			color;
+	t_bump_map	bump_map;
 }	t_obj;
 
 typedef struct s_hit {

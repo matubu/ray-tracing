@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/29 14:02:31 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 16:09:38 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,6 @@ int		hook_mouse_move(int x, int y, t_scene *scene);
 
 void	controls_init(t_scene *scene);
 int		controls_listen(t_scene *scene);
-void	make_straight_move(t_scene *scene, int direction);
-void	make_side_move(t_scene *scene, int direction);
-void	make_vertical_move(t_scene *scene, int direction);
 
 void	render(const t_scene *scene, const t_window *win,
 			const t_camera *cam, int *buf);

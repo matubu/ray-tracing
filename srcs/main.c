@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 14:09:23 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 17:25:18 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ void	render(const t_scene *scene, const t_window *win,
 	register int	y;
 	register int	x;
 
-	t.dir = radian_to_vector(&cam->rot_euler);
+	t.dir = radian_to_vector(&cam->rot);
 	t.cam_right = normalize(cross(&t.dir, &((t_vec){0, 0, 1})));
 	t.cam_up = normalize(cross(&t.cam_right, &t.dir));
 	t.half_x = cam->width / 2.0;

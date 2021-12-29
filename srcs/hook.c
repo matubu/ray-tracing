@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 12:42:08 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 14:06:46 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 17:46:34 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@ int	hook_mouse_move(int x, int y, t_scene *scene)
 
 	if (!first)
 	{
-		scene->cam.rot_euler.z += (float)(last.x - x) / 50.0;
-		scene->cam.rot_euler.y += (float)(last.y - y) / 50.0;
+		scene->cam.rot.z += (float)(last.x - x) / 50.0;
+		scene->cam.rot.y += (float)(last.y - y) / 50.0;
 		render(scene, &scene->win, &scene->cam, scene->win.buf);
 	}
 	first = 0;

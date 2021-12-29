@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:42:38 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/29 14:05:27 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 16:15:52 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,20 +42,6 @@ t_window	window_open(char *name, int width, int height)
 	return (win);
 }
 
-/*
-t_bump_map	load_bump_map(t_window *window, char *filename)
-{
-	t_bump_map	img;
-	int			null;
-
-	img.img = mlx_xpm_file_to_image(window->mlx, filename, &img.width, &img.height);
-	if (img.img == NULL)
-		err("could            not load image");
-	img.buf = (int *)mlx_get_data_addr(img.img, &null, &null, &null);
-	return (img);
-}
-*/
-
 //TODO initialize scene at first
 //TODO remove hard codded scene initialization
 //		and replace by check of number of camera, lights, ambient light ...
@@ -66,7 +52,8 @@ t_scene	parse(int argc, char **argv)
 	char		**splits;
 
 	scene = (t_scene){.obj_count = 0, .lights_count = 0, .cam_count = 0,
-		.ambient_count = 0};
+		.ambient_count = 0, .win = window_open("miniRT", WIDTH,
+				HEIGHT)};
 	while (1)
 	{
 		splits = split(gnl(fd), ' ');
@@ -83,7 +70,6 @@ t_scene	parse(int argc, char **argv)
 		err("a camera is missing");
 	if (scene.ambient_count < 1)
 		err("not enough ambient lights");
-	scene.win = window_open("miniRT", scene.cam.width, scene.cam.height);
 	scene.obj[scene.obj_count].func = NULL;
 	return (scene);
 }

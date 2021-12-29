@@ -6,7 +6,7 @@
 /*   By: matubu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/26 21:05:43 by matubu            #+#    #+#             */
-/*   Updated: 2021/12/28 19:44:01 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 16:16:18 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,39 +43,55 @@ static float	num(char ***args)
 }
 
 //parse a 3d vector from a string
-static t_vec	vec(char ***s)
+static t_vec	vec(char ***args)
 {
 	char	**splits;
 	t_vec	vec;
 
-	if (**s == NULL)
+	if (**args == NULL)
 		err("missing vector");
-	splits = split(**s, ',');
+	splits = split(**args, ',');
 	if (!splits || !splits[0] || !splits[1] || !splits[2] || splits[3])
 		err("invalid vector");
 	vec = (t_vec){num(&splits), num(&splits), num(&splits)};
 	free_splits(splits - 3, -1);
-	(*s)++;
+	(*args)++;
 	return (vec);
 }
 
 //parse a color from a string
-static int	col(char ***s)
+static int	col(char ***args)
 {
 	char	**splits;
 	int		color;
 
-	if (**s == NULL)
+	if (**args == NULL)
 		err("missing color");
-	splits = split(**s, ',');
+	splits = split(**args, ',');
 	if (!splits || !splits[0] || !splits[1] || !splits[2] || splits[3])
 		err("invalid color");
 	color = ((int)num(&splits) & 255) << 16
 		| ((int)num(&splits) & 255) << 8
 		| ((int)num(&splits) & 255) << 0;
 	free_splits(splits - 3, -1);
-	(*s)++;
+	(*args)++;
 	return (color);
+}
+
+t_bump_map	load_bump_map(t_scene *scene, char ***args)
+{
+	t_bump_map	img;
+	int			null;
+
+	if (**args == NULL)
+		return ((t_bump_map){NULL, NULL, 0, 0});
+	img.img = mlx_xpm_file_to_image(scene->win.ptr, **args,
+			&img.width, &img.height);
+	if (img.img == NULL)
+		err("could not load image");
+	img.buf = (int *)mlx_get_data_addr(img.img, &null, &null, &null);
+	(*args)++;
+	return (img);
 }
 
 void	parse_line(char *type, char **arg, t_scene *scene)
@@ -92,8 +108,8 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 			= (t_sphere){vec(&arg), num(&arg)}, .color = col(&arg)});
 	else if (type[0] == 'p' && type[1] == 'l' && type[2] == '\0')
 		push_obj(scene, (t_obj){.func = ray_plane,
-			.plane = (t_plane){vec(&arg), vec(&arg)},
-			.color = col(&arg)});
+			.plane = (t_plane){vec(&arg), vec(&arg)}, .color = col(&arg),
+			.bump_map = load_bump_map(scene, &arg)});
 	else if (type[0] == 'c' && type[1] == 'y' && type[2] == '\0')
 		push_obj(scene, (t_obj){.func = ray_cylinder,
 			.cylinder = (t_cylinder){vec(&arg), vec(&arg), num(&arg),
