@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 12:42:08 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 13:39:10 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 13:46:13 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,20 +32,9 @@ int	hook_mouse_move(int x, int y, t_scene *scene)
 
 int	hook_button_down(int button, int x, int y, t_scene *scene)
 {
-	t_vec	rad;
-
 	(void)x;
 	(void)y;
 	scene->button = button;
-	rad = radian_to_vector(&scene->cam.rot_euler);
-	rad = mult(&rad, 100);
-	if (button == MOUSE_SCROLL_DOWN)
-		rad = mult(&rad, -1);
-	if (button == MOUSE_SCROLL_UP || button == MOUSE_SCROLL_DOWN)
-	{
-		scene->cam.pos = sub(&scene->cam.pos, &rad);
-		render(scene, &scene->win, &scene->cam, scene->win.buf);
-	}
 	return (1);
 }
 
