@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/29 12:40:05 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/29 13:33:55 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 13:36:51 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ void	controls_init(t_scene *scene)
 	int	i;
 
 	i = -1;
-	while (++i < 256)
+	while (++i < 1024)
 		scene->keys[i] = 0;
 }
 
@@ -34,6 +34,8 @@ int	controls_listen(t_scene *scene)
 	if (scene->keys[KEY_D] || scene->keys[KEY_RIGHT])
 		make_side_move(scene, 1);
 	if (scene->keys[KEY_SPACE])
+		make_vertical_move(scene, -1); 
+	if (scene->keys[KEY_LSHIFT])
 		make_vertical_move(scene, 1);
 	return (0);
 }

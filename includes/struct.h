@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 13:33:33 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 13:38:14 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,11 @@
 
 # include <math.h>
 
-// MATH CONSTANT
 # define PI					3.14159265358979323846264338327950288
 # define TWO_PI				6.28318530717958647692528676655900577
 # define PI_TWO				1.57079632679489661923132169163975144
 # define EPSILON			0.0001
 
-// CAMERA
 # define WIDTH				1080
 # define HEIGHT				720
 # define CAMERA_CLIP_START	.01
@@ -41,6 +39,7 @@
 
 # define KEY_ESCAPE			53
 # define KEY_SPACE			49
+# define KEY_LSHIFT			257
 # define KEY_LEFT			123
 # define KEY_UP				126
 # define KEY_RIGHT			124
@@ -142,7 +141,7 @@ typedef struct s_scene {
 	t_ambient	ambient;
 	int			ambient_count;
 	int			button;
-	int			keys[256];
+	int			keys[1024];
 }	t_scene;
 
 #endif
