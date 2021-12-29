@@ -38,7 +38,7 @@ all: $(NAME)
 bonus: all
 
 watch:
-	@deno run --allow-read --allow-run ~/watchgcc.js $$(pwd)
+	@~/.deno/bin/deno run --allow-read --allow-run ~/watchgcc.js $$(pwd)
 
 run: all
 	@$(ECHO) "💪 $(GRE)Execution de $(NAME)$(EOC)"
