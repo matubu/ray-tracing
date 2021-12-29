@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/29 13:32:15 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 14:02:31 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ int		hook_close(t_scene *scene);
 int		hook_key_down(int key, t_scene *scene);
 int		hook_key_up(int key, t_scene *scene);
 int		hook_mouse_move(int x, int y, t_scene *scene);
-int		hook_button_down(int button, int x, int y, t_scene *scene);
-int		hook_button_up(int button, int x, int y, t_scene *scene);
+//int		hook_button_down(int button, int x, int y, t_scene *scene);
+//int		hook_button_up(int button, int x, int y, t_scene *scene);
 
 void	controls_init(t_scene *scene);
 int		controls_listen(t_scene *scene);

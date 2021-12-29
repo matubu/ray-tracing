@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 12:42:08 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 13:52:26 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 14:06:46 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,33 +17,14 @@ int	hook_mouse_move(int x, int y, t_scene *scene)
 	static int		first = 1;
 	static t_vec	last;
 
-	if (!first && scene->button == MOUSE_LEFT)
+	if (!first)
 	{
 		scene->cam.rot_euler.z += (float)(last.x - x) / 50.0;
 		scene->cam.rot_euler.y += (float)(last.y - y) / 50.0;
 		render(scene, &scene->win, &scene->cam, scene->win.buf);
 	}
 	first = 0;
-	if (scene->button == 0)
-		first = 1;
 	last = (t_vec){x, y, 0};
-	return (1);
-}
-
-int	hook_button_down(int button, int x, int y, t_scene *scene)
-{
-	(void)x;
-	(void)y;
-	scene->button = button;
-	return (1);
-}
-
-int	hook_button_up(int button, int x, int y, t_scene *scene)
-{
-	(void)x;
-	(void)y;
-	(void)button;
-	scene->button = 0;
 	return (1);
 }
 
