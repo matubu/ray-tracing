@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 17:04:28 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 18:49:55 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 19:35:55 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@ void	push_obj(t_scene *scene, t_obj obj)
 {
 	if (scene->obj_count == 1022)
 		err("too many objects");
-	obj.ka = 0.4f;
+	obj.ka = 0.7f;
 	obj.kd = 0.5f;
-	obj.ks = 0.9f;
-	obj.shinyness = 1.1f;
+	obj.ks = 0.8f;
+	obj.shinyness = 16.0f;
 	scene->obj[scene->obj_count++] = obj;
 }
 

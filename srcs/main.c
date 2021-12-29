@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 18:51:30 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 19:40:54 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ static inline float	ray_reflect(const t_light light, const t_vec *ray,
 
 	I_diff = light.intensity * hit.obj->kd * dot(&L, &hit.normal);
 	I_spec = light.intensity * hit.obj->ks;	
-	R = reflect(ray, &hit.normal);
+	R = reflect(&L, &hit.normal);
 	V = mult(ray, -1.0f);
 	R_dot = dot(&R, ray);
 	return (I_diff + I_spec * powf(R_dot, hit.obj->shinyness));
@@ -33,7 +33,6 @@ static inline unsigned int	ray_color(const t_vec *orig,
 		const t_vec *ray, const t_scene *scene)
 {
 	t_hit	hit;
-	t_hit	hit_light;
 	t_vec	L;
 	int		count;
 	float	total;
@@ -45,7 +44,6 @@ static inline unsigned int	ray_color(const t_vec *orig,
 	while (count--)
 	{
 		L = normalize(sub(&scene->lights[count].pos, &hit.pos));
-		ray_scene(&hit.pos, &L, scene, &hit_light);
 		total += ray_reflect(scene->lights[count], ray, hit, L);
 	}
 	return (rgbmult(hit.obj->color, 255.0 * total));

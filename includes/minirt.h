@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/29 16:09:38 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/29 19:40:29 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,12 +73,26 @@ static inline t_vec	radian_to_vector(const t_vec *rot)
 	});
 }
 
-static inline t_vec	reflect(const t_vec *ray, const t_vec *normal)
+static inline float	dist(const t_vec *a, const t_vec *b)
 {
-	t_vec	tmp;
+	return (sqrt((a->x - b->x) * (a->x - b->x)
+			+ (a->y - b->y) * (a->y - b->y)
+			+ (a->z - b->z) * (a->z - b->z)));
+}
 
-	tmp = mult(normal, 2 * dot(ray, normal));
-	return (sub(ray, &tmp));
+static inline float	size(const t_vec *a)
+{
+	return (sqrt(a->x * a->x + a->y * a->y + a->z * a->z));
+}
+
+static inline t_vec	reflect(const t_vec *L, const t_vec *normal)
+{
+	float	cos_theta;
+	t_vec	N;
+
+	cos_theta = dot(L, normal) / (size(L) * size(normal));
+	N = mult(normal, cos_theta * 2);
+	return (sub(&N, L));
 }
 
 #endif
