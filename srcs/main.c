@@ -6,14 +6,14 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 19:40:54 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 19:49:18 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minirt.h"
 
-static inline float	ray_reflect(const t_light light, const t_vec *ray,
-		const t_hit hit, const t_vec L)
+static inline float	ray_reflect(const t_light *light, const t_vec *ray,
+		const t_hit *hit, const t_vec *L)
 {
 	float	I_diff;
 	float	I_spec;
@@ -21,12 +21,12 @@ static inline float	ray_reflect(const t_light light, const t_vec *ray,
 	t_vec	R;
 	t_vec	V;
 
-	I_diff = light.intensity * hit.obj->kd * dot(&L, &hit.normal);
-	I_spec = light.intensity * hit.obj->ks;	
-	R = reflect(&L, &hit.normal);
+	I_diff = light->intensity * hit->obj->kd * dot(L, &hit->normal);
+	I_spec = light->intensity * hit->obj->ks;
+	R = reflect(L, &hit->normal);
 	V = mult(ray, -1.0f);
 	R_dot = dot(&R, ray);
-	return (I_diff + I_spec * powf(R_dot, hit.obj->shinyness));
+	return (I_diff + I_spec * powf(R_dot, hit->obj->shinyness));
 }
 
 static inline unsigned int	ray_color(const t_vec *orig,
@@ -44,7 +44,7 @@ static inline unsigned int	ray_color(const t_vec *orig,
 	while (count--)
 	{
 		L = normalize(sub(&scene->lights[count].pos, &hit.pos));
-		total += ray_reflect(scene->lights[count], ray, hit, L);
+		total += ray_reflect(scene->lights + count, ray, &hit, &L);
 	}
 	return (rgbmult(hit.obj->color, 255.0 * total));
 }
