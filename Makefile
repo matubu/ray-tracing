@@ -37,6 +37,9 @@ all: $(NAME)
 
 bonus: all
 
+watch:
+	@deno run --allow-read --allow-run ~/watchgcc.js $$(pwd)
+
 run: all
 	@$(ECHO) "💪 $(GRE)Execution de $(NAME)$(EOC)"
 	@./$(NAME) assets/minimal.rt

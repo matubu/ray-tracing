@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 12:49:07 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 13:33:33 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@
 # define KEY_W				13
 
 # define KEY_ESCAPE			53
+# define KEY_SPACE			49
 # define KEY_LEFT			123
 # define KEY_UP				126
 # define KEY_RIGHT			124

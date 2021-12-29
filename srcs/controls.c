@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/29 12:40:05 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/29 13:29:49 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/29 13:33:55 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ int	controls_listen(t_scene *scene)
 		make_side_move(scene, -1);
 	if (scene->keys[KEY_D] || scene->keys[KEY_RIGHT])
 		make_side_move(scene, 1);
+	if (scene->keys[KEY_SPACE])
+		make_vertical_move(scene, 1);
 	return (0);
 }
 
@@ -60,6 +62,22 @@ void	make_side_move(t_scene *scene, int direction)
 	m[0] = cross(&m[0], &((t_vec){0, 0, 1}));
 	m[0] = mult(&m[0], acceleration);
 	m[1] = (t_vec){0, 0, 0};
+	scene->cam.pos = add3(&scene->cam.pos, &m[0], &m[1]);
+	render(scene, &scene->win, &scene->cam, scene->win.buf);
+}
+
+void	make_vertical_move(t_scene *scene, int direction)
+{
+	t_vec	m[2];
+	float	velocity;
+	float	acceleration;
+
+	velocity = 50.0f;
+	acceleration = velocity * direction;
+	m[0] = radian_to_vector(&scene->cam.rot_euler);
+	m[1] = cross(&m[0], &((t_vec){1, 0, 0}));
+	m[1] = mult(&m[1], acceleration);
+	m[0] = (t_vec){0, 0, 0};
 	scene->cam.pos = add3(&scene->cam.pos, &m[0], &m[1]);
 	render(scene, &scene->win, &scene->cam, scene->win.buf);
 }
