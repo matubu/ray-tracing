@@ -6,13 +6,29 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 17:04:28 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 12:33:25 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/30 12:41:54 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minirt.h"
 
-void	push_obj(t_scene *scene, t_obj obj)
+t_bump_map	load_bump_map(t_scene *scene, char ***args)
+{
+	t_bump_map	img;
+	int			null;
+
+	if (**args == NULL)
+		return ((t_bump_map){NULL, NULL, 0, 0});
+	img.img = mlx_xpm_file_to_image(scene->win.ptr, **args,
+			&img.width, &img.height);
+	if (img.img == NULL)
+		err("could not load image");
+	img.buf = (int *)mlx_get_data_addr(img.img, &null, &null, &null);
+	(*args)++;
+	return (img);
+}
+
+void	push_obj(char ***args, t_scene *scene, t_obj obj)
 {
 	if (scene->obj_count == 1022)
 		err("too many objects");
@@ -20,6 +36,7 @@ void	push_obj(t_scene *scene, t_obj obj)
 	obj.kd = 0.5f;
 	obj.ks = 0.8f;
 	obj.shinyness = 2.0f;
+	obj.bump_map = load_bump_map(scene, args);
 	scene->obj[scene->obj_count++] = obj;
 }
 

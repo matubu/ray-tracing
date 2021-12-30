@@ -6,7 +6,7 @@
 /*   By: matubu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/26 21:05:43 by matubu            #+#    #+#             */
-/*   Updated: 2021/12/29 20:23:14 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 12:37:43 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,22 +78,6 @@ static int	col(char ***args)
 	return (color);
 }
 
-t_bump_map	load_bump_map(t_scene *scene, char ***args)
-{
-	t_bump_map	img;
-	int			null;
-
-	if (**args == NULL)
-		return ((t_bump_map){NULL, NULL, 0, 0});
-	img.img = mlx_xpm_file_to_image(scene->win.ptr, **args,
-			&img.width, &img.height);
-	if (img.img == NULL)
-		err("could not load image");
-	img.buf = (int *)mlx_get_data_addr(img.img, &null, &null, &null);
-	(*args)++;
-	return (img);
-}
-
 void	parse_line(char *type, char **arg, t_scene *scene)
 {
 	if (type[0] == 'A' && type[1] == '\0')
@@ -104,19 +88,17 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 	else if (type[0] == 'L' && type[1] == '\0')
 		push_light(scene, (t_light){vec(&arg), num(&arg), col(&arg)});
 	else if (type[0] == 's' && type[1] == 'p' && type[2] == '\0')
-		push_obj(scene, (t_obj){.func = ray_sphere, .sphere
-			= (t_sphere){vec(&arg), num(&arg)}, .color = col(&arg),
-			.bump_map = load_bump_map(scene, &arg)});
+		push_obj(&arg, scene, (t_obj){.func = ray_sphere, .sphere
+			= (t_sphere){vec(&arg), num(&arg)}, .color = col(&arg)});
 	else if (type[0] == 'p' && type[1] == 'l' && type[2] == '\0')
-		push_obj(scene, (t_obj){.func = ray_plane,
-			.plane = (t_plane){vec(&arg), vec(&arg)}, .color = col(&arg),
-			.bump_map = load_bump_map(scene, &arg)});
+		push_obj(&arg, scene, (t_obj){.func = ray_plane,
+			.plane = (t_plane){vec(&arg), vec(&arg)}, .color = col(&arg)});
 	else if (type[0] == 'c' && type[1] == 'y' && type[2] == '\0')
-		push_obj(scene, (t_obj){.func = ray_cylinder,
+		push_obj(&arg, scene, (t_obj){.func = ray_cylinder,
 			.cylinder = (t_cylinder){vec(&arg), vec(&arg), num(&arg),
 			num(&arg)}, .color = col(&arg)});
 	else if (type[0] == 'c' && type[1] == 'o' && type[2] == '\0')
-		push_obj(scene, (t_obj){.func = ray_cone,
+		push_obj(&arg, scene, (t_obj){.func = ray_cone,
 			.cone = (t_cone){vec(&arg), vec(&arg)}, .color = col(&arg)});
 	else
 		err("invalid object type");

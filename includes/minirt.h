@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/30 11:13:53 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/30 12:38:24 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ char	*gnl(int fd);
 int		free_splits(char **splits, int n);
 char	**split(const char *s, char c);
 
-void	push_obj(t_scene *scene, t_obj obj);
+void	push_obj(char ***args, t_scene *scene, t_obj obj);
 void	push_light(t_scene *scene, t_light light);
 void	push_camera(t_scene *scene, t_camera cam);
 void	push_ambient(t_scene *scene, t_ambient ambient);
@@ -44,8 +44,6 @@ int		hook_close(t_scene *scene);
 int		hook_key_down(int key, t_scene *scene);
 int		hook_key_up(int key, t_scene *scene);
 int		hook_mouse_move(int x, int y, t_scene *scene);
-//int		hook_button_down(int button, int x, int y, t_scene *scene);
-//int		hook_button_up(int button, int x, int y, t_scene *scene);
 
 void	controls_init(t_scene *scene);
 int		controls_listen(t_scene *scene);
