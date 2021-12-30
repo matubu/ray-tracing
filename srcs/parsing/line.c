@@ -6,7 +6,7 @@
 /*   By: matubu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/26 21:05:43 by matubu            #+#    #+#             */
-/*   Updated: 2021/12/30 12:37:43 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 16:31:44 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 		push_ambient(scene, (t_ambient){num(&arg), col(&arg)});
 	else if (type[0] == 'C' && type[1] == '\0')
 		push_camera(scene, (t_camera){vec(&arg), vec(&arg),
-			WIDTH, HEIGHT, num(&arg) * PI / WIDTH});
+			WIDTH, HEIGHT, num(&arg) / 180.0 * PI / WIDTH});
 	else if (type[0] == 'L' && type[1] == '\0')
 		push_light(scene, (t_light){vec(&arg), num(&arg), col(&arg)});
 	else if (type[0] == 's' && type[1] == 'p' && type[2] == '\0')
