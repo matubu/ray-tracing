@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/29 19:09:56 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 15:42:04 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@
 # define PI_TWO				1.57079632679489661923132169163975144
 # define EPSILON			0.0001
 
-# define WIDTH				1000
-# define HEIGHT				1000
+# define WIDTH				480
+# define HEIGHT				480
 # define CAMERA_CLIP_START	.01
 
 # define MOUSE_LEFT			1

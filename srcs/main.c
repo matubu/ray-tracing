@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 12:58:07 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 15:55:12 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,11 @@ static inline void	apply_bump_map(t_hit *hit)
 }
 
 static inline unsigned int	ray_color(const t_vec *orig,
-		const t_vec *ray, const t_scene *scene)
+		const t_vec *ray, const t_scene *scene, int rebounds)
 {
 	t_hit	hit;
 	t_vec	l;
+	t_vec	r;
 	int		cnt;
 	int		color;
 
@@ -60,6 +61,16 @@ static inline unsigned int	ray_color(const t_vec *orig,
 	{
 		l = normalize(sub(&scene->lights[cnt].pos, &hit.pos));
 		color = rgbadd(color, ray_reflect(scene->lights + cnt, ray, &hit, &l));
+	}
+	cnt = scene->lights_count;
+	if (rebounds > 0)
+	{
+		while (cnt--)
+		{
+			l = normalize(sub(&scene->lights[cnt].pos, &hit.pos));
+			r = reflect(&l, &hit.normal);
+			color = rgbadd(color, rgbmult(ray_color(&hit.pos, &r, scene, rebounds - 1), 128));
+		}	
 	}
 	return (rgbmatrix(hit.obj->color, color));
 }
@@ -99,7 +110,7 @@ void	render(const t_scene *scene, const t_window *win,
 		{
 			t.xr = mult(&t.cam_right, (t.half_x - x) * cam->fov_pixel);
 			t.ray = normalize(add3(&t.dir, &t.xr, &t.yr));
-			*buf++ = ray_color(&cam->pos, &t.ray, scene);
+			*buf++ = ray_color(&cam->pos, &t.ray, scene, 1);
 		}
 	}
 	mlx_put_image_to_window(win->ptr, win->win, win->img, 0, 0);
