@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 17:04:28 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 12:41:54 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 16:50:32 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void	push_obj(char ***args, t_scene *scene, t_obj obj)
 	obj.ka = 0.7f;
 	obj.kd = 0.5f;
 	obj.ks = 0.8f;
-	obj.shinyness = 2.0f;
+	obj.shinyness = 16.0f;
 	obj.bump_map = load_bump_map(scene, args);
 	scene->obj[scene->obj_count++] = obj;
 }
