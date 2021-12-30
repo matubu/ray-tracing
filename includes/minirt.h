@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2021/12/30 12:38:24 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 12:53:18 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,14 +83,14 @@ static inline float	size(const t_vec *a)
 	return (sqrt(a->x * a->x + a->y * a->y + a->z * a->z));
 }
 
-static inline t_vec	reflect(const t_vec *L, const t_vec *normal)
+static inline t_vec	reflect(const t_vec *l, const t_vec *normal)
 {
 	float	cos_theta;
-	t_vec	N;
+	t_vec	n;
 
-	cos_theta = dot(L, normal) / (size(L) * size(normal));
-	N = mult(normal, cos_theta * 2);
-	return (sub(&N, L));
+	cos_theta = dot(l, normal) / (size(l) * size(normal));
+	n = mult(normal, cos_theta * 2);
+	return (sub(&n, l));
 }
 
 #endif

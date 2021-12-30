@@ -6,53 +6,60 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 12:26:51 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/30 12:58:07 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minirt.h"
 
 static inline int	ray_reflect(const t_light *light, const t_vec *ray,
-		const t_hit *hit, const t_vec *L)
+		const t_hit *hit, const t_vec *l)
 {
-	float	I_diff;
-	float	I_spec;
-	float	R_dot;
-	t_vec	R;
-	t_vec	V;
+	float	i_diff;
+	float	i_spec;
+	float	r_dot;
+	t_vec	r;
+	t_vec	v;
 
-	I_diff = light->intensity * hit->obj->kd * dot(L, &hit->normal);
-	I_spec = light->intensity * hit->obj->ks;
-	R = reflect(L, &hit->normal);
-	V = mult(ray, -1.0f);
-	R_dot = dot(&R, &V);
-	return (rgbmult(light->color, (int)(255.0 * (I_diff + I_spec * powf(R_dot, hit->obj->shinyness)))));
+	i_diff = light->intensity * hit->obj->kd * dot(l, &hit->normal);
+	i_spec = light->intensity * hit->obj->ks;
+	r = reflect(l, &hit->normal);
+	v = mult(ray, -1.0f);
+	r_dot = dot(&r, &v);
+	return (rgbmult(light->color,
+			255.0 * (i_diff + i_spec * powf(r_dot, hit->obj->shinyness))));
+}
+
+static inline void	apply_bump_map(t_hit *hit)
+{
+	const t_vec	displace = mult(&hit->normal, -(float)hit->obj->bump_map.buf[
+			abs((int)fmod(hit->pos.y * 10, hit->obj->bump_map.height))
+			* hit->obj->bump_map.width
+			+ abs((int)fmod(hit->pos.x * 10, hit->obj->bump_map.width))
+		] / 50000.0 + .5);
+
+	hit->pos = add(&hit->pos, &displace);
 }
 
 static inline unsigned int	ray_color(const t_vec *orig,
 		const t_vec *ray, const t_scene *scene)
 {
 	t_hit	hit;
-	t_vec	L;
-	int		count;
+	t_vec	l;
+	int		cnt;
 	int		color;
 
 	if (!ray_scene(orig, ray, scene, &hit))
 		return (scene->ambient.color);
 	if (hit.obj->bump_map.buf)
+		apply_bump_map(&hit);
+	cnt = scene->lights_count;
+	color = rgbmult(scene->ambient.color,
+			255.0 * scene->ambient.intensity * hit.obj->ka);
+	while (cnt--)
 	{
-		t_vec	displace = mult(&hit.normal, -(float)hit.obj->bump_map.buf[
-					abs((int)fmod(hit.pos.y * 10, hit.obj->bump_map.height)) * hit.obj->bump_map.width
-					+ abs((int)fmod(hit.pos.x * 10, hit.obj->bump_map.width))
-				] / 50000.0 + .5);
-		hit.pos = add(&hit.pos, &displace);
-	}
-	count = scene->lights_count;
-	color = rgbmult(scene->ambient.color, (int)(255.0 * scene->ambient.intensity * hit.obj->ka));
-	while (count--)
-	{
-		L = normalize(sub(&scene->lights[count].pos, &hit.pos));
-		color = rgbadd(color, ray_reflect(scene->lights + count, ray, &hit, &L));
+		l = normalize(sub(&scene->lights[cnt].pos, &hit.pos));
+		color = rgbadd(color, ray_reflect(scene->lights + cnt, ray, &hit, &l));
 	}
 	return (rgbmatrix(hit.obj->color, color));
 }
