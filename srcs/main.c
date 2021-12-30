@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 15:55:12 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/30 15:56:58 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ static inline int	ray_reflect(const t_light *light, const t_vec *ray,
 
 static inline void	apply_bump_map(t_hit *hit)
 {
-	const t_vec	displace = mult(&hit->normal, -(float)hit->obj->bump_map.buf[
+	const t_vec	displace = mult(&hit->normal, (float)hit->obj->bump_map.buf[
 			abs((int)fmod(hit->pos.y * 10, hit->obj->bump_map.height))
 			* hit->obj->bump_map.width
 			+ abs((int)fmod(hit->pos.x * 10, hit->obj->bump_map.width))
@@ -45,6 +45,7 @@ static inline unsigned int	ray_color(const t_vec *orig,
 		const t_vec *ray, const t_scene *scene, int rebounds)
 {
 	t_hit	hit;
+	//t_hit	hit_light;
 	t_vec	l;
 	t_vec	r;
 	int		cnt;
@@ -60,7 +61,8 @@ static inline unsigned int	ray_color(const t_vec *orig,
 	while (cnt--)
 	{
 		l = normalize(sub(&scene->lights[cnt].pos, &hit.pos));
-		color = rgbadd(color, ray_reflect(scene->lights + cnt, ray, &hit, &l));
+		//if (!ray_scene(&hit.pos, &l, scene, &hit_light))
+			color = rgbadd(color, ray_reflect(scene->lights + cnt, ray, &hit, &l));
 	}
 	cnt = scene->lights_count;
 	if (rebounds > 0)
