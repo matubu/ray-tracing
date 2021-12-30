@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 16:50:18 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 17:58:58 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ static inline unsigned int	ray_color(const t_vec *orig,
 		const t_vec *ray, const t_scene *scene, int rec)
 {
 	t_hit	hit;
-	//t_hit	hit_light;
+	t_hit	hit_light;
 	t_vec	l;
 	int		i;
 	int		col;
@@ -60,7 +60,8 @@ static inline unsigned int	ray_color(const t_vec *orig,
 	while (i--)
 	{
 		l = normalize(sub(&scene->lights[i].pos, &hit.pos));
-		//if (!ray_scene(&hit.pos, &l, scene, &hit_light))
+		if (!ray_scene(&hit.pos, &l, scene, &hit_light)
+				|| hit_light.dist > dist(&scene->lights[i].pos, &hit.pos))
 			col = rgbadd(col, ray_reflect(scene->lights + i, ray, &hit, &l));
 	}
 	if (--rec < 0)
