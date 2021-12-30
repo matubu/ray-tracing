@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:34:02 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 12:01:39 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 12:22:35 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ static inline float	q_rsqrt(float y)
 	return (y * (threehalfs - (x2 * y * y)));
 }
 
-static inline unsigned int	rgbmult(unsigned int color, unsigned int fac)
+static inline unsigned int	rgbmult(unsigned int color, int fac)
 {
 	return (
 		((((color & (255 << 16)) * fac) & (255 << 24))
