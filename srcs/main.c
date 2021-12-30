@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 15:56:58 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 16:19:06 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,12 +67,12 @@ static inline unsigned int	ray_color(const t_vec *orig,
 	cnt = scene->lights_count;
 	if (rebounds > 0)
 	{
-		while (cnt--)
-		{
-			l = normalize(sub(&scene->lights[cnt].pos, &hit.pos));
+		//while (cnt--)
+		//{
+			l = normalize(sub(&scene->cam.pos, &hit.pos));
 			r = reflect(&l, &hit.normal);
 			color = rgbadd(color, rgbmult(ray_color(&hit.pos, &r, scene, rebounds - 1), 128));
-		}	
+		//}	
 	}
 	return (rgbmatrix(hit.obj->color, color));
 }
