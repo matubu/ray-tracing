@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 11:53:37 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 12:26:51 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static inline int	ray_reflect(const t_light *light, const t_vec *ray,
 	I_spec = light->intensity * hit->obj->ks;
 	R = reflect(L, &hit->normal);
 	V = mult(ray, -1.0f);
-	R_dot = dot(&R, ray);
+	R_dot = dot(&R, &V);
 	return (rgbmult(light->color, (int)(255.0 * (I_diff + I_spec * powf(R_dot, hit->obj->shinyness)))));
 }
 
@@ -53,12 +53,8 @@ static inline unsigned int	ray_color(const t_vec *orig,
 	{
 		L = normalize(sub(&scene->lights[count].pos, &hit.pos));
 		color = rgbadd(color, ray_reflect(scene->lights + count, ray, &hit, &L));
-		//printf("%#x\n", ray_reflect(scene->lights + count, ray, &hit, &L));
 	}
-	//printf("->%#x\n", color);
-	//return (color);
 	return (rgbmatrix(hit.obj->color, color));
-	//return (rgbmult(hit.obj->color, 255.0 * total));
 }
 
 typedef struct s_trash
