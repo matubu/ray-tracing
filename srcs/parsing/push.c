@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 17:04:28 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 11:21:01 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/30 12:33:25 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	push_obj(t_scene *scene, t_obj obj)
 	obj.ka = 0.7f;
 	obj.kd = 0.5f;
 	obj.ks = 0.8f;
-	obj.shinyness = 16.0f;
+	obj.shinyness = 2.0f;
 	scene->obj[scene->obj_count++] = obj;
 }
 
