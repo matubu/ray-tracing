@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 12:42:08 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 16:47:18 by acoezard         ###   ########.fr       */
+/*   Updated: 2021/12/30 17:38:14 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,12 @@ int	hook_mouse_move(int x, int y, t_scene *scene)
 {
 	static int		first = 1;
 	static t_vec	last;
-	const float		yy = y - last.y;
 
 	if (!first)
 	{
+		scene->cam.rot.x = fmax(fmin(scene->cam.rot.x
+					+ (float)(last.y - y) / 50.0f, 1), -1);
 		scene->cam.rot.z += (float)(last.x - x) / 50.0f;
-		scene->cam.rot.x += yy / 50.0f * cos(scene->cam.rot.z);
-		scene->cam.rot.y += yy / 50.0f * sin(scene->cam.rot.z);
 		render(scene, &scene->win, &scene->cam, scene->win.buf);
 	}
 	first = 0;

@@ -42,7 +42,7 @@ watch:
 
 run: all
 	@$(ECHO) "💪 $(GRE)Execution de $(NAME)$(EOC)"
-	@./$(NAME) assets/scene2.rt
+	@./$(NAME) assets/minimal.rt
 
 ${OBJECTS}/%.o: ${SOURCES}/%.c
 	@$(ECHO) "🔧 Compilation de $(BLU)${notdir $<}$(EOC)."

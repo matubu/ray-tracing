@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 16:24:58 by mberger-         ###   ########.fr       */
+/*   Updated: 2021/12/30 16:50:18 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,36 +42,33 @@ static inline void	apply_bump_map(t_hit *hit)
 }
 
 static inline unsigned int	ray_color(const t_vec *orig,
-		const t_vec *ray, const t_scene *scene, int rebounds)
+		const t_vec *ray, const t_scene *scene, int rec)
 {
 	t_hit	hit;
-	t_hit	hit_light;
+	//t_hit	hit_light;
 	t_vec	l;
-	t_vec	r;
-	int		cnt;
-	int		color;
+	int		i;
+	int		col;
 
 	if (!ray_scene(orig, ray, scene, &hit))
 		return (scene->ambient.color);
 	if (hit.obj->bump_map.buf)
 		apply_bump_map(&hit);
-	cnt = scene->lights_count;
-	color = rgbmult(scene->ambient.color,
+	i = scene->lights_count;
+	col = rgbmult(scene->ambient.color,
 			255.0 * scene->ambient.intensity * hit.obj->ka);
-	while (cnt--)
+	while (i--)
 	{
-		l = normalize(sub(&scene->lights[cnt].pos, &hit.pos));
-		if (!ray_scene(&hit.pos, &l, scene, &hit_light))
-			color = rgbadd(color, ray_reflect(scene->lights + cnt, ray, &hit, &l));
+		l = normalize(sub(&scene->lights[i].pos, &hit.pos));
+		//if (!ray_scene(&hit.pos, &l, scene, &hit_light))
+			col = rgbadd(col, ray_reflect(scene->lights + i, ray, &hit, &l));
 	}
-	cnt = scene->lights_count;
-	if (rebounds-- > 0)
-	{
-		l = normalize(sub(&scene->cam.pos, &hit.pos));
-		r = reflect(&l, &hit.normal);
-		color = rgbadd(color, rgbmult(ray_color(&hit.pos, &r, scene, rebounds), 128));
-	}
-	return (rgbmatrix(hit.obj->color, color));
+	if (--rec < 0)
+		return (rgbmatrix(hit.obj->color, col));
+	l = normalize(sub(&scene->cam.pos, &hit.pos));
+	l = reflect(&l, &hit.normal);
+	return (rgbmatrix(hit.obj->color, rgbadd(col,
+					rgbmult(ray_color(&hit.pos, &l, scene, rec), 128))));
 }
 
 typedef struct s_trash
@@ -109,7 +106,7 @@ void	render(const t_scene *scene, const t_window *win,
 		{
 			t.xr = mult(&t.cam_right, (t.half_x - x) * cam->fov_pixel);
 			t.ray = normalize(add3(&t.dir, &t.xr, &t.yr));
-			*buf++ = ray_color(&cam->pos, &t.ray, scene, 1);
+			*buf++ = ray_color(&cam->pos, &t.ray, scene, 2);
 		}
 	}
 	mlx_put_image_to_window(win->ptr, win->win, win->img, 0, 0);
