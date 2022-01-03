@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/03 13:19:27 by mberger-         ###   ########.fr       */
+/*   Updated: 2022/01/03 15:00:32 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,8 @@ typedef struct s_cone
 {
 	t_vec	pos;
 	t_vec	dir;
+	float	rad;
+	float	height;
 }	t_cone;
 
 typedef struct s_obj {
