@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 15:14:22 by mberger-         ###   ########.fr       */
+/*   Updated: 2022/01/03 12:22:05 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,34 +66,84 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	hit->pos = mult(ray, hit->dist);
 	hit->pos = add(orig, &hit->pos);
 	hit->normal = normalize((t_vec){hit->pos.x - obj->cylinder.pos.x, 0, hit->pos.z - obj->cylinder.pos.z});
+/*	const float	d = dot(obj->sphere.dir, P) + t*(N.V);
+	const float	t = (d - dot(obj->sphere.dir, P)) / dot(obj->sphere.dir, ray);
+
+	return (t);
+	const t_vec	pdp = sub(&obj->cylinder.dir, &obj->cylinder.pos);
+	const t_vec	tmp = sub(orig, &obj->sphere.pos);
+	const t_vec	eyexpdp = cross(&tmp, &pdp);
+	const t_vec	rdxpdp = cross(ray, &pdp);
+	const float	a = dot(&rdxpdp, &rdxpdp);
+	const float	b = 2 * dot(&rdxpdp, &eyexpdp);
+	const float	c = dot(&eyexpdp, &eyexpdp) - (obj->cylinder.rad * obj->cylinder.rad * dot(&pdp, &pdp));
+	const float	delta = sqrt((b * b) - (4.0 * a * c));
+	float		t[2];
+
+	if (isnan(delta))
+		return ((void)(hit->dist = -1));
+	t[0] = (-b - (delta)) / (2.0 * a);
+	t[1] = (-b + (delta)) / (2.0 * a);
+	if (t[0] > t[1])
+		*((float *)t) = t[1];
+	hit->dist = *t;
+	
+	const float	a = (ray->x * ray->x) + (ray->z * ray->z);
+	const float	b = 2 * (ray->x * (orig->x - obj->cylinder.pos.x)
+			+ ray->z * (orig->z - obj->cylinder.pos.z));
+	const float	c = (orig->x - obj->cylinder.pos.x)
+		* (orig->x - obj->cylinder.pos.x)
+		+ (orig->z - obj->cylinder.pos.z) * (orig->z - obj->cylinder.pos.z)
+		- obj->cylinder.rad * obj->cylinder.rad;
+	const float	delta = b * b - 4 * (a * c);
+
+	if (delta < 0.001)
+		return ((void)(hit->dist = -1));
+	hit->dist = fmin((-b - sqrt(delta)) / (2 * a),
+			(-b + sqrt(delta)) / (2 * a));
+	hit->pos = mult(ray, hit->dist);
+	hit->pos = add(orig, &hit->pos);
+	hit->normal = normalize((t_vec){hit->pos.x - obj->cylinder.pos.x, 0, hit->pos.z - obj->cylinder.pos.z});*/
 }
 
 static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 		const t_obj *obj, t_hit *hit)
 {
-	const float rad = 2;
-	const float height = 5;
+	const float	cosa = .5;
+	const float	height = 5;
 
-	const float A = orig->x - obj->cone.pos.x;
-	const float B = orig->z - obj->cone.pos.z;
-	const float D = height - orig->y + obj->cone.pos.y;
-	
-	const float tan = (rad / height) * (rad / height);
-	
-	const float a = (ray->x * ray->x) + (ray->z * ray->z) - (tan*(ray->y * ray->y));
-	const float b = (2 * A * ray->x) + (2 * B * ray->z) + (2 * tan * D * ray->y);
-	const float c = (A * A) + (B * B) - (D * D * tan);
-	
-	const float delta = b * b - 4 * a * c;
-	if (delta < 0.001) 
+	const t_vec	co = sub(orig, &obj->cone.pos);
+
+	const float a = dot(ray, &obj->cone.dir) * dot(ray, &obj->cone.dir) - cosa * cosa;
+	const float b = 2.0 * (dot(ray, &obj->cone.dir) * dot(&co, &obj->cone.dir) - dot(ray, &co) * cosa * cosa);
+	const float c = dot(&co, &obj->cone.dir) * dot(&co, &obj->cone.dir) - dot(&co, &co) * cosa * cosa;
+
+	float det = b * b - 4.0 * a * c;
+	if (det < .0)
 		return ((void)(hit->dist = -1));
-	
-	const float t2 = (-b + sqrt(delta))/(2*a);
-	const float t = (-b - sqrt(delta))/(2*a);
-	
-	if (t > t2)
-		*((float *)(&t)) = t2;
-	
+
+	det = sqrt(det);
+	float t1 = (-b - det) / (2. * a);
+	float t2 = (-b + det) / (2. * a);
+
+	// This is a bit messy; there ought to be a more elegant solution.
+	float t = t1;
+	if (t < .0 || (t2 > .0 && t2 < t))
+		t = t2;
+	if (t < .0)
+		return ((void)(hit->dist = -1));
+
+	hit->pos = mult(ray, hit->dist);
+	hit->pos = add(orig, &hit->pos);
+
+	t_vec	cp = sub(&hit->pos, &obj->cone.pos);
+	float h = dot(&cp, &obj->cone.dir);
+	if (h < 0. || h > height)
+		return ((void)(hit->dist = -1));
+
+	hit->normal = mult(&cp, dot(&obj->cone.dir, &cp));
+	hit->normal = mult(&hit->normal, 1.0 / dot(&cp, &cp));
+	hit->normal = normalize(sub(&hit->normal, &obj->cone.dir));
 	hit->dist = t;
 }
 
