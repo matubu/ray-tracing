@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/03 15:00:32 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/05 11:39:14 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,10 +107,10 @@ typedef struct s_cylinder
 
 typedef struct s_cone
 {
-	t_vec	pos;
-	t_vec	dir;
+	t_vec	pos;	// tip position
+	t_vec	dir;	// axis
 	float	rad;
-	float	height;
+	float	height; // hauteur
 }	t_cone;
 
 typedef struct s_obj {

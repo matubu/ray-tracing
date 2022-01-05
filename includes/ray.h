@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/03 16:39:17 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/05 12:30:54 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,39 +110,38 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 		t_obj *obj, t_hit *hit)
 {
 	const float	cosa = .95f * .95f;
-	const float	height = 100.0f;
+	obj->cone.height = 100.0f;
 
 	const t_vec	co = sub(orig, &obj->cone.pos);
 	const float a = powf(dot(ray, &obj->cone.dir), 2.0f) - cosa;
 	const float b = 2.0f * (dot(ray, &obj->cone.dir) * dot(&co, &obj->cone.dir) - dot(ray, &co) * cosa);
 	const float c = powf(dot(&co, &obj->cone.dir), 2.0f) - dot(&co, &co) * cosa;
 
-	const float rdet = b * b - 4.0f * a * c;
-	if (rdet < .0f)
+	const float rdet = b * b - (4.0f * a * c);
+	if (rdet < 0.0f)
 		return ((void)(hit->dist = -1));
-
-	const float det = sqrt(rdet);
-	const float t1 = (float) (-b - det) / (2.0f * a);
-	const float t2 = (float) (-b + det) / (2.0f * a);
+	
+	const float det = sqrtf(rdet);
+	const float t1 = (float)(-b - det) / (float)(2.0f * a);
+	const float t2 = (float)(-b + det) / (float)(2.0f * a);
 
 	float t = t1;
 	if (t < .0f || (t2 > .0f && t2 < t))
 		t = t2;
 	if (t < .0f)
 		return ((void)(hit->dist = -1));
-
 	t_vec cp = mult(ray, t);
 	cp = add(orig, &cp);
 	cp = sub(&cp, &obj->cone.pos);
 	const float h = dot(&cp, &obj->cone.dir);
-	if (h < .0f || h > height)
+	if (h < .0f || h > obj->cone.height)
 		return ((void)(hit->dist = -1));
+	hit->dist = t;
 	hit->pos = mult(ray, hit->dist);
 	hit->pos = add(orig, &hit->pos);
 	hit->normal = mult(&cp, dot(&obj->cone.dir, &cp));
-	hit->normal = mult(&hit->normal, (float)1.0f / dot(&cp, &cp));
+	hit->normal = vec_div(&hit->normal, dot(&cp, &cp));
 	hit->normal = normalize(sub(&hit->normal, &obj->cone.dir));
-	hit->dist = t;
 }
 
 static inline int	ray_scene(const t_vec *orig, const t_vec *ray,
