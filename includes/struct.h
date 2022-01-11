@@ -146,7 +146,7 @@ typedef struct s_scene {
 	int			lights_count;
 	t_ambient	ambient;
 	int			ambient_count;
-	int			keys[1024];
+	int			keys[256];
 }	t_scene;
 
 #endif

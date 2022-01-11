@@ -17,7 +17,7 @@ void	controls_init(t_scene *scene)
 	int	i;
 
 	i = -1;
-	while (++i < 1024)
+	while (++i < 256)
 		scene->keys[i] = 0;
 }
 
