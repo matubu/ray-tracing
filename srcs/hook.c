@@ -38,10 +38,10 @@ int	hook_close(t_scene *scene)
 
 int	hook_key_down(int key, t_scene *scene)
 {
-	return (scene->keys[key] = 1);
+	return (scene->keys[(unsigned char)key] = 1);
 }
 
 int	hook_key_up(int key, t_scene *scene)
 {
-	return (scene->keys[key] = 0);
+	return (scene->keys[(unsigned char)key] = 0);
 }
