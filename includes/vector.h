@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:33:45 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/21 16:33:46 by mberger-         ###   ########.fr       */
+/*   Updated: 2022/01/05 11:19:16 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,11 @@ static inline t_vec	sub(const t_vec *a, const t_vec *b)
 static inline t_vec	mult(const t_vec *a, const float fac)
 {
 	return ((t_vec){a->x * fac, a->y * fac, a->z * fac});
+}
+
+static inline t_vec	vec_div(const t_vec *a, const float fac)
+{
+	return ((t_vec){(float)a->x / fac, (float)a->y / fac, (float)a->z / fac});
 }
 
 static inline t_vec	normalize(const t_vec vec)

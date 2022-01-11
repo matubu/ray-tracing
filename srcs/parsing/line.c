@@ -6,7 +6,7 @@
 /*   By: matubu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/26 21:05:43 by matubu            #+#    #+#             */
-/*   Updated: 2021/12/30 16:31:44 by mberger-         ###   ########.fr       */
+/*   Updated: 2022/01/03 11:36:39 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 			num(&arg)}, .color = col(&arg)});
 	else if (type[0] == 'c' && type[1] == 'o' && type[2] == '\0')
 		push_obj(&arg, scene, (t_obj){.func = ray_cone,
-			.cone = (t_cone){vec(&arg), vec(&arg)}, .color = col(&arg)});
+			.cone = (t_cone){vec(&arg), vec(&arg), 2, 5}, .color = col(&arg)});
 	else
 		err("invalid object type");
 	if (*arg)
