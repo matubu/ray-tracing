@@ -32,13 +32,13 @@ static inline int	ray_reflect(const t_light *light, const t_vec *ray,
 
 static inline void	apply_bump_map(t_hit *hit)
 {
-	hit->pos = add(hit->pos, 
-		mult(hit->normal, (float)hit->obj->bump_map.buf[
-			abs((int)fmod(hit->pos.y * 10, hit->obj->bump_map.height))
-			* hit->obj->bump_map.width
-			+ abs((int)fmod(hit->pos.x * 10, hit->obj->bump_map.width))
-		] / 50000.0 + .5)
-	);
+	hit->pos = add(hit->pos,
+			mult(hit->normal, (float)hit->obj->bump_map.buf[
+				abs((int)fmod(hit->pos.y * 10, hit->obj->bump_map.height))
+				* hit->obj->bump_map.width
+				+ abs((int)fmod(hit->pos.x * 10, hit->obj->bump_map.width))
+			] / 50000.0 + .5)
+			);
 }
 
 static inline unsigned int	ray_color(const t_vec *orig,
