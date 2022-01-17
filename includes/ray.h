@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/17 12:35:59 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/17 12:40:31 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,9 +108,9 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 {
 	const float	cosa = powf(obj->cone.rad, 2.0f);
 	const t_vec	co = sub(orig, &obj->cone.pos);
-	const float a = powf(dot(ray, &obj->cone.dir), 2.0f) - cosa;
-	const float b = 2.0f * (dot(ray, &obj->cone.dir) * dot(&co, &obj->cone.dir) - dot(ray, &co) * cosa);
-	const float c = powf(dot(&co, &obj->cone.dir), 2.0f) - dot(&co, &co) * cosa;
+	const float	a = powf(dot(ray, &obj->cone.dir), 2.0f) - cosa;
+	const float	b = 2.0f * (dot(ray, &obj->cone.dir) * dot(&co, &obj->cone.dir) - dot(ray, &co) * cosa);
+	const float	c = powf(dot(&co, &obj->cone.dir), 2.0f) - dot(&co, &co) * cosa;
 
 	const float rdet = b * b - (4.0f * a * c);
 	if (rdet < 0.0f)

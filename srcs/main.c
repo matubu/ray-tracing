@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2021/12/30 18:08:24 by mberger-         ###   ########.fr       */
+/*   Updated: 2022/01/17 12:49:58 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,8 +109,7 @@ void	render(const t_scene *scene, const t_window *win,
 		}
 	}
 	mlx_put_image_to_window(win->ptr, win->win, win->img, 0, 0);
-	printf("rendering took %.3fms\n",
-		(double)(clock() - start) / CLOCKS_PER_SEC * 1000);
+	printf("%.3f FPS\n", 1.0f / ((double)(clock() - start) / CLOCKS_PER_SEC));
 }
 
 int	main(int argc, char **argv)
