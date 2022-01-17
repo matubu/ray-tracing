@@ -39,10 +39,8 @@ static inline void	ray_plane(const t_vec *orig, const t_vec *ray,
 
 	if (d >= EPSILON && d <= EPSILON)
 		return ((void)(hit->dist = -1));
-	hit->pos = sub(obj->plane.pos, *orig);
-	hit->dist = dot(hit->pos, obj->plane.normal) / d;
-	hit->pos = mult(*ray, hit->dist);
-	hit->pos = add(*orig, hit->pos);
+	hit->dist = dot(sub(obj->plane.pos, *orig), obj->plane.normal) / d;
+	hit->pos = add(*orig, mult(*ray, hit->dist));
 	hit->normal = obj->plane.normal;
 }
 
@@ -86,9 +84,8 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	const float	a = powf(dot(*ray, obj->cone.dir), 2.0f) - obj->cone.rad2;
 	const float	b = 2.0f * (dot(*ray, obj->cone.dir) * dot(co, obj->cone.dir)
 			- dot(*ray, co) * obj->cone.rad2);
-	const float	c = powf(dot(co, obj->cone.dir), 2.0f)
-		- dot(co, co) * obj->cone.rad2;
-	const float	det = b * b - (4.0f * a * c);
+	const float	det = b * b - (4.0f * a * (powf(dot(co, obj->cone.dir), 2.0f) \
+		- dot(co, co) * obj->cone.rad2));
 	float		t;
 	float		t2;
 	t_vec		cp;
@@ -109,8 +106,7 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 		return ((void)(hit->dist = -1));
 	hit->dist = t;
 	hit->pos = add(*orig, mult(*ray, hit->dist));
-	hit->normal = normalize(sub(vec_div(mult(cp, \
-			dot(obj->cone.dir, cp)), dot2(cp)), obj->cone.dir));
+	hit->normal = normalize(sub(vec_div(mult(cp, h), dot2(cp)), obj->cone.dir));
 }
 
 static inline int	ray_scene(const t_vec *orig, const t_vec *ray,

@@ -109,7 +109,7 @@ void	render(const t_scene *scene, const t_window *win,
 		}
 	}
 	mlx_put_image_to_window(win->ptr, win->win, win->img, 0, 0);
-	printf("%.3f FPS\n", 1.0f / ((double)(clock() - start) / CLOCKS_PER_SEC));
+	printf("%.3f fps\n", 1.0f / ((double)(clock() - start) / CLOCKS_PER_SEC));
 }
 
 int	main(int argc, char **argv)
