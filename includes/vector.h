@@ -16,11 +16,6 @@
 # include "vector_add.h"
 # include "struct.h"
 
-static inline t_vec	sub(const t_vec a, const t_vec b)
-{
-	return ((t_vec){a.x - b.x, a.y - b.y, a.z - b.z});
-}
-
 static inline t_vec	mult(const t_vec a, const float fac)
 {
 	return ((t_vec){a.x * fac, a.y * fac, a.z * fac});
