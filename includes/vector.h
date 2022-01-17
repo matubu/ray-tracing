@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:33:45 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/05 11:19:16 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/17 13:55:54 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,11 @@ static inline t_vec	normalize(const t_vec vec)
 static inline float	dot(const t_vec a, const t_vec b)
 {
 	return (a.x * b.x + a.y * b.y + a.z * b.z);
+}
+
+static inline float dot2(const t_vec v)
+{
+	return (dot(v, v));
 }
 
 static inline t_vec	cross(const t_vec a, const t_vec b)
