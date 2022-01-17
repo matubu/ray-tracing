@@ -29,11 +29,11 @@ void	make_move(t_scene *scene, int axis, int dist)
 	dir = radian_to_vector(&scene->cam.rot);
 	move = dir;
 	if (axis >= 1)
-		move = cross(&move, &((t_vec){0, 0, 1}));
+		move = cross(move, (t_vec){0, 0, 1});
 	if (axis == 2)
-		move = cross(&move, &dir);
-	move = mult(&move, dist);
-	scene->cam.pos = add(&scene->cam.pos, &move);
+		move = cross(move, dir);
+	move = mult(move, dist);
+	scene->cam.pos = add(scene->cam.pos, move);
 	render(scene, &scene->win, &scene->cam, scene->win.buf);
 }
 
