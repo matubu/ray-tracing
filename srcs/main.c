@@ -21,24 +21,24 @@ static inline int	ray_reflect(const t_light *light, const t_vec *ray,
 	t_vec	r;
 	t_vec	v;
 
-	i_diff = light->intensity * hit->obj->kd * dot(l, &hit->normal);
+	i_diff = light->intensity * hit->obj->kd * dot(*l, hit->normal);
 	i_spec = light->intensity * hit->obj->ks;
 	r = reflect(l, &hit->normal);
-	v = mult(ray, -1.0f);
-	r_dot = dot(&r, &v);
+	v = mult(*ray, -1.0f);
+	r_dot = dot(r, v);
 	return (rgbmult(light->color,
 			255.0 * (i_diff + i_spec * powf(r_dot, hit->obj->shinyness))));
 }
 
 static inline void	apply_bump_map(t_hit *hit)
 {
-	const t_vec	displace = mult(&hit->normal, (float)hit->obj->bump_map.buf[
+	hit->pos = add(hit->pos, 
+		mult(hit->normal, (float)hit->obj->bump_map.buf[
 			abs((int)fmod(hit->pos.y * 10, hit->obj->bump_map.height))
 			* hit->obj->bump_map.width
 			+ abs((int)fmod(hit->pos.x * 10, hit->obj->bump_map.width))
-		] / 50000.0 + .5);
-
-	hit->pos = add(&hit->pos, &displace);
+		] / 50000.0 + .5)
+	);
 }
 
 static inline unsigned int	ray_color(const t_vec *orig,
@@ -58,14 +58,14 @@ static inline unsigned int	ray_color(const t_vec *orig,
 	i = scene->lights_count;
 	while (i--)
 	{
-		l = normalize(sub(&scene->lights[i].pos, &hits->pos));
+		l = normalize(sub(scene->lights[i].pos, hits->pos));
 		if (!ray_scene(&hits->pos, &l, scene, hits + 1)
 			|| hits[1].dist > dist(&scene->lights[i].pos, &hits->pos))
 			col = rgbadd(col, ray_reflect(scene->lights + i, ray, hits, &l));
 	}
 	if (--rec < 0)
 		return (rgbmatrix(hits->obj->color, col));
-	l = normalize(sub(&scene->cam.pos, &hits->pos));
+	l = normalize(sub(scene->cam.pos, hits->pos));
 	l = reflect(&l, &hits->normal);
 	return (rgbmatrix(hits->obj->color, rgbadd(col,
 				rgbmult(ray_color(&hits->pos, &l, scene, rec), 128))));
@@ -92,19 +92,19 @@ void	render(const t_scene *scene, const t_window *win,
 	register int	x;
 
 	t.dir = radian_to_vector(&cam->rot);
-	t.cam_right = normalize(cross(&t.dir, &((t_vec){0, 0, 1})));
-	t.cam_up = normalize(cross(&t.cam_right, &t.dir));
+	t.cam_right = normalize(cross(t.dir, (t_vec){0, 0, 1}));
+	t.cam_up = normalize(cross(t.cam_right, t.dir));
 	t.half_x = cam->width / 2.0;
 	t.half_y = cam->height / 2.0;
 	y = cam->height;
 	while (y--)
 	{
-		t.yr = mult(&t.cam_up, (y - t.half_y) * cam->fov_pixel);
+		t.yr = mult(t.cam_up, (y - t.half_y) * cam->fov_pixel);
 		x = cam->width;
 		while (x--)
 		{
-			t.xr = mult(&t.cam_right, (t.half_x - x) * cam->fov_pixel);
-			t.ray = normalize(add3(&t.dir, &t.xr, &t.yr));
+			t.xr = mult(t.cam_right, (t.half_x - x) * cam->fov_pixel);
+			t.ray = normalize(add3(t.dir, t.xr, t.yr));
 			*buf++ = ray_color(&cam->pos, &t.ray, scene, 2);
 		}
 	}

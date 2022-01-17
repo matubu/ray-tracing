@@ -16,37 +16,37 @@
 # include "vector_add.h"
 # include "struct.h"
 
-static inline t_vec	sub(const t_vec *a, const t_vec *b)
+static inline t_vec	sub(const t_vec a, const t_vec b)
 {
-	return ((t_vec){a->x - b->x, a->y - b->y, a->z - b->z});
+	return ((t_vec){a.x - b.x, a.y - b.y, a.z - b.z});
 }
 
-static inline t_vec	mult(const t_vec *a, const float fac)
+static inline t_vec	mult(const t_vec a, const float fac)
 {
-	return ((t_vec){a->x * fac, a->y * fac, a->z * fac});
+	return ((t_vec){a.x * fac, a.y * fac, a.z * fac});
 }
 
-static inline t_vec	vec_div(const t_vec *a, const float fac)
+static inline t_vec	vec_div(const t_vec a, const float fac)
 {
-	return ((t_vec){(float)a->x / fac, (float)a->y / fac, (float)a->z / fac});
+	return ((t_vec){(float)a.x / fac, (float)a.y / fac, (float)a.z / fac});
 }
 
 static inline t_vec	normalize(const t_vec vec)
 {
-	return (mult(&vec, q_rsqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z)));
+	return (mult(vec, q_rsqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z)));
 }
 
-static inline float	dot(const t_vec *a, const t_vec *b)
+static inline float	dot(const t_vec a, const t_vec b)
 {
-	return (a->x * b->x + a->y * b->y + a->z * b->z);
+	return (a.x * b.x + a.y * b.y + a.z * b.z);
 }
 
-static inline t_vec	cross(const t_vec *a, const t_vec *b)
+static inline t_vec	cross(const t_vec a, const t_vec b)
 {
 	return ((t_vec){
-		a->y * b->z - a->z * b->y,
-		a->z * b->x - a->x * b->z,
-		a->x * b->y - a->y * b->x
+		a.y * b.z - a.z * b.y,
+		a.z * b.x - a.x * b.z,
+		a.x * b.y - a.y * b.x
 	});
 }
 

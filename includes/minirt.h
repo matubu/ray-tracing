@@ -85,12 +85,9 @@ static inline float	size(const t_vec *a)
 
 static inline t_vec	reflect(const t_vec *l, const t_vec *normal)
 {
-	float	cos_theta;
-	t_vec	n;
+	const float	cos_theta = dot(*l, *normal) / (size(l) * size(normal));
 
-	cos_theta = dot(l, normal) / (size(l) * size(normal));
-	n = mult(normal, cos_theta * 2);
-	return (sub(&n, l));
+	return (sub(mult(*normal, cos_theta * 2), *l));
 }
 
 #endif
