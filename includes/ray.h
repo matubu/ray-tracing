@@ -75,7 +75,7 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	hit->dist = t;
 	hit->pos = add(*orig, mult(*ray, hit->dist));
 }
-/*
+
 static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 		t_obj *obj, t_hit *hit)
 {
@@ -108,8 +108,8 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	hit->normal = mult(cp, dot(obj->cone.dir, cp));
 	hit->normal = vec_div(hit->normal, dot(cp, cp));
 	hit->normal = normalize(sub(hit->normal, obj->cone.dir));
-}*/
-
+}
+/*
 vec4 coneIntersect( in vec3  ro, in vec3  rd, in vec3  pa, in vec3  pb, in float ra, in float rb )
 {
 	vec3  ba = pb - pa;
@@ -148,7 +148,7 @@ vec4 coneIntersect( in vec3  ro, in vec3  rd, in vec3  pa, in vec3  pb, in float
 	if( y<0.0 || y>m0 ) return vec4(-1.0); //no intersection
 	return vec4(t, normalize(m0*(m0*(oa+t*rd)+rr*ba*ra)-ba*hy*y));
 }
-
+*/
 static inline int	ray_scene(const t_vec *orig, const t_vec *ray,
 		const t_scene *scene, t_hit *closest)
 {
