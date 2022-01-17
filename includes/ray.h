@@ -92,11 +92,9 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 
 	if (det < 0.0f)
 		return ((void)(hit->dist = -1));
-
 	*(float *)&det = sqrtf(det);
 	const float	t = (float)(-b - det) / (float)(2.0f * a);
 	const float	t2 = (float)(-b + det) / (float)(2.0f * a);
-
 	if (t < EPSILON || (t2 > EPSILON && t2 < t))
 		*(float *)&t = t2;
 	if (t < EPSILON)
