@@ -66,13 +66,13 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	hit->dist = (-b - h) / a;
 	const float	y = caoc + hit->dist * card;
 	if (y > 0.0 && y < caca)
-		hit->normal = mult(add(oc, sub(mult(*ray, hit->dist), \
-			vec_div(vec_div(ca, y), caca))), obj->cylinder.rad);
+		hit->normal = normalize(mult(add(oc, sub(mult(*ray, hit->dist), \
+			vec_div(vec_div(ca, y), caca))), obj->cylinder.rad));
 	else
 	{
 		hit->dist = (caca * !(y < 0.0) - caoc) / card;
 		if (fabs(b + a * hit->dist) < h)
-			hit->normal = vec_div(mult(ca, sign(y)), caca);
+			hit->normal = normalize(vec_div(mult(ca, sign(y)), caca));
 		else
 			return ((void)(hit->dist = -1));
 	}
@@ -97,11 +97,11 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	const float	t2 = (float)(-b + det) / (float)(2.0f * a);
 	if (t < EPSILON || (t2 > EPSILON && t2 < t))
 		*(float *)&t = t2;
-	if (t < EPSILON)
+	if (t < 0.0)
 		return ((void)(hit->dist = -1));
 	const t_vec	cp = sub(add(*orig, mult(*ray, t)), obj->cone.pos);
 	const float	h = dot(cp, obj->cone.dir);
-	if (h < EPSILON || h > obj->cone.height)
+	if (h < 0.0 || h > obj->cone.height)
 		return ((void)(hit->dist = -1));
 	hit->dist = t;
 	hit->pos = add(*orig, mult(*ray, hit->dist));
