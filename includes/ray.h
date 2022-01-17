@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/17 15:38:51 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/17 15:48:40 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,17 +52,17 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	const t_vec	ca = sub(add(obj->cylinder.pos, \
 		mult(obj->cylinder.dir, obj->cylinder.height)), obj->cylinder.pos);
 	const t_vec	oc = sub(*orig, obj->cylinder.pos);
-	const float	caca = dot(ca, ca);
+	const float	caca = dot2(ca);
 	const float	card = dot(ca, *ray);
 	const float	caoc = dot(ca, oc);
 	const float	a = caca - card * card;
 	const float	b = caca * dot(oc, *ray) - caoc * card;
-	const float	h = b * b - a * (caca * dot(oc, oc) - caoc * caoc \
+	const float	h = b * b - a * (caca * dot2(oc) - caoc * caoc \
 		- obj->cylinder.rad * obj->cylinder.rad * caca);
 
 	if (h < 0.0)
 		return ((void)(hit->dist = -1));
-	*(float *)&h = sqrt(h);
+	*(float *)&h = sqrtf(h);
 	hit->dist = (-b - h) / a;
 	const float	y = caoc + hit->dist * card;
 	if (y > 0.0 && y < caca)
