@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef VECTOR_ADD_H
-# define VECTOR_ADD_H
+#ifndef VECTOR_OPERATORS_H
+# define VECTOR_OPERATORS_H
 
 # include "struct.h"
 
@@ -32,6 +32,16 @@ static inline t_vec	add3(const t_vec a, const t_vec b, const t_vec c)
 static inline t_vec	add(const t_vec a, const t_vec b)
 {
 	return ((t_vec){a.x + b.x, a.y + b.y, a.z + b.z});
+}
+
+static inline t_vec	mult(const t_vec a, const float fac)
+{
+	return ((t_vec){a.x * fac, a.y * fac, a.z * fac});
+}
+
+static inline t_vec	vec_div(const t_vec a, const float fac)
+{
+	return ((t_vec){(float)a.x / fac, (float)a.y / fac, (float)a.z / fac});
 }
 
 #endif

@@ -13,18 +13,8 @@
 #ifndef VECTOR_H
 # define VECTOR_H
 
-# include "vector_add.h"
+# include "vector_operators.h"
 # include "struct.h"
-
-static inline t_vec	mult(const t_vec a, const float fac)
-{
-	return ((t_vec){a.x * fac, a.y * fac, a.z * fac});
-}
-
-static inline t_vec	vec_div(const t_vec a, const float fac)
-{
-	return ((t_vec){(float)a.x / fac, (float)a.y / fac, (float)a.z / fac});
-}
 
 static inline t_vec	normalize(const t_vec vec)
 {
@@ -36,7 +26,7 @@ static inline float	dot(const t_vec a, const t_vec b)
 	return (a.x * b.x + a.y * b.y + a.z * b.z);
 }
 
-static inline float dot2(const t_vec v)
+static inline float	dot2(const t_vec v)
 {
 	return (dot(v, v));
 }

@@ -1,7 +1,6 @@
 *.swp
 *.swa
 *.DS_Store
-
 bin/
-
 minirt
+.vscode

@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/17 14:29:50 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/17 14:34:16 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,33 +49,37 @@ static inline void	ray_plane(const t_vec *orig, const t_vec *ray,
 static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 		const t_obj *obj, t_hit *hit)
 {
-	const t_vec	ca = sub(add(obj->cylinder.pos, mult(obj->cylinder.dir, obj->cylinder.height)), obj->cylinder.pos);
+	const t_vec	ca = sub(add(obj->cylinder.pos, \
+		mult(obj->cylinder.dir, obj->cylinder.height)), obj->cylinder.pos);
 	const t_vec	oc = sub(*orig, obj->cylinder.pos);
 	const float	caca = dot(ca, ca);
 	const float	card = dot(ca, *ray);
 	const float	caoc = dot(ca, oc);
 	const float	a = caca - card * card;
 	const float	b = caca * dot(oc, *ray) - caoc * card;
-	const float	c = caca * dot(oc, oc) - caoc * caoc - obj->cylinder.rad * obj->cylinder.rad * caca;
-	float	h = b * b - a * c;
-	if(h < 0.0)
+	const float	h = b * b - a * (caca * dot(oc, oc) - caoc * caoc \
+		- obj->cylinder.rad * obj->cylinder.rad * caca);
+
+	if (h < 0.0)
 		return ((void)(hit->dist = -1));
-	h = sqrt(h);
-	float t = (-b - h) / a;
-	const float y = caoc + t * card;
-	if(y > 0.0 && y < caca)
-		hit->normal = mult(add(oc, sub(mult(*ray, t), mult(mult(ca, y), 1 / caca))), 1 / obj->cylinder.rad);
-	else {
-		t = ((caca * !(y < 0.0)) - caoc) / card;
-		if (fabs(b + a * t) < h)
+	*(float *)&h = sqrt(h);
+	hit->dist = (-b - h) / a;
+	const float	y = caoc + hit->dist * card;
+	if (y > 0.0 && y < caca)
+		hit->normal = mult(add(oc, sub(mult(*ray, hit->dist), \
+			mult(mult(ca, y), 1 / caca))), 1 / obj->cylinder.rad);
+	else
+	{
+		hit->dist = (caca * !(y < 0.0) - caoc) / card;
+		if (fabs(b + a * hit->dist) < h)
 			hit->normal = mult(mult(ca, sign(y)), 1 / caca);
-		else 
+		else
 			return ((void)(hit->dist = -1));
 	}
-	hit->dist = t;
 	hit->pos = add(*orig, mult(*ray, hit->dist));
 }
-/*
+
+/* OLD RAY CONE INTERSECTION
 static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 		t_obj *obj, t_hit *hit)
 {
@@ -88,7 +92,7 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	const float	rdet = b * b - (4.0f * a * c);
 	if (rdet < 0.0f)
 		return ((void)(hit->dist = -1));
-	
+
 	const float	det = sqrtf(rdet);
 	const float	t1 = (float)(-b - det) / (float)(2.0f * a);
 	const float	t2 = (float)(-b + det) / (float)(2.0f * a);
@@ -110,14 +114,9 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	hit->normal = normalize(sub(hit->normal, obj->cone.dir));
 }
 */
-// ro	ray origin		orig
-// rd	ray direction	ray
-static inline void	ray_cone(
-	const t_vec *orig, 
-	const t_vec *ray,
-	t_obj *obj, 
-	t_hit *hit
-)
+
+static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
+	t_obj *obj, t_hit *hit)
 {
 	const t_vec	pa = obj->cone.pos;
 	const t_vec	pb = {pa.x, pa.y + obj->cone.height, pa.z};
