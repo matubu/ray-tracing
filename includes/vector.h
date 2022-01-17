@@ -18,7 +18,7 @@
 
 static inline t_vec	normalize(const t_vec vec)
 {
-	return (mult(vec, q_rsqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z)));
+	return (mult(vec, 1.0 / sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z)));
 }
 
 static inline float	dot(const t_vec a, const t_vec b)

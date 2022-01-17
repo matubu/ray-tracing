@@ -109,7 +109,7 @@ typedef struct s_cone
 {
 	t_vec	pos;
 	t_vec	dir;
-	float	rad;
+	float	rad2;
 	float	height;
 }	t_cone;
 

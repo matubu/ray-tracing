@@ -13,24 +13,13 @@
 #ifndef MATHS_H
 # define MATHS_H
 
+# include <math.h>
+
 static inline int	min(int a, int b)
 {
 	if (a > b)
 		return (b);
 	return (a);
-}
-
-static inline float	q_rsqrt(float y)
-{
-	int			i;
-	float		x2;
-	const float	threehalfs = 1.5F;
-
-	x2 = y * 0.5F;
-	i = *(int *)&y;
-	i = 0x5f3759df - (i >> 1);
-	y = *(float *)&i;
-	return (y * (threehalfs - (x2 * y * y)));
 }
 
 static inline unsigned int	rgbmult(unsigned int color, int fac)

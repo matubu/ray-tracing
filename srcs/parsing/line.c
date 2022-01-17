@@ -99,7 +99,7 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 			num(&arg)}, .color = col(&arg)});
 	else if (type[0] == 'c' && type[1] == 'o' && type[2] == '\0')
 		push_obj(&arg, scene, (t_obj){.func = ray_cone,
-			.cone = (t_cone){vec(&arg), vec(&arg), num(&arg),
+			.cone = (t_cone){vec(&arg), vec(&arg), powf(num(&arg), 2.0),
 			num(&arg)}, .color = col(&arg)});
 	else
 		err("invalid object type");

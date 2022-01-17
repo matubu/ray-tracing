@@ -79,25 +79,25 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	hit->pos = add(*orig, mult(*ray, hit->dist));
 }
 
-/* OLD RAY CONE INTERSECTION
 static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 		t_obj *obj, t_hit *hit)
 {
-	const float	cosa = powf(obj->cone.rad, 2.0f);
 	const t_vec	co = sub(*orig, obj->cone.pos);
-	const float	a = powf(dot(*ray, obj->cone.dir), 2.0f) - cosa;
-	const float	b = 2.0f * (dot(*ray, obj->cone.dir) * dot(co, obj->cone.dir) - dot(*ray, co) * cosa);
-	const float	c = powf(dot(co, obj->cone.dir), 2.0f) - dot(co, co) * cosa;
-
+	const float	a = powf(dot(*ray, obj->cone.dir), 2.0f) - obj->cone.rad2;
+	const float	b = 2.0f * (dot(*ray, obj->cone.dir) * dot(co, obj->cone.dir)
+			- dot(*ray, co) * obj->cone.rad2);
+	const float	c = powf(dot(co, obj->cone.dir), 2.0f)
+		- dot(co, co) * obj->cone.rad2;
 	const float	rdet = b * b - (4.0f * a * c);
+
 	if (rdet < 0.0f)
 		return ((void)(hit->dist = -1));
 
 	const float	det = sqrtf(rdet);
 	const float	t1 = (float)(-b - det) / (float)(2.0f * a);
 	const float	t2 = (float)(-b + det) / (float)(2.0f * a);
-
 	float t = t1;
+
 	if (t < EPSILON || (t2 > EPSILON && t2 < t))
 		t = t2;
 	if (t < EPSILON)
@@ -112,48 +112,6 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	hit->normal = mult(cp, dot(obj->cone.dir, cp));
 	hit->normal = vec_div(hit->normal, dot(cp, cp));
 	hit->normal = normalize(sub(hit->normal, obj->cone.dir));
-}
-*/
-
-static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
-	t_obj *obj, t_hit *hit)
-{
-	const t_vec	pa = obj->cone.pos;
-	const t_vec	pb = {pa.x, pa.y + obj->cone.height, pa.z};
-	const float	rb = obj->cone.rad;
-	const t_vec	ba = sub(pb, pa);
-	const t_vec	oa = sub(*orig, pa);
-	const t_vec	ob = sub(*orig, pb);
-	const float	m0 = dot(ba, ba);
-	const float	m1 = dot(oa, ba);
-	const float m2 = dot(*ray, ba);
-	const float m3 = dot(*ray, oa);
-	const float m5 = dot(oa, oa);
-	const float m9 = dot(ob, ba); 
-
-	if (m1 < 0.0f)
-	{
-		if (dot2(sub(mult(oa, m2), mult(*ray, m1))) < 0.0f)
-			return ((void)(hit->dist = -m1 / m2));
-	}
-	else if (m9 > 0.0f)
-	{
-		float t = -m9 / m2;
-		if (dot2(mult(add(ob, *ray), t)) < rb * rb)
-			return ((void)(hit->dist = t));
-	}
-	const float	hy = m0 + rb * rb;
-	const float	k2 = m0 * m0 - m2 * m2 * hy;
-	const float	k1 = m0 * m0 * m3 - m1 * m2 * hy;
-	const float	k0 = m0 * m0 * m5 - m1 * m1 * hy;
-	const float	h = k1 * k1 - k2 * k0;
-	if (h < 0.0f)
-		return ((void)(hit->dist = -1));
-	float t = (-k1 - sqrt(h)) / k2;
-	float y = m1 + t * m2;
-	if (y < 0.0f || y > m0)
-		return ((void)(hit->dist = -1));
-	hit->dist = t;
 }
 
 static inline int	ray_scene(const t_vec *orig, const t_vec *ray,
