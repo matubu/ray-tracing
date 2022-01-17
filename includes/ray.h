@@ -93,17 +93,10 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 		t_obj *obj, t_hit *hit)
 {
 	const float	cosa = powf(obj->cone.rad, 2.0f);
-<<<<<<< HEAD
-	const t_vec	co = sub(orig, &obj->cone.pos);
-	const float	a = powf(dot(ray, &obj->cone.dir), 2.0f) - cosa;
-	const float	b = 2.0f * (dot(ray, &obj->cone.dir) * dot(&co, &obj->cone.dir) - dot(ray, &co) * cosa);
-	const float	c = powf(dot(&co, &obj->cone.dir), 2.0f) - dot(&co, &co) * cosa;
-=======
 	const t_vec	co = sub(*orig, obj->cone.pos);
 	const float a = powf(dot(*ray, obj->cone.dir), 2.0f) - cosa;
 	const float b = 2.0f * (dot(*ray, obj->cone.dir) * dot(co, obj->cone.dir) - dot(*ray, co) * cosa);
 	const float c = powf(dot(co, obj->cone.dir), 2.0f) - dot(co, co) * cosa;
->>>>>>> 9829d5cd758eaff8d735605b35ee55622d6c1b27
 
 	const float rdet = b * b - (4.0f * a * c);
 	if (rdet < 0.0f)

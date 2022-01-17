@@ -107,10 +107,10 @@ typedef struct s_cylinder
 
 typedef struct s_cone
 {
-	t_vec	pos;	// tip position
-	t_vec	dir;	// axis
+	t_vec	pos;
+	t_vec	dir;
 	float	rad;
-	float	height; // hauteur
+	float	height;
 }	t_cone;
 
 typedef struct s_obj {
