@@ -86,7 +86,6 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 			- dot(*ray, co) * obj->cone.rad2);
 	const float	det = b * b - (4.0f * a * (powf(dot(co, obj->cone.dir), 2.0f) \
 		- dot(co, co) * obj->cone.rad2));
-	float		t;
 	float		t2;
 	t_vec		cp;
 	float		h;
@@ -94,17 +93,16 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	if (det < 0.0f)
 		return ((void)(hit->dist = -1));
 	*(float *)&det = sqrtf(det);
-	t = (float)(-b - det) / (float)(2.0f * a);
+	hit->dist = (float)(-b - det) / (float)(2.0f * a);
 	t2 = (float)(-b + det) / (float)(2.0f * a);
-	if (t < EPSILON || (t2 > EPSILON && t2 < t))
-		*(float *)&t = t2;
-	if (t < 0.0)
+	if (hit->dist < EPSILON || (t2 > EPSILON && t2 < hit->dist))
+		hit->dist = t2;
+	if (hit->dist < 0.0)
 		return ((void)(hit->dist = -1));
-	cp = sub(add(*orig, mult(*ray, t)), obj->cone.pos);
+	cp = sub(add(*orig, mult(*ray, hit->dist)), obj->cone.pos);
 	h = dot(cp, obj->cone.dir);
 	if (h < 0.0 || h > obj->cone.height)
 		return ((void)(hit->dist = -1));
-	hit->dist = t;
 	hit->pos = add(*orig, mult(*ray, hit->dist));
 	hit->normal = normalize(sub(vec_div(mult(cp, h), dot2(cp)), obj->cone.dir));
 }
