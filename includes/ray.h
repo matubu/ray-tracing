@@ -66,7 +66,7 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	if(y > 0.0 && y < caca)
 		hit->normal = mult(add(oc, sub(mult(*ray, t), mult(mult(ca, y), 1 / caca))), 1 / obj->cylinder.rad);
 	else {
-		t = (((y < 0.0) ? 0.0 : caca) - caoc) / card;
+		t = ((caca * !(y < 0.0)) - caoc) / card;
 		if (fabs(b + a * t) < h)
 			hit->normal = mult(mult(ca, sign(y)), 1 / caca);
 		else 
@@ -75,7 +75,7 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	hit->dist = t;
 	hit->pos = add(*orig, mult(*ray, hit->dist));
 }
-
+/*
 static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 		t_obj *obj, t_hit *hit)
 {
@@ -108,6 +108,45 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	hit->normal = mult(cp, dot(obj->cone.dir, cp));
 	hit->normal = vec_div(hit->normal, dot(cp, cp));
 	hit->normal = normalize(sub(hit->normal, obj->cone.dir));
+}*/
+
+vec4 coneIntersect( in vec3  ro, in vec3  rd, in vec3  pa, in vec3  pb, in float ra, in float rb )
+{
+	vec3  ba = pb - pa;
+	vec3  oa = ro - pa;
+	vec3  ob = ro - pb;
+	float m0 = dot(ba,ba);
+	float m1 = dot(oa,ba);
+	float m2 = dot(rd,ba);
+	float m3 = dot(rd,oa);
+	float m5 = dot(oa,oa);
+	float m9 = dot(ob,ba); 
+
+	// caps
+	if( m1<0.0 )
+	{
+		if( dot2(oa*m2-rd*m1)<(ra*ra*m2*m2) ) // delayed division
+			return vec4(-m1/m2,-ba*inversesqrt(m0));
+	}
+	else if( m9>0.0 )
+	{
+		float t = -m9/m2;                     // NOT delayed division
+		if( dot2(ob+rd*t)<(rb*rb) )
+			return vec4(t,ba*inversesqrt(m0));
+	}
+
+	// body
+	float rr = ra - rb;
+	float hy = m0 + rr*rr;
+	float k2 = m0*m0    - m2*m2*hy;
+	float k1 = m0*m0*m3 - m1*m2*hy + m0*ra*(rr*m2*1.0        );
+	float k0 = m0*m0*m5 - m1*m1*hy + m0*ra*(rr*m1*2.0 - m0*ra);
+	float h = k1*k1 - k2*k0;
+	if( h<0.0 ) return vec4(-1.0); //no intersection
+	float t = (-k1-sqrt(h))/k2;
+	float y = m1 + t*m2;
+	if( y<0.0 || y>m0 ) return vec4(-1.0); //no intersection
+	return vec4(t, normalize(m0*(m0*(oa+t*rd)+rr*ba*ra)-ba*hy*y));
 }
 
 static inline int	ray_scene(const t_vec *orig, const t_vec *ray,
