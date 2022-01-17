@@ -64,11 +64,12 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 		return ((void)(hit->dist = -1));
 	*(float *)&h = sqrt(h);
 	hit->dist = (-b - h) / a;
-	const float y = caoc + hit->dist * card;
+	const float	y = caoc + hit->dist * card;
 	if (y > 0.0 && y < caca)
 		hit->normal = mult(add(oc, sub(mult(*ray, hit->dist), \
 			mult(mult(ca, y), 1 / caca))), 1 / obj->cylinder.rad);
-	else {
+	else
+	{
 		hit->dist = (caca * !(y < 0.0) - caoc) / card;
 		if (fabs(b + a * hit->dist) < h)
 			hit->normal = mult(mult(ca, sign(y)), 1 / caca);
@@ -90,7 +91,7 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	const float	rdet = b * b - (4.0f * a * c);
 	if (rdet < 0.0f)
 		return ((void)(hit->dist = -1));
-	
+
 	const float	det = sqrtf(rdet);
 	const float	t1 = (float)(-b - det) / (float)(2.0f * a);
 	const float	t2 = (float)(-b + det) / (float)(2.0f * a);
