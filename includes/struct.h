@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:22 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/05 11:39:14 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/17 10:50:44 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ typedef struct s_scene {
 	int			lights_count;
 	t_ambient	ambient;
 	int			ambient_count;
-	int			keys[256];
+	int			keys[1024];
 }	t_scene;
 
 #endif
