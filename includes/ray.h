@@ -120,41 +120,39 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 {
 	const t_vec	pa = obj->cone.pos;
 	const t_vec	pb = {pa.x, pa.y + obj->cone.height, pa.z};
-	const float	rb = 5;
+	const float	rb = obj->cone.rad;
 	const t_vec	ba = sub(pb, pa);
 	const t_vec	oa = sub(*orig, pa);
 	const t_vec	ob = sub(*orig, pb);
-	float m0 = dot(ba, ba);
-	float m1 = dot(oa, ba);
-	float m2 = dot(*ray, ba);
-	float m3 = dot(*ray, oa);
-	float m5 = dot(oa, oa);
-	float m9 = dot(ob, ba); 
+	const float	m0 = dot(ba, ba);
+	const float	m1 = dot(oa, ba);
+	const float m2 = dot(*ray, ba);
+	const float m3 = dot(*ray, oa);
+	const float m5 = dot(oa, oa);
+	const float m9 = dot(ob, ba); 
 
-	if(m1 < 0.0f)
+	if (m1 < 0.0f)
 	{
-		if(dot2(sub(mult(oa, m2), mult(*ray, m1))) < 0.0f)
-			return ((void) (hit->dist = -m1 / m2));
+		if (dot2(sub(mult(oa, m2), mult(*ray, m1))) < 0.0f)
+			return ((void)(hit->dist = -m1 / m2));
 	}
-	else if(m9 > 0.0f)
+	else if (m9 > 0.0f)
 	{
 		float t = -m9 / m2;
-		if(dot2(mult(add(ob, *ray), t)) < rb * rb)
-			return ((void) (hit->dist = t));
+		if (dot2(mult(add(ob, *ray), t)) < rb * rb)
+			return ((void)(hit->dist = t));
 	}
-
-	float rr = -rb;
-	float hy = m0 + rr * rr;
-	float k2 = m0 * m0 - m2 * m2 * hy;
-	float k1 = m0 * m0 * m3 - m1 * m2 * hy;
-	float k0 = m0 * m0 * m5 - m1 * m1 * hy;
-	float h = k1 * k1 - k2 * k0;
-	if(h < 0.0f)
-		return ((void) (hit->dist = -1));
+	const float	hy = m0 + rb * rb;
+	const float	k2 = m0 * m0 - m2 * m2 * hy;
+	const float	k1 = m0 * m0 * m3 - m1 * m2 * hy;
+	const float	k0 = m0 * m0 * m5 - m1 * m1 * hy;
+	const float	h = k1 * k1 - k2 * k0;
+	if (h < 0.0f)
+		return ((void)(hit->dist = -1));
 	float t = (-k1 - sqrt(h)) / k2;
 	float y = m1 + t * m2;
-	if(y < 0.0f || y > m0)
-		return ((void) (hit->dist = -1));
+	if (y < 0.0f || y > m0)
+		return ((void)(hit->dist = -1));
 	hit->dist = t;
 }
 
