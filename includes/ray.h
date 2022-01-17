@@ -49,30 +49,30 @@ static inline void	ray_plane(const t_vec *orig, const t_vec *ray,
 static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 		const t_obj *obj, t_hit *hit)
 {
-	const t_vec	ca = sub(add(obj->cylinder.pos, \
-		mult(obj->cylinder.dir, obj->cylinder.height)), obj->cylinder.pos);
 	const t_vec	oc = sub(*orig, obj->cylinder.pos);
-	const float	caca = dot2(ca);
-	const float	card = dot(ca, *ray);
-	const float	caoc = dot(ca, oc);
-	const float	a = caca - card * card;
-	const float	b = caca * dot(oc, *ray) - caoc * card;
-	const float	h = b * b - a * (caca * dot2(oc) - caoc * caoc \
-		- obj->cylinder.rad * obj->cylinder.rad * caca);
+	const float	card = dot(obj->cylinder.ca, *ray);
+	const float	caoc = dot(obj->cylinder.ca, oc);
+	const float	a = obj->cylinder.caca - card * card;
+	const float	b = obj->cylinder.caca * dot(oc, *ray) - caoc * card;
+	const float	h = b * b - a * (obj->cylinder.caca * dot2(oc) - caoc * caoc \
+		- obj->cylinder.rad * obj->cylinder.rad * obj->cylinder.caca);
+	float		y;
 
 	if (h < 0.0)
 		return ((void)(hit->dist = -1));
 	*(float *)&h = sqrtf(h);
 	hit->dist = (-b - h) / a;
-	const float	y = caoc + hit->dist * card;
-	if (y > 0.0 && y < caca)
-		hit->normal = mult(add(oc, sub(mult(*ray, hit->dist), \
-			vec_div(vec_div(ca, y), caca))), obj->cylinder.rad);
+	y = caoc + hit->dist * card;
+	if (y > 0.0 && y < obj->cylinder.caca)
+		hit->normal = normalize(mult(add(oc, sub(mult(*ray, hit->dist), \
+			vec_div(vec_div(obj->cylinder.ca, y), \
+			obj->cylinder.caca))), obj->cylinder.rad));
 	else
 	{
-		hit->dist = (caca * !(y < 0.0) - caoc) / card;
+		hit->dist = (obj->cylinder.caca * !(y < 0.0) - caoc) / card;
 		if (fabs(b + a * hit->dist) < h)
-			hit->normal = vec_div(mult(ca, sign(y)), caca);
+			hit->normal = normalize(vec_div(mult(obj->cylinder.ca, sign(y)), \
+				obj->cylinder.caca));
 		else
 			return ((void)(hit->dist = -1));
 	}
@@ -89,19 +89,23 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	const float	c = powf(dot(co, obj->cone.dir), 2.0f)
 		- dot(co, co) * obj->cone.rad2;
 	const float	det = b * b - (4.0f * a * c);
+	float		t;
+	float		t2;
+	t_vec		cp;
+	float		h;
 
 	if (det < 0.0f)
 		return ((void)(hit->dist = -1));
 	*(float *)&det = sqrtf(det);
-	const float	t = (float)(-b - det) / (float)(2.0f * a);
-	const float	t2 = (float)(-b + det) / (float)(2.0f * a);
+	t = (float)(-b - det) / (float)(2.0f * a);
+	t2 = (float)(-b + det) / (float)(2.0f * a);
 	if (t < EPSILON || (t2 > EPSILON && t2 < t))
 		*(float *)&t = t2;
-	if (t < EPSILON)
+	if (t < 0.0)
 		return ((void)(hit->dist = -1));
-	const t_vec	cp = sub(add(*orig, mult(*ray, t)), obj->cone.pos);
-	const float	h = dot(cp, obj->cone.dir);
-	if (h < EPSILON || h > obj->cone.height)
+	cp = sub(add(*orig, mult(*ray, t)), obj->cone.pos);
+	h = dot(cp, obj->cone.dir);
+	if (h < 0.0 || h > obj->cone.height)
 		return ((void)(hit->dist = -1));
 	hit->dist = t;
 	hit->pos = add(*orig, mult(*ray, hit->dist));
