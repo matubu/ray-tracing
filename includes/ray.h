@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/17 15:10:20 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/17 15:13:45 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	const float	y = caoc + hit->dist * card;
 	if (y > 0.0 && y < caca)
 		hit->normal = mult(add(oc, sub(mult(*ray, hit->dist), \
-			mult(mult(ca, y), 1 / caca))), 1 / obj->cylinder.rad);
+			vec_div(vec_mult(ca, y), caca))), obj->cylinder.rad);
 	else
 	{
 		hit->dist = (caca * !(y < 0.0) - caoc) / card;
