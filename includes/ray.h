@@ -88,18 +88,15 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 			- dot(*ray, co) * obj->cone.rad2);
 	const float	c = powf(dot(co, obj->cone.dir), 2.0f)
 		- dot(co, co) * obj->cone.rad2;
-	const float	rdet = b * b - (4.0f * a * c);
+	const float	det = b * b - (4.0f * a * c);
 
-	if (rdet < 0.0f)
+	if (det < 0.0f)
 		return ((void)(hit->dist = -1));
-
-	const float	det = sqrtf(rdet);
-	const float	t1 = (float)(-b - det) / (float)(2.0f * a);
+	*(float *)&det = sqrtf(det);
+	const float	t = (float)(-b - det) / (float)(2.0f * a);
 	const float	t2 = (float)(-b + det) / (float)(2.0f * a);
-	float t = t1;
-
 	if (t < EPSILON || (t2 > EPSILON && t2 < t))
-		t = t2;
+		*(float *)&t = t2;
 	if (t < EPSILON)
 		return ((void)(hit->dist = -1));
 	const t_vec	cp = sub(add(*orig, mult(*ray, t)), obj->cone.pos);
@@ -109,7 +106,7 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	hit->dist = t;
 	hit->pos = add(*orig, mult(*ray, hit->dist));
 	hit->normal = normalize(sub(vec_div(mult(cp, \
-					dot(obj->cone.dir, cp)), dot2(cp)), obj->cone.dir));
+			dot(obj->cone.dir, cp)), dot2(cp)), obj->cone.dir));
 }
 
 static inline int	ray_scene(const t_vec *orig, const t_vec *ray,

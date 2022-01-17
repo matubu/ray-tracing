@@ -51,4 +51,13 @@ static inline unsigned int	rgbadd(unsigned int a, unsigned int b)
 	);
 }
 
+static inline float	sign(float v)
+{
+	if (v == 0)
+		return (0);
+	if (v > 0)
+		return (1);
+	return (-1);
+}
+
 #endif
