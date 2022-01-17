@@ -64,12 +64,14 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	const float	y = caoc + hit->dist * card;
 	if (y > 0.0 && y < obj->cylinder.caca)
 		hit->normal = normalize(mult(add(oc, sub(mult(*ray, hit->dist), \
-			vec_div(vec_div(obj->cylinder.ca, y), obj->cylinder.caca))), obj->cylinder.rad));
+			vec_div(vec_div(obj->cylinder.ca, y), \
+			obj->cylinder.caca))), obj->cylinder.rad));
 	else
 	{
 		hit->dist = (obj->cylinder.caca * !(y < 0.0) - caoc) / card;
 		if (fabs(b + a * hit->dist) < h)
-			hit->normal = normalize(vec_div(mult(obj->cylinder.ca, sign(y)), obj->cylinder.caca));
+			hit->normal = normalize(vec_div(mult(obj->cylinder.ca, sign(y)), \
+				obj->cylinder.caca));
 		else
 			return ((void)(hit->dist = -1));
 	}
