@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/05 13:51:32 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/17 12:21:22 by mberger-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,63 +47,60 @@ static inline void	ray_plane(const t_vec *orig, const t_vec *ray,
 	hit->normal = obj->plane.normal;
 }
 
+static inline float sign(float v)
+{
+	if (v >= 0)
+		return (1);
+	return (-1);
+}
+
 static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 		const t_obj *obj, t_hit *hit)
 {
-	const float	a = (ray->x * ray->x) + (ray->z * ray->z);
-	const float	b = 2 * (ray->x * (orig->x - obj->cylinder.pos.x)
-			+ ray->z * (orig->z - obj->cylinder.pos.z));
-	const float	c = (orig->x - obj->cylinder.pos.x)
-		* (orig->x - obj->cylinder.pos.x)
-		+ (orig->z - obj->cylinder.pos.z) * (orig->z - obj->cylinder.pos.z)
-		- obj->cylinder.rad * obj->cylinder.rad;
-	const float	delta = b * b - 4 * (a * c);
-
-	if (delta < 0.001)
+	t_vec pb = mult(&obj->cylinder.dir, obj->cylinder.height);
+	pb = add(&obj->cylinder.pos, &pb);
+	t_vec ca = sub(&pb, &obj->cylinder.pos);
+	t_vec oc = sub(orig, &obj->cylinder.pos);
+	float caca = dot(&ca, &ca);
+	float card = dot(&ca, ray);
+	float caoc = dot(&ca, &oc);
+	float a = caca - card * card;
+	float b = caca * dot(&oc, ray) - caoc * card;
+	float c = caca * dot(&oc, &oc) - caoc * caoc - obj->cylinder.rad * obj->cylinder.rad * caca;
+	float h = b * b - a * c;
+	if(h < 0.0) //no intersection
 		return ((void)(hit->dist = -1));
-	hit->dist = fmin((-b - sqrt(delta)) / (2 * a),
-			(-b + sqrt(delta)) / (2 * a));
-	hit->pos = mult(ray, hit->dist);
-	hit->pos = add(orig, &hit->pos);
-	hit->normal = normalize((t_vec){hit->pos.x - obj->cylinder.pos.x, 0, hit->pos.z - obj->cylinder.pos.z});
-/*	const float	d = dot(obj->sphere.dir, P) + t*(N.V);
-	const float	t = (d - dot(obj->sphere.dir, P)) / dot(obj->sphere.dir, ray);
-
-	return (t);
-	const t_vec	pdp = sub(&obj->cylinder.dir, &obj->cylinder.pos);
-	const t_vec	tmp = sub(orig, &obj->sphere.pos);
-	const t_vec	eyexpdp = cross(&tmp, &pdp);
-	const t_vec	rdxpdp = cross(ray, &pdp);
-	const float	a = dot(&rdxpdp, &rdxpdp);
-	const float	b = 2 * dot(&rdxpdp, &eyexpdp);
-	const float	c = dot(&eyexpdp, &eyexpdp) - (obj->cylinder.rad * obj->cylinder.rad * dot(&pdp, &pdp));
-	const float	delta = sqrt((b * b) - (4.0 * a * c));
-	float		t[2];
-
-	if (isnan(delta))
-		return ((void)(hit->dist = -1));
-	t[0] = (-b - (delta)) / (2.0 * a);
-	t[1] = (-b + (delta)) / (2.0 * a);
-	if (t[0] > t[1])
-		*((float *)t) = t[1];
-	hit->dist = *t;
-	
-	const float	a = (ray->x * ray->x) + (ray->z * ray->z);
-	const float	b = 2 * (ray->x * (orig->x - obj->cylinder.pos.x)
-			+ ray->z * (orig->z - obj->cylinder.pos.z));
-	const float	c = (orig->x - obj->cylinder.pos.x)
-		* (orig->x - obj->cylinder.pos.x)
-		+ (orig->z - obj->cylinder.pos.z) * (orig->z - obj->cylinder.pos.z)
-		- obj->cylinder.rad * obj->cylinder.rad;
-	const float	delta = b * b - 4 * (a * c);
-
-	if (delta < 0.001)
-		return ((void)(hit->dist = -1));
-	hit->dist = fmin((-b - sqrt(delta)) / (2 * a),
-			(-b + sqrt(delta)) / (2 * a));
-	hit->pos = mult(ray, hit->dist);
-	hit->pos = add(orig, &hit->pos);
-	hit->normal = normalize((t_vec){hit->pos.x - obj->cylinder.pos.x, 0, hit->pos.z - obj->cylinder.pos.z});*/
+	h = sqrt(h);
+	float t = (-b - h) / a;
+	// body
+	float y = caoc + t * card;
+	if(y > 0.0 && y < caca)
+	{
+		hit->dist = t;
+		hit->pos = mult(ray, hit->dist);
+		hit->pos = add(orig, &hit->pos);
+		//hit->normal = (oc + t * ray - ca * y / caca) / ra;
+		t_vec tmp = mult(&ca, y);
+		t_vec tmp1 = mult(ray, t);
+		t_vec tmp2 = mult(&tmp, 1 / caca);
+		t_vec tmp3 = sub(&tmp1, &tmp2);
+		tmp = add(&oc, &tmp3);
+		hit->normal = mult(&tmp, 1 / obj->cylinder.rad);
+		return ;
+	}
+	// caps
+	t = (((y < 0.0) ? 0.0 : caca) - caoc) / card;
+	if (fabs(b + a * t) < h)
+	{
+		hit->dist = t;
+		hit->pos = mult(ray, hit->dist);
+		hit->pos = add(orig, &hit->pos);
+		//hit->normal = ca * sign(y) / caca;
+		t_vec tmp = mult(&ca, sign(y));
+		hit->normal = mult(&tmp, 1 / caca);
+		return ;
+	}
+	hit->dist = -1;
 }
 
 static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
