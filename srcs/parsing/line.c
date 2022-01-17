@@ -78,6 +78,21 @@ static int	col(char ***args)
 	return (color);
 }
 
+void	parse_cylinder(char ***arg, t_scene *scene)
+{
+	t_cylinder	cylinder;
+
+	cylinder.pos = vec(arg);
+	cylinder.dir = vec(arg);
+	cylinder.rad = num(arg);
+	cylinder.height = num(arg);
+	cylinder.ca = sub(add(cylinder.pos, \
+		mult(cylinder.dir, cylinder.height)), cylinder.pos);
+	cylinder.caca = dot2(cylinder.ca);
+	push_obj(arg, scene, (t_obj){.func = ray_cylinder,
+		.cylinder = cylinder, .color = col(arg)});
+}
+
 void	parse_line(char *type, char **arg, t_scene *scene)
 {
 	if (type[0] == 'A' && type[1] == '\0')
@@ -94,9 +109,7 @@ void	parse_line(char *type, char **arg, t_scene *scene)
 		push_obj(&arg, scene, (t_obj){.func = ray_plane,
 			.plane = (t_plane){vec(&arg), vec(&arg)}, .color = col(&arg)});
 	else if (type[0] == 'c' && type[1] == 'y' && type[2] == '\0')
-		push_obj(&arg, scene, (t_obj){.func = ray_cylinder,
-			.cylinder = (t_cylinder){vec(&arg), vec(&arg), num(&arg),
-			num(&arg)}, .color = col(&arg)});
+		parse_cylinder(&arg, scene);
 	else if (type[0] == 'c' && type[1] == 'o' && type[2] == '\0')
 		push_obj(&arg, scene, (t_obj){.func = ray_cone,
 			.cone = (t_cone){vec(&arg), vec(&arg), powf(num(&arg), 2.0),

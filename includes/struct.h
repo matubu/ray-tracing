@@ -103,6 +103,8 @@ typedef struct s_cylinder
 	t_vec	dir;
 	float	rad;
 	float	height;
+	t_vec	ca;
+	float	caca;
 }	t_cylinder;
 
 typedef struct s_cone
