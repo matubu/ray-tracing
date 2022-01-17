@@ -107,11 +107,9 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	if (h < EPSILON || h > obj->cone.height)
 		return ((void)(hit->dist = -1));
 	hit->dist = t;
-	hit->pos = mult(*ray, hit->dist);
-	hit->pos = add(*orig, hit->pos);
-	hit->normal = mult(cp, dot(obj->cone.dir, cp));
-	hit->normal = vec_div(hit->normal, dot(cp, cp));
-	hit->normal = normalize(sub(hit->normal, obj->cone.dir));
+	hit->pos = add(*orig, mult(*ray, hit->dist));
+	hit->normal = normalize(sub(vec_div(mult(cp, \
+					dot(obj->cone.dir, cp)), dot2(cp)), obj->cone.dir));
 }
 
 static inline int	ray_scene(const t_vec *orig, const t_vec *ray,
