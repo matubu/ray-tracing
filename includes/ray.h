@@ -49,30 +49,32 @@ static inline void	ray_plane(const t_vec *orig, const t_vec *ray,
 static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 		const t_obj *obj, t_hit *hit)
 {
-	const t_vec	ca = sub(add(obj->cylinder.pos, mult(obj->cylinder.dir, obj->cylinder.height)), obj->cylinder.pos);
+	const t_vec	ca = sub(add(obj->cylinder.pos, \
+		mult(obj->cylinder.dir, obj->cylinder.height)), obj->cylinder.pos);
 	const t_vec	oc = sub(*orig, obj->cylinder.pos);
 	const float	caca = dot(ca, ca);
 	const float	card = dot(ca, *ray);
 	const float	caoc = dot(ca, oc);
 	const float	a = caca - card * card;
 	const float	b = caca * dot(oc, *ray) - caoc * card;
-	const float	c = caca * dot(oc, oc) - caoc * caoc - obj->cylinder.rad * obj->cylinder.rad * caca;
-	float	h = b * b - a * c;
-	if(h < 0.0)
+		- obj->cylinder.rad * obj->cylinder.rad * caca;
+	const float	h = b * b - a * (caca * dot(oc, oc) - caoc * caoc);
+
+	if (h < 0.0)
 		return ((void)(hit->dist = -1));
-	h = sqrt(h);
-	float t = (-b - h) / a;
-	const float y = caoc + t * card;
-	if(y > 0.0 && y < caca)
-		hit->normal = mult(add(oc, sub(mult(*ray, t), mult(mult(ca, y), 1 / caca))), 1 / obj->cylinder.rad);
+	*(float *)&h = sqrt(h);
+	hit->dist = (-b - h) / a;
+	const float y = caoc + hit->dist * card;
+	if (y > 0.0 && y < caca)
+		hit->normal = mult(add(oc, sub(mult(*ray, hit->dist), \
+			mult(mult(ca, y), 1 / caca))), 1 / obj->cylinder.rad);
 	else {
-		t = ((caca * !(y < 0.0)) - caoc) / card;
-		if (fabs(b + a * t) < h)
+		hit->dist = (caca * !(y < 0.0) - caoc) / card;
+		if (fabs(b + a * hit->dist) < h)
 			hit->normal = mult(mult(ca, sign(y)), 1 / caca);
-		else 
+		else
 			return ((void)(hit->dist = -1));
 	}
-	hit->dist = t;
 	hit->pos = add(*orig, mult(*ray, hit->dist));
 }
 
@@ -109,8 +111,10 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	hit->normal = vec_div(hit->normal, dot(cp, cp));
 	hit->normal = normalize(sub(hit->normal, obj->cone.dir));
 }
+
 /*
-vec4 coneIntersect( in vec3  ro, in vec3  rd, in vec3  pa, in vec3  pb, in float ra, in float rb )
+vec4 coneIntersect( in vec3  ro, in vec3  rd, in vec3  pa,
+	in vec3  pb, in float ra, in float rb )
 {
 	vec3  ba = pb - pa;
 	vec3  oa = ro - pa;
@@ -149,6 +153,7 @@ vec4 coneIntersect( in vec3  ro, in vec3  rd, in vec3  pa, in vec3  pb, in float
 	return vec4(t, normalize(m0*(m0*(oa+t*rd)+rr*ba*ra)-ba*hy*y));
 }
 */
+
 static inline int	ray_scene(const t_vec *orig, const t_vec *ray,
 		const t_scene *scene, t_hit *closest)
 {
