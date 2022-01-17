@@ -71,7 +71,7 @@ static inline unsigned int	ray_color(const t_vec *orig,
 				rgbmult(ray_color(&hits->pos, &l, scene, rec), 128))));
 }
 
-typedef struct s_trash
+typedef struct s_vars_render
 {
 	t_vec	dir;
 	t_vec	cam_right;
@@ -81,13 +81,13 @@ typedef struct s_trash
 	t_vec	ray;
 	t_vec	yr;
 	t_vec	xr;
-}	t_trash;
+}	t_vars_render;
 
 void	render(const t_scene *scene, const t_window *win,
 		const t_camera *cam, int *buf)
 {
 	const clock_t	start = clock();
-	t_trash			t;
+	t_vars_render	t;
 	register int	y;
 	register int	x;
 

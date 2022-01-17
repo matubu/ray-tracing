@@ -48,23 +48,21 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 		const t_obj *obj, t_hit *hit)
 {
 	const t_vec	oc = sub(*orig, obj->cylinder.pos);
-	const float	card = dot(obj->cylinder.ca, *ray);
-	const float	caoc = dot(obj->cylinder.ca, oc);
-	const float	a = obj->cylinder.caca - card * card;
-	const float	b = obj->cylinder.caca * dot(oc, *ray) - caoc * card;
-	const float	h = b * b - a * (obj->cylinder.caca * dot2(oc) - caoc * caoc \
-		- obj->cylinder.rad * obj->cylinder.rad * obj->cylinder.caca);
-	float		y;
+	const float	card = dot(obj->cylinder.ca, *ray) \
+	, caoc = dot(obj->cylinder.ca, oc), a = obj->cylinder.caca - card * card;
+	const float	b = obj->cylinder.caca * dot(oc, *ray) - caoc \
+	* card, h = b * b - a * (obj->cylinder.caca * dot2(oc) - caoc * caoc \
+		- obj->cylinder.rad * obj->cylinder.rad * \
+		obj->cylinder.caca), y;
 
 	if (h < 0.0)
 		return ((void)(hit->dist = -1));
 	*(float *)&h = sqrtf(h);
 	hit->dist = (-b - h) / a;
-	y = caoc + hit->dist * card;
+	*(float *)&y = caoc + hit->dist * card;
 	if (y > 0.0 && y < obj->cylinder.caca)
-		hit->normal = normalize(mult(add(oc, sub(mult(*ray, hit->dist), \
-			vec_div(vec_div(obj->cylinder.ca, y), \
-			obj->cylinder.caca))), obj->cylinder.rad));
+		hit->normal = normalize(mult(add(oc, sub(mult(*ray, hit->dist), vec_div(\
+	vec_div(obj->cylinder.ca, y), obj->cylinder.caca))), obj->cylinder.rad));
 	else
 	{
 		hit->dist = (obj->cylinder.caca * !(y < 0.0) - caoc) / card;
