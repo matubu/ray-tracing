@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/17 14:34:16 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/17 15:10:20 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	{
 		hit->dist = (caca * !(y < 0.0) - caoc) / card;
 		if (fabs(b + a * hit->dist) < h)
-			hit->normal = mult(mult(ca, sign(y)), 1 / caca);
+			hit->normal = vec_div(mult(ca, sign(y)), caca);
 		else
 			return ((void)(hit->dist = -1));
 	}
