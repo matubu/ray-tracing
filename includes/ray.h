@@ -57,8 +57,8 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 	const float	caoc = dot(ca, oc);
 	const float	a = caca - card * card;
 	const float	b = caca * dot(oc, *ray) - caoc * card;
-		- obj->cylinder.rad * obj->cylinder.rad * caca;
-	const float	h = b * b - a * (caca * dot(oc, oc) - caoc * caoc);
+	const float	h = b * b - a * (caca * dot(oc, oc) - caoc * caoc \
+		- obj->cylinder.rad * obj->cylinder.rad * caca);
 
 	if (h < 0.0)
 		return ((void)(hit->dist = -1));
