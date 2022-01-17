@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/05 13:51:32 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/17 12:34:03 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,9 +109,7 @@ static inline void	ray_cylinder(const t_vec *orig, const t_vec *ray,
 static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 		t_obj *obj, t_hit *hit)
 {
-	const float	cosa = .95f * .95f;
-	obj->cone.height = 100.0f;
-
+	const float	cosa = powf(obj->cone.rad, 2.0f);
 	const t_vec	co = sub(orig, &obj->cone.pos);
 	const float a = powf(dot(ray, &obj->cone.dir), 2.0f) - cosa;
 	const float b = 2.0f * (dot(ray, &obj->cone.dir) * dot(&co, &obj->cone.dir) - dot(ray, &co) * cosa);
@@ -126,15 +124,15 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	const float t2 = (float)(-b + det) / (float)(2.0f * a);
 
 	float t = t1;
-	if (t < .0f || (t2 > .0f && t2 < t))
+	if (t < EPSILON || (t2 > EPSILON && t2 < t))
 		t = t2;
-	if (t < .0f)
+	if (t < EPSILON)
 		return ((void)(hit->dist = -1));
 	t_vec cp = mult(ray, t);
 	cp = add(orig, &cp);
 	cp = sub(&cp, &obj->cone.pos);
 	const float h = dot(&cp, &obj->cone.dir);
-	if (h < .0f || h > obj->cone.height)
+	if (h < EPSILON || h > obj->cone.height)
 		return ((void)(hit->dist = -1));
 	hit->dist = t;
 	hit->pos = mult(ray, hit->dist);
