@@ -11,9 +11,14 @@ SRCS			:=	main.c \
 					parsing/push.c \
 					libs/gnl.c \
 					libs/split.c
+
+DEFAULT_MAP		:=	./assets/minimal.rt
+
 ifdef BONUS
 SRCS			+=	controls_bonus.c \
 					hook_bonus.c
+
+DEFAULT_MAP		:=	./assets/minimal_bonus.rt
 else
 SRCS			+=	controls.c \
 					hook.c
@@ -46,9 +51,9 @@ bonus:
 watch:
 	@~/.deno/bin/deno run --allow-read --allow-run ~/gccwatcher.js $$(pwd) '(\.((c|h)(pp)?|rt)|(\/|^)Makefile)$$'
 
-run: all
+run:
 	@$(ECHO) "💪 $(GRE)Execution de $(NAME)$(EOC)"
-	@./$(NAME) assets/origin.rt
+	@./$(NAME) $(DEFAULT_MAP)
 
 ${OBJECTS}/%.o: ${SOURCES}/%.c
 	@$(ECHO) "🔧 Compilation de $(BLU)${notdir $<}$(EOC)."
