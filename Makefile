@@ -11,17 +11,15 @@ SRCS			:=	main.c \
 					parsing/push.c \
 					libs/gnl.c \
 					libs/split.c
+SRCS_MANDATORY	:=	controls.c hook.c
+SRCS_BONUS		:=	controls_bonus.c hook_bonus.c
 
-DEFAULT_MAP		:=	./assets/minimal.rt
-
-ifdef BONUS
-SRCS			+=	controls_bonus.c hook_bonus.c
-DEFAULT_MAP		:=	./assets/minimal_bonus.rt
-else
-SRCS			+=	controls.c hook.c
-endif
+MAP_MANDATORY	:=	./assets/minimal.rt
+MAP_BONUS		:=	./assets/minimal_bonus.rt
 
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
+OBJS_MANDATORY	:=	$(addprefix ${OBJECTS}/, $(SRCS_MANDATORY:.c=.o))
+OBJS_BONUS		:=	$(addprefix ${OBJECTS}/, $(SRCS_BONUS:.c=.o))
 
 CC				:=	gcc
 CFLAGS			:=	-Wall -Wextra -Werror \
@@ -40,20 +38,21 @@ GRA = \033[37m
 BLU = \033[34m
 EOC = \033[0m
 
-all: $(NAME)
+all: OBJS += $(OBJS_MANDATORY)
+all: OBJS_UNUSED := $(OBJS_BONUS)
+all: $(OBJS_MANDATORY) $(NAME)
 
-bonus:
-	@make BONUS=1 $(NAME)
-
-watch:
-	@~/.deno/bin/deno run --allow-read --allow-run ~/gccwatcher.js $$(pwd) '(\.((c|h)(pp)?|rt)|(\/|^)Makefile)$$'
+bonus: OBJS += $(OBJS_BONUS)
+bonus: OBJS_UNUSED := $(OBJS_MANDATORY)
+bonus: $(OBJS_BONUS) $(NAME)
 
 run:
 	@$(ECHO) "💪 $(GRE)Execution de $(NAME)$(EOC)"
-	@./$(NAME) $(DEFAULT_MAP)
+	./$(NAME) $(MAP_MANDATORY)
 
 ${OBJECTS}/%.o: ${SOURCES}/%.c
 	@$(ECHO) "🔧 Compilation de $(BLU)${notdir $<}$(EOC)."
+	@rm -rf $(NAME) $(OBJS_UNUSED)
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -o $@ -c $^ -I${INCLUDES}
 
