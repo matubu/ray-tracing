@@ -15,13 +15,10 @@ SRCS			:=	main.c \
 DEFAULT_MAP		:=	./assets/minimal.rt
 
 ifdef BONUS
-SRCS			+=	controls_bonus.c \
-					hook_bonus.c
-
+SRCS			+=	controls_bonus.c hook_bonus.c
 DEFAULT_MAP		:=	./assets/minimal_bonus.rt
 else
-SRCS			+=	controls.c \
-					hook.c
+SRCS			+=	controls.c hook.c
 endif
 
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
@@ -46,7 +43,7 @@ EOC = \033[0m
 all: $(NAME)
 
 bonus:
-	@make BONUS=1 ${NAME}
+	@make BONUS=1 $(NAME)
 
 watch:
 	@~/.deno/bin/deno run --allow-read --allow-run ~/gccwatcher.js $$(pwd) '(\.((c|h)(pp)?|rt)|(\/|^)Makefile)$$'
@@ -62,10 +59,10 @@ ${OBJECTS}/%.o: ${SOURCES}/%.c
 
 $(NAME): $(OBJS)
 	@if [ $(OS) = 'Linux' ]; then \
-		$(ECHO) "⚙️  $(GRE)Compilation de ${NAME}... $(GRA)(Linux 🐧 mode)$(EOC)"; \
+		$(ECHO) "⚙️  $(GRE)Compilation de ${NAME}...$(EOC)"; \
 		${CC} $(CFLAGS) -L/usr/local/lib $(OBJS) -o $(NAME) -lm -lmlx -lXext -lX11 -lz; \
 	else \
-		$(ECHO) "⚙️  $(GRE)Compilation de ${NAME}... $(GRA)(macOS 🍎 mode)$(EOC)"; \
+		$(ECHO) "⚙️  $(GRE)Compilation de ${NAME}...$(EOC)"; \
 		${CC} $(CFLAGS) -lmlx -framework OpenGL -framework AppKit $(OBJS) -o $(NAME) -lm; \
 	fi
 
