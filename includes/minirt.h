@@ -6,7 +6,7 @@
 /*   By: acoezard <acoezard@student.42nice.f>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 13:12:22 by acoezard          #+#    #+#             */
-/*   Updated: 2022/01/17 13:41:12 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/18 10:15:02 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@
 # include <stdlib.h>
 # include <mlx.h>
 
-# include <time.h>
 # include <stdio.h>
 
 char	*gnl(int fd);
