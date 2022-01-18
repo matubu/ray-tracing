@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 16:31:31 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/17 15:48:40 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/18 11:56:33 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ static inline void	ray_cone(const t_vec *orig, const t_vec *ray,
 	const float	b = 2.0f * (dot(*ray, obj->cone.dir) * dot(co, obj->cone.dir)
 			- dot(*ray, co) * obj->cone.rad2);
 	const float	det = b * b - (4.0f * a * (powf(dot(co, obj->cone.dir), 2.0f) \
-		- dot(co, co) * obj->cone.rad2));
+		- dot2(co) * obj->cone.rad2));
 	float		t;
 
 	if (det < 0.0f)
