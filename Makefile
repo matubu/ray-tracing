@@ -5,14 +5,19 @@ INCLUDES		:=	./includes
 SOURCES			:=	./srcs
 
 SRCS			:=	main.c \
-					hook.c \
-					controls.c \
 					libs/err.c \
 					parsing/parse.c \
 					parsing/line.c \
 					parsing/push.c \
 					libs/gnl.c \
 					libs/split.c
+ifdef BONUS
+SRCS			+=	controls_bonus.c \
+					hook_bonus.c
+else
+SRCS			+=	controls.c \
+					hook.c
+endif
 
 OBJS			:=	$(addprefix ${OBJECTS}/, $(SRCS:.c=.o))
 
@@ -35,14 +40,15 @@ EOC = \033[0m
 
 all: $(NAME)
 
-bonus: all
+bonus:
+	@make BONUS=1 ${NAME}
 
 watch:
 	@~/.deno/bin/deno run --allow-read --allow-run ~/gccwatcher.js $$(pwd) '(\.((c|h)(pp)?|rt)|(\/|^)Makefile)$$'
 
 run: all
 	@$(ECHO) "💪 $(GRE)Execution de $(NAME)$(EOC)"
-	@./$(NAME) assets/minimal.rt
+	@./$(NAME) assets/origin.rt
 
 ${OBJECTS}/%.o: ${SOURCES}/%.c
 	@$(ECHO) "🔧 Compilation de $(BLU)${notdir $<}$(EOC)."

@@ -6,7 +6,7 @@
 /*   By: mberger- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 16:15:51 by mberger-          #+#    #+#             */
-/*   Updated: 2022/01/17 13:46:45 by acoezard         ###   ########.fr       */
+/*   Updated: 2022/01/18 09:46:44 by acoezard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,6 @@ typedef struct s_vars_render
 void	render(const t_scene *scene, const t_window *win,
 		const t_camera *cam, int *buf)
 {
-	const clock_t	start = clock();
 	t_vars_render	t;
 	register int	y;
 	register int	x;
@@ -109,7 +108,6 @@ void	render(const t_scene *scene, const t_window *win,
 		}
 	}
 	mlx_put_image_to_window(win->ptr, win->win, win->img, 0, 0);
-	printf("%.3f fps\n", 1.0f / ((double)(clock() - start) / CLOCKS_PER_SEC));
 }
 
 int	main(int argc, char **argv)
