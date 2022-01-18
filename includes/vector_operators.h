@@ -39,9 +39,4 @@ static inline t_vec	mult(const t_vec a, const float fac)
 	return ((t_vec){a.x * fac, a.y * fac, a.z * fac});
 }
 
-static inline t_vec	vec_div(const t_vec a, const float fac)
-{
-	return ((t_vec){(float)a.x / fac, (float)a.y / fac, (float)a.z / fac});
-}
-
 #endif
